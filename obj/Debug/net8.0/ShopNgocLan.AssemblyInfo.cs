@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ShopNgocLan")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+375674e16bf34be5e2ff4ea1a19e7b4fd6ebabd5")]
 [assembly: System.Reflection.AssemblyProductAttribute("ShopNgocLan")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ShopNgocLan")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
