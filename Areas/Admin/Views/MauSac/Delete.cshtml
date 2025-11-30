@@ -1,0 +1,155 @@
+﻿@using ShopNgocLan.Models
+@model ProductListViewModel
+
+@{
+    ViewData["Title"] = "Xóa sản phẩm";
+    Layout = "AdminLayout";
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+
+        <div class="pagetitle mb-3">
+            <h1>Xóa sản phẩm</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="SanPham" asp-action="Index">Sản phẩm</a>
+                    </li>
+                    <li class="breadcrumb-item active">Xóa</li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Bạn có chắc chắn muốn <strong>xóa vĩnh viễn</strong> sản phẩm này không?
+            <br />
+            <small>Hành động này không thể hoàn tác.</small>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <img src="@(!string.IsNullOrEmpty(Model.AnhDaiDienUrl) ? Model.AnhDaiDienUrl : "/images/placeholder.jpg")"
+                             alt="@Model.TenSanPham"
+                             class="img-fluid mb-3"
+                             style="max-height: 220px; object-fit: cover; border-radius: 8px; border: 1px solid #eee;" />
+
+                        <h5 class="card-title">@Model.TenSanPham</h5>
+
+                        <span class="badge bg-secondary">
+                            @Model.TenDanhMuc
+                        </span>
+
+                        <div class="mt-2">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">Đang hiển thị</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Đã ẩn</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <strong>Thông tin chi tiết</strong>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-3">Mã sản phẩm</dt>
+                            <dd class="col-sm-9">@Model.Id</dd>
+
+                            <dt class="col-sm-3">Tên sản phẩm</dt>
+                            <dd class="col-sm-9">@Model.TenSanPham</dd>
+
+                            <dt class="col-sm-3">Danh mục</dt>
+                            <dd class="col-sm-9">@Model.TenDanhMuc</dd>
+
+                            <dt class="col-sm-3">Giá</dt>
+                            <dd class="col-sm-9">@Model.PriceString</dd>
+
+                            <dt class="col-sm-3">Size</dt>
+                            <dd class="col-sm-9">@Model.SizeString</dd>
+
+                            <dt class="col-sm-3">Tồn kho</dt>
+                            <dd class="col-sm-9">
+                                @Model.TotalStock
+                                @if (Model.TotalStock <= 5)
+                                {
+                                    <span class="badge bg-warning text-dark ms-2">Sắp hết hàng</span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-3">Ngày tạo</dt>
+                            <dd class="col-sm-9">@Model.NgayTaoFormatted</dd>
+                        </dl>
+                    </div>
+
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                        </a>
+
+                        <form asp-area="Admin" asp-controller="Products" asp-action="Delete" method="post" class="mb-0">
+                            
+                            <input type="hidden" asp-for="Id" />
+
+                            <button type="button" class="btn btn-danger" id="btnConfirmDelete">
+                                <i class="bi bi-trash-fill"></i> Xóa sản phẩm
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+@section Scripts {
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.getElementById('btnConfirmDelete').addEventListener('click', function () {
+
+            Swal.fire({
+                title: 'Xác nhận xóa?',
+                text: "Bạn có chắc chắn muốn xóa sản phẩm '@Model.TenSanPham' không?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    // Hiển thị loading
+                    Swal.fire({
+                        title: 'Đang xóa...',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Submit form
+                    document.querySelector('form[method="post"]').submit();
+                }
+            });
+        });
+    </script>
+
+}

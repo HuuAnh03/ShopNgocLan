@@ -1,0 +1,142 @@
+﻿@model List<ShopNgocLan.Models.HoaDon>
+@{
+    ViewData["Title"] = "Lịch sử đơn hàng";
+    Layout = "_Layout";
+
+}
+<link rel="stylesheet" href="~/assets/css/account.css" asp-append-version="true">
+
+@functions {
+    public (string CssClass, string DisplayText) GetOrderStatus(string maTrangThai)
+    {
+        switch (maTrangThai)
+        {
+            case "AwaitingPayment":
+                return ("status-chothanhtoan", "Chờ thanh toán trực tuyến");
+
+            case "Pending":
+                return ("status-pending", "Chờ xác nhận");
+
+            case "Confirmed":
+                return ("status-confirmed", "Đã xác nhận");
+
+            case "Processing":
+                return ("status-processing", "Đang xử lý");
+
+            case "Shipped":
+                return ("status-shipped", "Đang giao");
+
+            case "Delivered":
+                return ("status-success", "Hoàn thành");
+
+            case "PaymentFailed":
+                return ("status-failed", "Thanh toán thất bại");
+
+            case "Cancelled":
+                return ("status-danger", "Đã hủy");
+
+            // 🔥 MỚI: Yêu cầu hoàn hàng
+            case "ReturnRequested":
+                return ("status-returnrequested", "Yêu cầu hoàn hàng");
+
+            // 🔥 MỚI: Hoàn hàng
+            case "Returned":
+                return ("status-returned", "Hoàn hàng");
+
+            default:
+                return ("status-default", "Trạng thái không xác định: " + maTrangThai);
+        }
+    }
+}
+
+<div class="breadcrumbs_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">home</a></li>
+                        <li>Danh sách hóa đơn</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="account-container">
+
+    <nav class="account-nav">
+        <h3>Lịch sử đặt hàng</h3>
+        <ul class="account-nav-list">
+            <li>
+                <a asp-action="Edit" asp-controller="Account">Thông tin tài khoản</a>
+            </li>
+            <li>
+                <a asp-action="Index" asp-controller="HoaDon" class="active">Lịch sử đơn hàng</a>
+            </li>
+            <li>
+                <a asp-action="Index" asp-controller="DiaChiGiaoHang">Địa chỉ giao hàng</a>
+            </li>
+            <li>
+                <a asp-action="Logout" asp-controller="Account">Đăng xuất</a>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="account-content">
+        <h1 class="content-header">Lịch sử đơn hàng</h1>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="order-history-table">
+                    <thead>
+                        <tr>
+                            <th>Mã ĐH</th>
+                            <th>Ngày đặt</th>
+                            <th>Trạng thái</th>
+                            <th>Tổng tiền</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            var status = GetOrderStatus(order.TrangThai.MaTrangThai);
+
+                            <tr>
+                                <td>
+                                    <strong>#@order.Id</strong>
+                                </td>
+                                <td>
+                                    @order.NgayTao?.ToString("dd/MM/yyyy")
+                                </td>
+                                <td style="text-align: center;">
+                                    <span class="status-badge @status.CssClass">
+                                        @status.DisplayText
+                                    </span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <strong>@order.ThanhTien.ToString("N0")đ</strong>
+                                </td>
+                                <td style="text-align: right;">
+                                    <a asp-action="Details" asp-route-id="@order.Id" class="btn-view-details">
+                                        Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p>Bạn chưa có đơn hàng nào.</p>
+        }
+    
+    </main>
+
+</div>

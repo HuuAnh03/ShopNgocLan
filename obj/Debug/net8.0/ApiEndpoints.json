@@ -1,0 +1,34 @@
+[
+  {
+    "ContainingType": "ShopNgocLan.Controllers.VoucherApiController",
+    "Method": "ApplyVoucher",
+    "RelativePath": "api/VoucherApi/apply",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ShopNgocLan.Models.VoucherRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ShopNgocLan.Controllers.VoucherApiController",
+    "Method": "UpdateShipping",
+    "RelativePath": "api/VoucherApi/update-shipping",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "ShopNgocLan.Controllers.VoucherApiController\u002BShippingRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

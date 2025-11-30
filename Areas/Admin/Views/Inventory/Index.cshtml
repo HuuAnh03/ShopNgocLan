@@ -1,0 +1,294 @@
+﻿@using ShopNgocLan.Models.Inventory
+@model List<InventoryItemViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý tồn kho";
+    Layout = "AdminLayout";
+
+    var fromDate = ViewBag.FromDate as string;
+    var toDate = ViewBag.ToDate as string;
+
+    string rangeLabel = Model != null && Model.Any() && !string.IsNullOrEmpty(Model.First().KhoangThoiGianLabel)
+        ? Model.First().KhoangThoiGianLabel!
+        : "";
+}
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="pagetitle d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h1>Quản lý tồn kho</h1>
+                <nav>
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">
+                            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item active">Tồn kho</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Bộ lọc ngày để thống kê nhập/xuất -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <form method="get" asp-area="Admin" asp-controller="Inventory" asp-action="Index" class="row g-3 align-items-end">
+                    <div class="col-sm-4 col-md-3">
+                        <label class="form-label">Từ ngày</label>
+                        <input type="date" name="fromDate" class="form-control" value="@fromDate" />
+                    </div>
+                    <div class="col-sm-4 col-md-3">
+                        <label class="form-label">Đến ngày</label>
+                        <input type="date" name="toDate" class="form-control" value="@toDate" />
+                    </div>
+                    <div class="col-sm-4 col-md-3">
+                        <button type="submit" class="btn btn-primary">
+                            Lọc thống kê
+                        </button>
+                        <a asp-area="Admin" asp-controller="Inventory" asp-action="Index" class="btn btn-outline-secondary ms-1">
+                            Reset
+                        </a>
+                    </div>
+                    <div class="col-md-3 text-md-end">
+                        @if (!string.IsNullOrEmpty(rangeLabel))
+                        {
+                            <span class="badge bg-info text-dark">
+                                Thống kê trong: @rangeLabel
+                            </span>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- THỐNG KÊ TỔNG QUAN -->
+        @if (Model != null && Model.Any())
+        {
+            var tongTon = Model.Sum(x => x.SoLuongTonHienTai);
+            var tongNhapAll = Model.Sum(x => x.TongNhapAll);
+            var tongXuatAll = Model.Sum(x => x.TongXuatAll);
+
+            <div class="row mb-3">
+                <div class="col-md-4 mb-2">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Tổng tồn kho hiện tại</div>
+                            <div class="fs-4 fw-semibold">@tongTon</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Tổng nhập (toàn thời gian)</div>
+                            <div class="fs-5 fw-semibold">@tongNhapAll</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="text-muted small">Tổng xuất (toàn thời gian)</div>
+                            <div class="fs-5 fw-semibold">@tongXuatAll</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- BẢNG TỒN KHO -->
+        <div class="card">
+            <div class="card-body table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Sản phẩm</th>
+                            <th>Danh mục</th>
+                            <th class="text-end">Tồn hiện tại</th>
+                            <th class="text-end">Tổng nhập (all)</th>
+                            <th class="text-end">Tổng xuất (all)</th>
+                            <th class="text-end">Nhập </th>
+                            <th class="text-end">Xuất </th>
+                            <th class="text-center" style="width: 80px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    Chưa có dữ liệu tồn kho.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int stt = 1;
+                            foreach (var item in Model)
+                            {
+                                <tr data-ctsp-id="@item.ChiTietSanPhamId">
+
+                                    <td>@stt</td>
+
+                                    <!-- Cột sản phẩm + ảnh -->
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@item.AnhSanPham"
+                                                 class="me-2 rounded"
+                                                 style="width:48px;height:48px;object-fit:cover;border:1px solid #ddd;" />
+
+                                            <div>
+                                                <div class="fw-semibold">@item.TenSanPham</div>
+                                                <div class="text-muted small">@item.MauSac - @item.Size</div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>@item.DanhMuc</td>
+
+                                    <td class="text-end">
+                                        <span class="stock-value fw-semibold">@item.SoLuongTonHienTai</span>
+                                    </td>
+
+                                    <td class="text-end">@item.TongNhapAll</td>
+                                    <td class="text-end">@item.TongXuatAll</td>
+                                    <td class="text-end">@item.TongNhapTrongKhoang</td>
+                                    <td class="text-end">@item.TongXuatTrongKhoang</td>
+
+                                    <td class="text-center">
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary"
+                                                onclick="openNhapKhoModal(
+                                                                    @item.ChiTietSanPhamId,
+                                                                    '@item.TenSanPham'.replace('\'','\\\''),
+                                                                    '@item.MauSac - @item.Size',
+                                                                    @item.SoLuongTonHienTai)">
+                                            Nhập kho
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                stt++;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Form ẩn cho AntiForgeryToken -->
+<form id="antiForgeryForm" method="post" class="d-none">
+    @Html.AntiForgeryToken()
+</form>
+
+<!-- Modal nhập kho -->
+<div class="modal fade" id="nhapKhoModal" tabindex="-1" aria-labelledby="nhapKhoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="nhapKhoModalLabel">Nhập kho sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="nk-ctsp-id" />
+
+                <div class="mb-2">
+                    <div class="fw-semibold" id="nk-ten-sp"></div>
+                    <div class="text-muted small" id="nk-variant-info"></div>
+                    <div class="text-muted small">
+                        Tồn hiện tại: <span id="nk-stock-current" class="fw-semibold"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Số lượng nhập</label>
+                    <input type="number" id="nk-so-luong" class="form-control" min="1" value="1" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ghi chú</label>
+                    <textarea id="nk-ghi-chu" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="submitNhapKho()">
+                    Xác nhận nhập kho
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const nhapKhoUrl = '@Url.Action("NhapKhoAjax", "Inventory", new { area = "Admin" })';
+
+        let nhapKhoModalInstance = null;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const modalElement = document.getElementById('nhapKhoModal');
+            nhapKhoModalInstance = new bootstrap.Modal(modalElement);
+        });
+
+        function openNhapKhoModal(ctspId, tenSp, variantInfo, currentStock) {
+            document.getElementById('nk-ctsp-id').value = ctspId;
+            document.getElementById('nk-ten-sp').textContent = tenSp;
+            document.getElementById('nk-variant-info').textContent = variantInfo;
+            document.getElementById('nk-stock-current').textContent = currentStock;
+
+            document.getElementById('nk-so-luong').value = 1;
+            document.getElementById('nk-ghi-chu').value = "";
+
+            nhapKhoModalInstance.show();
+        }
+
+        async function submitNhapKho() {
+            const id = parseInt(document.getElementById('nk-ctsp-id').value || "0");
+            const soLuong = parseInt(document.getElementById('nk-so-luong').value || "0");
+            const ghiChu = document.getElementById('nk-ghi-chu').value || "";
+
+            if (!id || soLuong <= 0) {
+                alert("Vui lòng nhập số lượng hợp lệ.");
+                return;
+            }
+
+            // AntiForgeryToken
+            const token = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
+
+            const response = await fetch(nhapKhoUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
+                },
+                body: JSON.stringify({
+                    chiTietSanPhamId: id,
+                    soLuongNhap: soLuong,
+                    ghiChu: ghiChu
+                })
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                alert(data.message || "Nhập kho thất bại.");
+                return;
+            }
+
+            // cập nhật tồn trên bảng
+            const row = document.querySelector('tr[data-ctsp-id="' + id + '"] .stock-value');
+            if (row) row.textContent = data.newStock;
+
+            alert("Nhập kho thành công!");
+
+            nhapKhoModalInstance.hide();
+        }
+    </script>
+}

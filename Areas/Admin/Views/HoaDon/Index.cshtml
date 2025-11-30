@@ -1,0 +1,319 @@
+﻿@model List<ShopNgocLan.Models.HoaDon>
+@{
+    ViewData["Title"] = "Quản lý Đơn hàng";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+    string currentSearch = ViewBag.CurrentSearch ?? "";
+
+    // Đếm số đơn đang YÊU CẦU HOÀN HÀNG
+    var returnRequestedCount = Model.Count(h => h.TrangThai?.MaTrangThai == "ReturnRequested");
+}
+<link rel="stylesheet" href="~/assets/css/account.css" asp-append-version="true">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+@functions {
+    // CLASS FIX LỖI TUPLE
+    public class StatusInfo
+    {
+        public string CssClass { get; set; }
+        public string DisplayText { get; set; }
+    }
+
+    // MAPPING TRẠNG THÁI → CSS + TEXT
+    public StatusInfo GetStatus(string maTrangThai)
+    {
+        return maTrangThai switch
+        {
+            "AwaitingPayment" => new StatusInfo { CssClass = "status-chothanhtoan", DisplayText = "Chờ thanh toán trực tuyến" },
+            "Pending" => new StatusInfo { CssClass = "status-pending", DisplayText = "Chờ xác nhận" },
+            "Confirmed" => new StatusInfo { CssClass = "status-confirmed", DisplayText = "Đã xác nhận" },
+            "Processing" => new StatusInfo { CssClass = "status-processing", DisplayText = "Đang xử lý" },
+            "Shipped" => new StatusInfo { CssClass = "status-shipped", DisplayText = "Đang giao" },
+            "Delivered" => new StatusInfo { CssClass = "status-success", DisplayText = "Hoàn thành" },
+            "PaymentFailed" => new StatusInfo { CssClass = "status-failed", DisplayText = "Thanh toán thất bại" },
+            "Cancelled" => new StatusInfo { CssClass = "status-danger", DisplayText = "Đã hủy" },
+
+            // 🔥 MỚI: Return Requested
+            "ReturnRequested" => new StatusInfo { CssClass = "status-returnrequested", DisplayText = "Yêu cầu hoàn hàng" },
+
+            // 🔥 MỚI: Returned
+            "Returned" => new StatusInfo { CssClass = "status-returned", DisplayText = "Hoàn hàng" },
+
+            _ => new StatusInfo { CssClass = "status-default", DisplayText = "Không xác định" }
+        };
+    }
+}
+
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="pagetitle">
+            <h3>Quản lý hóa đơn</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item active">Danh sách hóa đơn</li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="card shadow mb-4">
+
+            <div class="card-header py-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    DANH SÁCH HÓA ĐƠN (@Model.Count)
+                </h6>
+
+                <div class="search-box ms-md-auto">
+                    <form id="searchForm" asp-area="Admin" asp-controller="HoaDon" asp-action="Index" method="get" class="d-flex align-items-center">
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Tìm Mã ĐH/Tên Khách hàng..."
+                               name="searchQuery"
+                               id="searchInput"
+                               value="@currentSearch" />
+
+                        <button type="submit" class="btn btn-primary ms-2 btn-sm">Tìm</button>
+                    </form>
+                </div>
+            </div>
+
+            @* 🔥 THANH FILTER TRẠNG THÁI + TAB YÊU CẦU HOÀN HÀNG *@
+            <div class="px-3 pt-3 pb-1">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="fw-semibold me-2">Lọc theo trạng thái:</span>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm filter-status-btn active-status-filter"
+                            data-search="">
+                        Tất cả
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm filter-status-btn"
+                            data-search="Chờ xác nhận">
+                        Chờ xác nhận
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm filter-status-btn"
+                            data-search="Đang xử lý">
+                        Đang xử lý
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm filter-status-btn"
+                            data-search="Đang giao">
+                        Đang giao
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm filter-status-btn"
+                            data-search="Hoàn thành">
+                        Hoàn thành
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm filter-status-btn"
+                            data-search="Đã hủy">
+                        Đã hủy
+                    </button>
+
+                    @* ⭐ TAB ĐẶC BIỆT: YÊU CẦU HOÀN HÀNG *@
+                    <button type="button"
+                            class="btn btn-outline-warning btn-sm filter-status-btn filter-return-tab"
+                            data-search="Yêu cầu hoàn hàng">
+                        Yêu cầu hoàn hàng
+                        @if (returnRequestedCount > 0)
+                        {
+                            <span class="badge bg-danger ms-1">@returnRequestedCount</span>
+                        }
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Mã ĐH</th>
+                                <th>Ngày tạo</th>
+                                <th>Người mua hàng</th>
+                                <th>Người nhận</th>
+                                <th>Tổng tiền</th>
+                                <th>PT Thanh toán</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                var status = GetStatus(item.TrangThai.MaTrangThai);
+
+                                <tr>
+                                    <td>#@item.Id</td>
+                                    <td>@item.NgayTao</td>
+
+                                    <td>
+                                        @if (item.User != null)
+                                        {
+                                            <strong>@item.User.Ho @item.User.Ten</strong>
+                                            <br />
+                                            <small>(@item.User.Email)</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-secondary">Khách vãng lai</span>
+                                        }
+                                    </td>
+
+                                    <td>@item.TenKhachHang</td>
+                                    <td>@item.ThanhTien.ToString("N0") đ</td>
+                                    <td>@item.PhuongThucThanhToan.TenPhuongThuc</td>
+
+                                    <td class="text-center">
+                                        <span class="status-badge @status.CssClass">
+                                            @status.DisplayText
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <a asp-area="Admin" asp-controller="HoaDon" asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">
+                                            Chi tiết
+                                        </a>
+
+                                        <form class="d-inline" data-order-id="@item.Id">
+                                            @Html.AntiForgeryToken()
+                                            <button type="button" class="btn btn-danger btn-sm">Xóa</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // DATA TABLE
+            const table = $('#dataTable').DataTable({
+                language: {
+                    sProcessing: "Đang xử lý...",
+                    sZeroRecords: "Không tìm thấy kết quả",
+                    sInfo: "Hiển thị _START_ đến _END_ / _TOTAL_",
+                    sInfoEmpty: "Không có dữ liệu",
+                    sSearch: "",
+                    oPaginate: { sFirst: "Đầu", sPrevious: "Trước", sNext: "Tiếp", sLast: "Cuối" }
+                },
+                dom: 'lrtip',
+                order: [[1, "desc"]]
+            });
+
+            // SEARCH REALTIME (Ô tìm kiếm trên header)
+            $('#searchInput').on('keyup', function () {
+                table.search(this.value).draw();
+            });
+
+            // 🔥 FILTER TRẠNG THÁI (DÙNG CỘT 6 - "Trạng thái")
+            const statusColumnIndex = 6;
+
+            $('.filter-status-btn').on('click', function () {
+                // Bỏ active cũ
+                $('.filter-status-btn').removeClass('active-status-filter');
+
+                // Active nút hiện tại
+                $(this).addClass('active-status-filter');
+
+                // Lấy từ cần search
+                const searchValue = $(this).data('search') || '';
+
+                // Search trên cột trạng thái
+                table.column(statusColumnIndex).search(searchValue).draw();
+            });
+
+            // DELETE ORDER
+            const antiForgeryToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
+            $('#dataTable').on('click', 'button.btn-danger', function () {
+
+                const form = $(this).closest('form');
+                const orderId = form.data('order-id');
+
+                Swal.fire({
+                    title: `Xóa đơn hàng #${orderId}?`,
+                    text: "Thao tác này sẽ khôi phục tồn kho!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Xóa'
+                }).then(result => {
+                    if (!result.isConfirmed) return;
+
+                    fetch(`/Admin/HoaDon/Delete?id=${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': antiForgeryToken,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+
+                            if (data.success) {
+                                Swal.fire('Đã xóa!', data.message, 'success')
+                                    .then(() => window.location.reload());
+                            } else {
+                                Swal.fire('Lỗi!', data.message, 'error');
+                            }
+
+                        });
+                });
+            });
+
+        });
+    </script>
+}
+
+<style>
+    .search-box {
+        display: flex;
+        align-items: center;
+        position: relative;
+        max-width: 300px;
+        margin-left: auto;
+    }
+
+        .search-box .form-control {
+            padding-right: 35px;
+            width: 100%;
+        }
+
+    /* Nút filter đang chọn */
+    .active-status-filter {
+        border-color: #0d6efd !important;
+        background-color: #0d6efd !important;
+        color: #fff !important;
+    }
+
+    /* Tab yêu cầu hoàn hàng nổi bật khi có đơn */
+    .filter-return-tab .badge {
+        font-size: 0.7rem;
+    }
+</style>

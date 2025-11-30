@@ -1,0 +1,116 @@
+﻿@{
+    Layout = null;
+}
+<head>
+    <!-- Title Meta -->
+    <meta charset="utf-8" />
+    <title>Đăng nhập</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A fully responsive premium admin dashboard template" />
+    <meta name="author" content="Techzaa" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="~/admin/images/favicon.ico">
+
+    <!-- Vendor css (Require in all Page) -->
+    <link href="~/admin/css/vendor.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Icons css (Require in all Page) -->
+    <link href="~/admin/css/icons.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- App css (Require in all Page) -->
+    <link href="~/admin/css/app.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Theme Config js (Require in all Page) -->
+    <script src="~/admin/js/config.js"></script>
+</head>
+<body class="h-100">
+    <div class="d-flex flex-column h-100 p-3">
+        <div class="d-flex flex-column flex-grow-1">
+            <div class="row h-100">
+                <div class="col-xxl-7">
+                    <div class="row justify-content-center h-100">
+                        <div class="col-lg-6 py-lg-5">
+                            <div class="d-flex flex-column h-100 justify-content-center">
+                                <div class="auth-logo mb-4">
+                                    <a asp-action="Index" asp-controller="Home" class="logo-dark">
+                                        <img src="~/admin/images/logo3.png" height="150" alt="logo dark">
+                                    </a>
+
+                                    <a asp-action="Index" asp-controller="Home" class="logo-light">
+                                        <img src="~/admin/images/logo3.png" height="150" alt="logo light">
+                                    </a>
+                                </div>
+
+                                <h2 class="fw-bold fs-24">Đăng nhập</h2>
+
+                                <p class="text-muted mt-1 mb-4">Nhập tên đăng nhập và mật khẩu</p>
+
+                                @using (Html.BeginForm("Login", "Account", FormMethod.Post))
+                                {
+                                    @* Email Field *@
+                                    <div class="mb-4">
+                                        <label class="form-label" for="Email">Tên đăng nhập</label>
+                                        <input type="text" id="username" name="username" class="form-control form-control-lg" required />
+                                    </div>
+
+                                    @* Password Field *@
+                                    <div class="mb-4">
+                                        <label class="form-label" for="Password">Mật khẩu</label>
+                                        <input type="password" id="Password" name="Password" class="form-control form-control-lg" required />
+                                    </div>
+
+                                    @* Remember Me & Forgot Password *@
+                                    <div class="mb-4 row py-2 flex-wrap">
+                                        <div class="col-auto me-auto">
+                                            <label class="form-check mb-0">
+                                                <input type="checkbox" class="form-check-input" name="RememberMe" />
+                                                <span class="form-check-label">Nhớ mật khẩu</span>
+                                            </label>
+                                        </div>
+                                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                        <div class="col-auto d-flex align-items-center">
+                                            <a href="@Url.Action("ForgotPassword", "Account")">Quên mật khẩu?</a>
+                                        </div>
+                                    </div>
+
+                                    @* Submit Button *@
+                                    <div>
+                                        <button type="submit" class="btn btn-primary btn-lg w-100">Đăng nhập</button>
+                                    </div>
+                                }
+
+
+                                <p class="text-danger text-center">Bạn chưa có tài khoản? <a href="@Url.Action("Register", "Account")" class="text-dark fw-bold ms-1">Đăng ký</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xxl-5 d-none d-xxl-flex">
+                    <div class="card h-100 mb-0 overflow-hidden">
+                        <div class="d-flex flex-column h-100">
+                            <img src="../admin/images/small/img-10.jpg" alt="" class="w-100 h-100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/admin/js/vendor.js"></script>
+
+    <!-- App Javascript (Require in all Page) -->
+    <script src="~/admin/js/app.js"></script>
+
+    <!-- Vector Map Js -->
+    <script src="~/admin/vendor/jsvectormap/js/jsvectormap.min.js"></script>
+    <script src="~/admin/vendor/jsvectormap/maps/world-merc.js"></script>
+    <script src="~/admin/vendor/jsvectormap/maps/world.js"></script>
+
+    <!-- Dashboard Js -->
+    <script src="~/admin/js/pages/dashboard.js"></script>
+
+</body>
+
+

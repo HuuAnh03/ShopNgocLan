@@ -1,0 +1,255 @@
+﻿@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+@{
+    var currentUrl = Context.Request.Path + Context.Request.QueryString;
+}
+@model ShopNgocLan.Models.User
+
+            <div class="page-content">
+
+                <!-- Start Container Fluid -->
+                <div class="container-xxl">
+        <div class="pagetitle">
+            <h3>Chi tiết người dùng</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Users" asp-action="Index">Danh sách người dùng</a>
+                    </li>
+                    <li class="breadcrumb-item active">Chi tiết người dùng</li>
+                </ol>
+            </nav>
+        </div>
+
+                    <div class="row">
+                        <div class="col-lg-4">
+                            <div class="card overflow-hidden">
+                                <div class="card-body">
+                                    <div class="bg-primary profile-bg rounded-top p-5 position-relative mx-n3 mt-n3">
+                            <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/avatars/default.jpg" : Model.AvatarUrl)" alt="" class="avatar-lg border border-light border-3 rounded-circle position-absolute top-100 start-0 translate-middle ms-5">
+                                    </div>
+                                    <div class="mt-4 pt-3">
+                                        <h4 class="mb-1"> #@Model.Id @Model.Ho @Model.Ten <i class="bx bxs-badge-check text-success align-middle"></i></h4>
+                                        <div class="mt-2">
+                                            <a href="#!" class="link-primary fs-15">Link FB</a>
+                                            <p class="fs-15 mb-1 mt-1"><span class="text-dark fw-semibold">Email : </span> @Model.Email</p>
+                                            <p class="fs-15 mb-0 mt-1"><span class="text-dark fw-semibold">Phone : </span> @Model.SoDienThoai</p>
+                                            <p class="fs-15 mb-0 mt-1"><span class="text-dark fw-semibold">Giới tính : </span> @(Model.GioiTinh ?? "Chưa cập nhật")</p>
+                                            <p class="fs-15 mb-0 mt-1"><span class="text-dark fw-semibold">Ngày sinh : </span> @(Model.NgaySinh?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</p>
+                                            <p class="fs-15 mb-0 mt-1"><span class="text-dark fw-semibold">Ngày tạo : </span> @(Model.NgayTao?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</p>
+                                            @{
+                                                // Khai báo biến để chứa class và tên vai trò
+                                                string badgeClassRool = "bg-secondary-subtle text-secondary";
+                                                string roleName = "Chưa xác định";
+
+                                                // Dùng switch case để kiểm tra RoleId của User
+                                                switch (Model.RoleId)
+                                                {
+                                                    case 1:
+                                                        badgeClassRool = "bg-danger-subtle text-danger";
+                                                        roleName = "Admin";
+                                                        break;
+                                                    case 2:
+                                                        badgeClassRool = "bg-info-subtle text-info";
+                                                        roleName = "Nhân viên";
+                                                        break;
+                                                    case 3:
+                                                        badgeClassRool = "bg-success-subtle text-success";
+                                                        roleName = "Khách hàng";
+                                                        break;
+                                                }
+                                            }
+                                            <p class="fs-15 mb-0 mt-1">
+                                                <span class="text-dark fw-semibold">Role : </span><span class="badge @badgeClassRool px-2 py-1">@roleName</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer border-top gap-1 hstack">
+                                    <a href="#!" class="btn btn-primary w-100">Nhắn tin</a>
+                                    <a href="#!" class="btn btn-light w-100">Phân tích</a>
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-soft-dark d-inline-flex align-items-center justify-content-center rounded avatar-sm"><i class='bx bx-edit-alt fs-18'></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h4 class="card-title">Thông tin</h4>
+                                    </div>
+                                </div>
+                                <div class="card-body py-2">
+                                    <div class="table-responsive">
+                                        <div class="card-body">
+                                            @if (Model.DiaChiGiaoHangs != null && Model.DiaChiGiaoHangs.Any())
+                                            {
+                                                <ul class="list-group list-group-flush">
+                                                    @foreach (var diaChi in Model.DiaChiGiaoHangs)
+                                                    {
+                                                        <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                                                            <div>
+                                                                <div class="fw-bold">
+                                                                    @diaChi.TinhThanhPho
+                                                                    @if (diaChi.LaMacDinh == true)
+                                                                    {
+                                                                        <span class="badge bg-primary ms-2">Mặc định</span>
+                                                                    }
+                                                                </div>
+                                                                <span>@diaChi.DiaChiChiTiet, @diaChi.PhuongXa, @diaChi.QuanHuyen, @diaChi.TinhThanhPho</span>
+                                                            </div>
+                                                
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <p class="text-muted">Chưa có địa chỉ nào được lưu.</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-8">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h4 class="card-title mb-2 d-flex align-items-center gap-2">Tổng số Hóa đơn</h4>
+                                                    <p class="text-muted fw-medium fs-22 mb-0">@ViewBag.TotalInvoices</p>
+                                                </div>
+                                                <div>
+                                                    <div class="avatar-md bg-primary bg-opacity-10 rounded">
+                                                        <iconify-icon icon="solar:bill-list-bold-duotone" class="fs-32 text-primary avatar-title"></iconify-icon>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h4 class="card-title mb-2 d-flex align-items-center gap-2">Tổng số Đơn hàng</h4>
+                                                    <p class="text-muted fw-medium fs-22 mb-0">@ViewBag.CompletedOrders</p>
+                                                </div>
+                                                <div>
+                                                    <div class="avatar-md bg-primary bg-opacity-10 rounded">
+                                                        <iconify-icon icon="solar:box-bold-duotone" class="fs-32 text-primary avatar-title"></iconify-icon>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <h4 class="card-title mb-2 d-flex align-items-center gap-2">Tổng thanh toán</h4>
+                                                    <p class="text-muted fw-medium fs-22 mb-0">@string.Format("{0:N0} đ", ViewBag.TotalExpense)</p>
+                                                </div>
+                                                <div>
+                                                    <div class="avatar-md bg-primary bg-opacity-10 rounded">
+                                                        <iconify-icon icon="solar:chat-round-money-bold-duotone" class="fs-32 text-primary avatar-title"></iconify-icon>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">Lịch sử giao dịch</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table align-middle mb-0 table-hover table-centered">
+                                            <thead class="bg-light-subtle">
+                                                <tr>
+                                                    <th>Mã Hóa Đơn</th>
+                                                    <th>Trạng Thái</th>
+                                                    <th>Thành Tiền</th>
+                                                    <th>Ngày Tạo</th>
+                                                    <th>P.Thức Thanh Toán</th>
+                                                    <th>Hành Động</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @if (ViewBag.UserInvoices != null && ViewBag.UserInvoices.Count > 0)
+                                                {
+                                                    foreach (var hoadon in ViewBag.UserInvoices)
+                                                    {
+                                                        // Logic để chọn màu cho badge trạng thái
+                                                        string badgeClassGH = "bg-secondary-subtle text-secondary";
+                                            switch (hoadon.TrangThai.MaTrangThai)
+                                                        {
+                                                case "Delivered":
+                                                    badgeClassGH = "bg-success-subtle text-success";
+                                                    break;
+                                                case "Shipped":
+                                                case "Processing":
+                                                    badgeClassGH = "bg-info-subtle text-info";
+                                                    break;
+                                                case "Confirmed":
+                                                    badgeClassGH = "bg-primary-subtle text-primary";
+                                                    break;
+                                                case "Pending": // (ChoXacNhan)
+                                                    badgeClassGH = "bg-warning-subtle text-warning";
+                                                    break;
+                                                case "Cancelled":
+                                                    badgeClassGH = "bg-danger-subtle text-danger";
+                                                    break;
+                                                        }
+
+                                                        <tr>
+                                                            <td><a href="#" class="text-body fw-bold">#@hoadon.Id</a></td>
+                                                <td> <span class="badge @badgeClassGH py-1 px-2">@hoadon.TrangThai.TenTrangThai</span> </td>
+                                                            <td>@string.Format("{0:N0} đ", hoadon.ThanhTien)</td>
+                                                            <td>@(hoadon.NgayTao?.ToString("dd/MM/yyyy"))</td>
+                                                            <td>@(hoadon.PhuongThucThanhToan?.TenPhuongThuc ?? "N/A")</td>
+                                                            <td class="text-center">
+                                                                <div class="d-flex gap-2 justify-content-center">
+                                                                    @* BƯỚC 3: Dùng Tag Helper để tạo link đến các Action Edit, Details, Delete *@
+                                                                    <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-light btn-sm"><iconify-icon icon="solar:eye-broken" class="align-middle fs-18"></iconify-icon></a>
+                                                                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-soft-primary btn-sm"><iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon></a>
+                                                                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-soft-danger btn-sm"><iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon></a>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr>
+                                                        <td colspan="5" class="text-center">Không có lịch sử giao dịch.</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                               
+                            </div>
+                           
+                        </div>
+                    </div>
+
+
+                </div>
+                
+
+            </div>

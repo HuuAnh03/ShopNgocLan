@@ -1,0 +1,448 @@
+﻿@model List<ShopNgocLan.Models.Voucher>
+@{
+    ViewData["Title"] = "Quản lý Mã Giảm Giá";
+    Layout = "AdminLayout";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+    /* CSS tùy chỉnh cho trang Voucher (nếu cần) */
+    .table td:nth-child(4), /* Giá trị */
+    .table td:nth-child(5) /* Đơn hàng TT */ {
+        font-weight: 600; /* In đậm giá trị tiền tệ */
+    }
+</style>
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="pagetitle">
+    <h3>Quản lý mã giảm giá</h3>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+            </li>
+            
+            <li class="breadcrumb-item active">Quản lý mã giảm giá</li>
+        </ol>
+    </nav>
+</div>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">DANH SÁCH MÃ GIẢM GIÁ (@Model.Count)</h6>
+
+                <div class="search-box ms-auto me-3">
+                    <div style="position: relative; flex-grow: 1;">
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Tìm Mã/Mô tả Voucher..."
+                               id="searchInput" />
+                    </div>
+                </div>
+
+                <button type="button" id="btn-create-voucher" class="btn btn-primary btn-sm">
+                    <i class="fa fa-plus"></i> Thêm Voucher
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="voucherTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">ID</th>
+                                <th style="width: 15%;">Mã Voucher</th>
+                                <th style="width: 15%;">Mô Tả</th>
+                                <th style="width: 10%;">Giá Trị GG</th>
+                                <th style="width: 10%;">ĐH Tối Thiểu</th>
+                                <th style="width: 10%;">Ngày Bắt Đầu</th>
+                                <th style="width: 10%;">Ngày Hết Hạn</th>
+                                <th style="width: 10%;">Lượt dùng</th>
+                                <th style="width: 10%;">Trạng Thái</th>
+                                <th style="width: 15%;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @* Dữ liệu được tải bằng DataTables *@
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm / Sửa Voucher -->
+<div class="modal fade" id="voucherModal" tabindex="-1" role="dialog" aria-labelledby="voucherModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="voucherModalLabel">Thêm / Sửa Voucher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="voucherForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="Voucher_Id" name="Id" value="0" />
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Cột trái -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="Voucher_MaVoucher" class="form-label">Mã Voucher (*)</label>
+                                <input type="text" class="form-control" id="Voucher_MaVoucher" name="MaVoucher" maxlength="20" required>
+                                <div class="text-danger" id="errorMaVoucher"></div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="Voucher_MoTa" class="form-label">Mô Tả</label>
+                                <textarea class="form-control" id="Voucher_MoTa" name="MoTa" rows="2"></textarea>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="Voucher_LoaiGiamGia" class="form-label">Loại Giảm Giá (*)</label>
+                                <select class="form-select" id="Voucher_LoaiGiamGia" name="LoaiGiamGia" required>
+                                    <option value="1">Phần trăm (%)</option>
+                                    <option value="2">Giá trị cố định (VNĐ)</option>
+                                    <option value="3">FreeShip</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="Voucher_GiaTriGiam" class="form-label">Giá Trị Giảm (*)</label>
+                                <input type="number" step="0.01" class="form-control" id="Voucher_GiaTriGiam" name="GiaTriGiam" required min="0">
+                            </div>
+                        </div>
+
+                        <!-- Cột phải -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="Voucher_GiamGiaToiDa" class="form-label">Giảm Giá Tối Đa (VNĐ)</label>
+                                <input type="number" class="form-control" id="Voucher_GiamGiaToiDa" name="GiamGiaToiDa" min="0" placeholder="Chỉ áp dụng khi chọn loại %">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="Voucher_DonHangToiThieu" class="form-label">Đơn Hàng Tối Thiểu (*)</label>
+                                <input type="number" class="form-control" id="Voucher_DonHangToiThieu" name="DonHangToiThieu" required min="0">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="Voucher_SoLuotSuDungToiDa" class="form-label">Số Lượt SD Tối Đa (*)</label>
+                                <input type="number" class="form-control" id="Voucher_SoLuotSuDungToiDa" name="SoLuotSuDungToiDa" required min="1">
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="Voucher_NgayBatDau" class="form-label">Ngày Bắt Đầu (*)</label>
+                                <input type="datetime-local" class="form-control" id="Voucher_NgayBatDau" name="NgayBatDau" required>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="Voucher_NgayKetThuc" class="form-label">Ngày Kết Thúc (*)</label>
+                                <input type="datetime-local" class="form-control" id="Voucher_NgayKetThuc" name="NgayKetThuc" required>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="Voucher_SoLuotDaSuDung" class="form-label">Số Lượt Đã Sử Dụng</label>
+                                <input type="number" class="form-control" id="Voucher_SoLuotDaSuDung" name="SoLuotDaSuDung" readonly>
+                            </div>
+
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" id="Voucher_KichHoat" name="KichHoat" checked>
+                                <label class="form-check-label" for="Voucher_KichHoat">Kích Hoạt Voucher</label>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- modal-body -->
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Lưu Voucher</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        var dataTable;
+        const antiForgeryToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
+        // Hàm hỗ trợ định dạng tiền tệ
+        function formatCurrency(number) {
+            return (number === null || number === undefined) ? 'N/A' : number.toLocaleString('vi-VN') + ' ₫';
+        }
+
+        // Hàm hỗ trợ định dạng ngày tháng (dd/MM/yyyy)
+        function formatDate(isoDateString) {
+            if (!isoDateString) return 'N/A';
+            const date = new Date(isoDateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // Dữ liệu từ server (List<Voucher>)
+        const serverData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model,
+            new System.Text.Json.JsonSerializerOptions {
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+            }
+        ));
+
+        $(document).ready(function () {
+            loadDataTable();
+
+            $('#searchInput').on('keyup', function() {
+                dataTable.search(this.value).draw();
+            });
+
+            $('#btn-create-voucher').click(function () {
+                $('#voucherForm')[0].reset();
+                $('#Voucher_Id').val(0);
+                $('#Voucher_KichHoat').prop('checked', true);
+                $('#Voucher_SoLuotDaSuDung').val(0);
+                $('#voucherModalLabel').text('Thêm Voucher mới');
+                $('#errorMaVoucher').text('');
+                var voucherModal = new bootstrap.Modal(document.getElementById('voucherModal'));
+                voucherModal.show();
+            });
+
+            $('#voucherForm').submit(function (e) {
+                e.preventDefault();
+                saveVoucher();
+            });
+
+            $('#voucherModal').on('hidden.bs.modal', function () {
+                $('#voucherForm')[0].reset();
+                $('#errorMaVoucher').text('');
+            });
+        });
+
+        // --- 1. Tải Dữ Liệu Bảng (Dùng dữ liệu từ Model) ---
+        function loadDataTable() {
+            if ($.fn.DataTable.isDataTable('#voucherTable')) {
+                $('#voucherTable').DataTable().destroy();
+            }
+
+            dataTable = $('#voucherTable').DataTable({
+                "data": serverData,
+                "columns": [
+                    { "data": "Id", "width": "5%" },
+                    { "data": "MaVoucher", "width": "15%" },
+                    { "data": "MoTa", "width": "15%" },
+                    {
+                        "data": "GiaTriGiam",
+                        "render": function (data, type, row) {
+                            return row.LoaiGiamGia === 1 ? data + '%' : formatCurrency(data);
+                        },
+                        "width": "10%"
+                    },
+                    {
+                        "data": "DonHangToiThieu",
+                        "render": function (data) {
+                            return formatCurrency(data);
+                        },
+                        "width": "10%"
+                    },
+                    {
+                        "data": "NgayBatDau",
+                        "render": function (data) {
+                            return formatDate(data);
+                        },
+                        "width": "10%"
+                    },
+                    {
+                        "data": "NgayKetThuc",
+                        "render": function (data) {
+                            return formatDate(data);
+                        },
+                        "width": "10%"
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            var used = row.SoLuotDaSuDung || 0;
+                            var max = row.SoLuotSuDungToiDa;
+                            if (max === null || max === undefined) {
+                                return used + ' / ∞';
+                            }
+                            return used + ' / ' + max;
+                        },
+                        "width": "10%"
+                    },
+                    {
+                        "data": "KichHoat",
+                        "render": function (data) {
+                            return data
+                                ? '<span class="badge bg-success">Hoạt động</span>'
+                                : '<span class="badge bg-secondary">Ngừng</span>';
+                        },
+                        "width": "10%"
+                    },
+                    {
+                        "data": "Id",
+                        "render": function (data, type, row) {
+                            return `
+                                <button onclick="openEditModal(${data})" class="btn btn-sm btn-warning mb-1">Sửa</button>
+                                <button onclick="deleteVoucher(${data})" class="btn btn-sm btn-danger mb-1">Xóa</button>
+                            `;
+                        },
+                        "orderable": false,
+                        "width": "15%"
+                    }
+                ],
+                "language": {
+                    "sProcessing": "Đang xử lý...",
+                    "sLengthMenu": "Xem _MENU_ mục",
+                    "sZeroRecords": "Không tìm thấy kết quả nào",
+                    "sInfo": "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                    "sInfoEmpty": "Đang xem 0 đến 0 trong tổng số 0 mục",
+                    "sInfoFiltered": "(Được lọc từ tổng số _MAX_ mục)",
+                    "sSearch": "",
+                    "oPaginate": {
+                        "sFirst": "Đầu",
+                        "sPrevious": "Trước",
+                        "sNext": "Tiếp",
+                        "sLast": "Cuối"
+                    }
+                },
+                "dom": 'lrtip',
+                "order": [[ 0, "desc" ]]
+            });
+        }
+
+        // --- 2. Thêm/Sửa Voucher (AJAX POST) ---
+        function saveVoucher() {
+            var isCreating = $('#Voucher_Id').val() == 0;
+
+            var endpoint = isCreating
+                ? '@Url.Action("Create", "Voucher", new { Area = "Admin" })'
+                : '@Url.Action("Edit", "Voucher", new { Area = "Admin" })';
+
+            var voucherData = {
+                Id: parseInt($('#Voucher_Id').val()),
+                MaVoucher: $('#Voucher_MaVoucher').val(),
+                MoTa: $('#Voucher_MoTa').val(),
+                LoaiGiamGia: parseInt($('#Voucher_LoaiGiamGia').val()),
+                GiaTriGiam: parseFloat($('#Voucher_GiaTriGiam').val()),
+                GiamGiaToiDa: $('#Voucher_GiamGiaToiDa').val() ? parseFloat($('#Voucher_GiamGiaToiDa').val()) : null,
+                DonHangToiThieu: parseFloat($('#Voucher_DonHangToiThieu').val()),
+                NgayBatDau: $('#Voucher_NgayBatDau').val(),
+                NgayKetThuc: $('#Voucher_NgayKetThuc').val(),
+                SoLuotSuDungToiDa: parseInt($('#Voucher_SoLuotSuDungToiDa').val()),
+                KichHoat: $('#Voucher_KichHoat').is(':checked'),
+            };
+
+            if (isCreating) {
+                delete voucherData.Id;
+            }
+
+            $.ajax({
+                url: endpoint,
+                type: "POST",
+                contentType: "application/json",
+                headers: {
+                    "RequestVerificationToken": antiForgeryToken
+                },
+                data: JSON.stringify(voucherData),
+                beforeSend: function() {
+                    $('#modalSubmitBtn').attr('disabled', true).text('Đang xử lý...');
+                },
+                success: function (response) {
+                    $('#modalSubmitBtn').attr('disabled', false).text('Lưu Voucher');
+                    if (response.success) {
+                        Swal.fire('Thành công!', response.message, 'success');
+                        var modalInstance = bootstrap.Modal.getInstance(document.getElementById('voucherModal'));
+                        modalInstance.hide();
+                        window.location.reload();
+                    } else {
+                        if (response.message && response.message.includes("Mã Voucher đã tồn tại")) {
+                            $('#errorMaVoucher').text(response.message);
+                        } else {
+                            Swal.fire('Thất bại', response.message || 'Đã xảy ra lỗi.', 'error');
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    $('#modalSubmitBtn').attr('disabled', false).text('Lưu Voucher');
+                    var msg = xhr.status === 403 ? "Bạn không có quyền thực hiện thao tác này." : "Đã xảy ra lỗi hệ thống.";
+                    Swal.fire('Lỗi', msg, 'error');
+                }
+            });
+        }
+
+        // --- 3. Mở Modal Sửa (Điền dữ liệu vào Form) ---
+        function openEditModal(id) {
+            var rowData = serverData.find(v => v.Id === id);
+
+            if (rowData) {
+                $('#Voucher_Id').val(rowData.Id);
+                $('#Voucher_MaVoucher').val(rowData.MaVoucher);
+                $('#Voucher_MoTa').val(rowData.MoTa);
+                $('#Voucher_LoaiGiamGia').val(rowData.LoaiGiamGia);
+                $('#Voucher_GiaTriGiam').val(rowData.GiaTriGiam);
+                $('#Voucher_GiamGiaToiDa').val(rowData.GiamGiaToiDa || '');
+                $('#Voucher_DonHangToiThieu').val(rowData.DonHangToiThieu);
+                $('#Voucher_SoLuotSuDungToiDa').val(rowData.SoLuotSuDungToiDa);
+                $('#Voucher_KichHoat').prop('checked', rowData.KichHoat);
+
+                // Ngày Bắt Đầu
+                if (rowData.NgayBatDau) {
+                    $('#Voucher_NgayBatDau')
+                        .val(new Date(rowData.NgayBatDau).toISOString().slice(0, 16));
+                } else {
+                    $('#Voucher_NgayBatDau').val('');
+                }
+
+                // Ngày Kết Thúc
+                if (rowData.NgayKetThuc) {
+                    $('#Voucher_NgayKetThuc')
+                        .val(new Date(rowData.NgayKetThuc).toISOString().slice(0, 16));
+                } else {
+                    $('#Voucher_NgayKetThuc').val('');
+                }
+
+                // Số lượt đã dùng (chỉ xem)
+                $('#Voucher_SoLuotDaSuDung').val(rowData.SoLuotDaSuDung || 0);
+
+                $('#voucherModalLabel').text('Sửa Voucher: ' + rowData.MaVoucher);
+                var voucherModal = new bootstrap.Modal(document.getElementById('voucherModal'));
+                voucherModal.show();
+            }
+        }
+
+        // --- 4. Xóa Voucher (AJAX POST) ---
+        function deleteVoucher(id) {
+            Swal.fire({
+                title: 'Bạn có chắc chắn?',
+                text: 'Mã giảm giá sẽ bị xóa vĩnh viễn.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "Voucher", new { Area = "Admin" })',
+                        type: "POST",
+                        contentType: "application/json",
+                        headers: {
+                            "RequestVerificationToken": antiForgeryToken
+                        },
+                        data: JSON.stringify(id),
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire('Đã xóa!', response.message, 'success');
+                                window.location.reload();
+                            } else {
+                                Swal.fire('Thất bại', response.message, 'error');
+                            }
+                        },
+                        error: function (xhr) {
+                            var msg = xhr.status === 403 ? "Bạn không có quyền thực hiện thao tác này." : "Lỗi kết nối máy chủ.";
+                            Swal.fire('Lỗi', msg, 'error');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

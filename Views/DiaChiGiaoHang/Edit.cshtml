@@ -1,0 +1,107 @@
+﻿@model ShopNgocLan.Models.DiaChiGiaoHang
+
+@{
+    ViewData["Title"] = "Sửa Địa Chỉ";
+    Layout = "_Layout";
+}
+<link rel="stylesheet" href="~/assets/css/account.css" asp-append-version="true">
+
+<div class="breadcrumbs_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">home</a></li>
+                        <li><a asp-action="Index" asp-controller="DiaChiGiaoHang">Địa chỉ giao hàng</a></li>
+                        <li>Sửa</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="account-container">
+
+    <nav class="account-nav">
+        <h3>Tài khoản</h3>
+        <ul class="account-nav-list">
+            <li><a asp-action="Edit" asp-controller="Account">Thông tin tài khoản</a></li>
+            <li><a asp-action="Index" asp-controller="HoaDon">Lịch sử đơn hàng</a></li>
+            <li><a asp-action="Index" asp-controller="DiaChiGiaoHang" class="active">Địa chỉ giao hàng</a></li>
+            <li><a asp-action="Logout" asp-controller="Account">Đăng xuất</a></li>
+        </ul>
+    </nav>
+
+    <main class="account-content">
+        <div class="page-content">
+            <div class="container-xxl">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Chỉnh Sửa Địa Chỉ Giao Hàng</h4>
+                            </div>
+                            <div class="card-body">
+                                <form asp-action="Edit" method="post">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                                    <input type="hidden" asp-for="Id" />
+                                    <input type="hidden" asp-for="UserId" />
+
+                                    <div class="mb-3">
+                                        <label asp-for="DiaChiChiTiet" class="form-label">Địa chỉ chi tiết (Số nhà, tên đường)</label>
+                                        <input asp-for="DiaChiChiTiet" class="form-control" />
+                                        <span asp-validation-for="DiaChiChiTiet" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label asp-for="PhuongXa" class="form-label">Phường/Xã</label>
+                                                <input asp-for="PhuongXa" class="form-control" />
+                                                <span asp-validation-for="PhuongXa" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label asp-for="QuanHuyen" class="form-label">Quận/Huyện</label>
+                                                <input asp-for="QuanHuyen" class="form-control" />
+                                                <span asp-validation-for="QuanHuyen" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <label asp-for="TinhThanhPho" class="form-label">Tỉnh/Thành phố</label>
+                                                <input asp-for="TinhThanhPho" class="form-control" />
+                                                <span asp-validation-for="TinhThanhPho" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-check mb-3">
+                                        <input asp-for="LaMacDinh" class="form-check-input" type="checkbox" />
+                                        <label asp-for="LaMacDinh" class="form-check-label">Đặt làm địa chỉ mặc định</label>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <input type="submit" value="Lưu Thay Đổi" class="btn btn-primary" />
+                                        <a asp-controller="Users" asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-light">Hủy</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

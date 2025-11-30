@@ -1,0 +1,321 @@
+﻿@model ShopNgocLan.Models.KhuyenMai
+
+@{
+    ViewData["Title"] = "Chi tiết khuyến mãi: " + Model.TenKhuyenMai;
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+    var sanPhamTrongKm = ViewBag.SanPhamTrongKm as List<ShopNgocLan.Models.SanPham>;
+    var sanPhamChuaKm = ViewBag.SanPhamChuaKm as List<ShopNgocLan.Models.SanPham>;
+
+    var now = DateTime.Now;
+    string statusText;
+    string statusClass;
+
+    if (now < Model.NgayBatDau)
+    {
+        statusText = "Sắp diễn ra";
+        statusClass = "badge bg-info-subtle text-info";
+    }
+    else if (now >= Model.NgayBatDau && now <= Model.NgayKetThuc)
+    {
+        statusText = "Đang diễn ra";
+        statusClass = "badge bg-success-subtle text-success";
+    }
+    else
+    {
+        statusText = "Đã kết thúc";
+        statusClass = "badge bg-secondary-subtle text-secondary";
+    }
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+
+        <!-- PAGE TITLE -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                    <h4 class="mb-sm-0">@ViewData["Title"]</h4>
+                    <div class="page-title-right">
+                        <a asp-area="Admin" asp-controller="KhuyenMai" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bx bx-chevron-left"></i> Danh sách khuyến mãi
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALERTS -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @* form ẩn để tạo AntiForgeryToken dùng cho Ajax *@
+        <form id="antiForgeryForm" style="display:none;">
+            @Html.AntiForgeryToken()
+        </form>
+
+        <div class="row">
+            <!-- CỘT TRÁI: THÔNG TIN KHUYẾN MÃI + BUTTON MỞ MODAL -->
+            <div class="col-lg-4">
+                <!-- THÔNG TIN KHUYẾN MÃI -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Thông tin khuyến mãi</h5>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="fw-semibold">@Model.TenKhuyenMai</h5>
+                        <p class="text-muted">@Model.MoTa</p>
+
+                        <p class="mb-1">
+                            <span class="fw-semibold">Giảm giá:</span>
+                            <span class="text-danger fw-bold">@Model.PhanTramGiam.ToString("0.##")%</span>
+                        </p>
+
+                        <p class="mb-1">
+                            <span class="fw-semibold">Thời gian:</span><br />
+                            Từ: @Model.NgayBatDau.ToString("dd/MM/yyyy HH:mm")<br />
+                            Đến: @Model.NgayKetThuc.ToString("dd/MM/yyyy HH:mm")
+                        </p>
+
+                        <p class="mb-0">
+                            <span class="fw-semibold">Trạng thái:</span>
+                            <span class="@statusClass ms-1">@statusText</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- THÊM SẢN PHẨM (MỞ MODAL) -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Thêm sản phẩm vào khuyến mãi</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (sanPhamChuaKm == null || !sanPhamChuaKm.Any())
+                        {
+                            <p class="text-muted mb-0">Tất cả sản phẩm hiện tại đã thuộc khuyến mãi này.</p>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    class="btn btn-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#chonSanPhamModal">
+                                <i class="bx bx-plus"></i> Thêm sản phẩm
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: DANH SÁCH SẢN PHẨM ĐANG KM -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Sản phẩm thuộc khuyến mãi này</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (sanPhamTrongKm == null || !sanPhamTrongKm.Any())
+                        {
+                            <p class="text-muted mb-0">Chưa có sản phẩm nào trong khuyến mãi này.</p>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 5%;">ID</th>
+                                            <th style="width: 65%;">Tên sản phẩm</th>
+                                            <th style="width: 15%;">Trạng thái</th>
+                                            <th style="width: 15%;">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var sp in sanPhamTrongKm)
+                                        {
+                                            var anhDaiDien = sp.HinhAnhSanPhams?
+                                            .FirstOrDefault(p => p.LaAnhDaiDien == true)?.UrlHinhAnh
+                                            ?? "/images/no-image.png";
+
+                                            <tr>
+                                                <td>@sp.Id</td>
+                                                <td class="fw-semibold">
+                                                    <img src="@anhDaiDien" width="50" class="me-2" />
+                                                    @sp.TenSanPham
+                                                </td>
+                                                <td>
+                                                    @if (now >= Model.NgayBatDau && now <= Model.NgayKetThuc)
+                                                    {
+                                                        <span class="badge bg-success-subtle text-success">Đang áp dụng</span>
+                                                    }
+                                                    else if (now < Model.NgayBatDau)
+                                                    {
+                                                        <span class="badge bg-info-subtle text-info">Chưa áp dụng</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary-subtle text-secondary">Đã hết hạn</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            onclick="removeProductFromKm(@Model.Id, @sp.Id)">
+                                                        <i class="bx bx-x-circle"></i> Gỡ khỏi KM
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- end row -->
+
+    </div> <!-- container-fluid -->
+</div> <!-- page-content -->
+@* ========== MODAL CHỌN NHIỀU SẢN PHẨM (ĐÃ FIX SCROLL, KHÔNG MẤT NÚT LƯU) ========== *@
+@if (sanPhamChuaKm != null && sanPhamChuaKm.Any())
+{
+    <div class="modal fade" id="chonSanPhamModal" tabindex="-1" aria-labelledby="chonSanPhamModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <form asp-area="Admin"
+                      asp-controller="KhuyenMai"
+                      asp-action="AddProducts"
+                      method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="khuyenMaiId" value="@Model.Id" />
+
+                    <!-- HEADER -->
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="chonSanPhamModalLabel">
+                            Chọn sản phẩm thêm vào khuyến mãi
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+
+                    <!-- BODY (SCROLL RIÊNG) -->
+                    <div class="modal-body d-flex flex-column" style="max-height: 75vh;">
+
+                        <div class="mb-2 d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">
+                                Chọn nhiều sản phẩm bằng checkbox bên dưới.
+                            </span>
+                        </div>
+
+                        <!-- KHUNG SCROLL -->
+                        <div class="flex-grow-1 overflow-auto border rounded p-2 bg-light">
+                            <div class="row g-2">
+                                @foreach (var sp in sanPhamChuaKm)
+                                {
+                                    var anhDaiDien = sp.HinhAnhSanPhams?
+                                    .FirstOrDefault(x => x.LaAnhDaiDien == true)?.UrlHinhAnh
+                                    ?? "/images/no-image.png";
+
+                                    <div class="col-6 col-md-4 col-lg-3">
+                                        <div class="card h-100 border shadow-sm">
+                                            <label class="p-2 h-100 d-flex flex-column align-items-center text-center"
+                                                   style="cursor:pointer;">
+                                                <input type="checkbox"
+                                                       class="form-check-input mb-2"
+                                                       name="sanPhamIds"
+                                                       value="@sp.Id" />
+
+                                                <img src="@anhDaiDien"
+                                                     alt="@sp.TenSanPham"
+                                                     class="img-fluid mb-2"
+                                                     style="max-height:80px; object-fit:contain;" />
+
+                                                <div class="small fw-semibold text-truncate w-100"
+                                                     title="@sp.TenSanPham">
+                                                    @sp.TenSanPham
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- FOOTER -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bx bx-save"></i> Thêm vào khuyến mãi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function getAntiForgeryToken() {
+            var tokenInput = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]')
+                || document.querySelector('input[name="__RequestVerificationToken"]');
+            return tokenInput ? tokenInput.value : '';
+        }
+
+        function removeProductFromKm(khuyenMaiId, sanPhamId) {
+            var antiForgeryToken = getAntiForgeryToken();
+            if (!antiForgeryToken) {
+                console.error('Không tìm thấy AntiForgeryToken');
+            }
+
+            Swal.fire({
+                title: 'Bạn chắc chắn?',
+                text: 'Sản phẩm sẽ được gỡ khỏi khuyến mãi. Giá sẽ cập nhật lại theo các khuyến mãi còn lại (hoặc giá gốc).',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Gỡ',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("RemoveProduct", "KhuyenMai", new { Area = "Admin" })',
+                        type: 'POST',
+                        headers: { 'RequestVerificationToken': antiForgeryToken },
+                        data: {
+                            khuyenMaiId: khuyenMaiId,
+                            sanPhamId: sanPhamId
+                        },
+                        success: function (res) {
+                            console.log('RemoveProduct response:', res);
+                            if (res && res.success) {
+                                Swal.fire('Thành công', res.message, 'success')
+                                    .then(() => window.location.reload());
+                            } else {
+                                Swal.fire('Không thể gỡ', (res && res.message) || 'Không rõ lỗi.', 'error');
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error('RemoveProduct error:', xhr.responseText);
+                            Swal.fire('Lỗi', 'Lỗi hệ thống. Vui lòng thử lại.', 'error');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

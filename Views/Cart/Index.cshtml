@@ -1,0 +1,319 @@
+﻿@model List<ShopNgocLan.Models.ChiTietGioHang>
+@{
+    ViewData["Title"] = "Giỏ hàng của bạn";
+    Layout = "_Layout";
+
+    // Tính toán tổng tiền ban đầu (tất cả sản phẩm)
+    // JavaScript sẽ cập nhật lại dựa trên checkbox
+    decimal tamTinh = Model.Sum(item => item.SoLuong * item.ChiTietSanPham.Gia);
+    decimal phiVanChuyen = (tamTinh > 0) ? 25000 : 0;
+    decimal tongCong = tamTinh + phiVanChuyen;
+}
+<link rel="stylesheet" href="~/assets/css/cart.css" asp-append-version="true">
+
+<div class="breadcrumbs_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">Trang chủ</a></li>
+                        <li>Chi tiết giỏ hàng</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="cart-container">
+
+    <h1 class="cart-header">Giỏ hàng của bạn</h1>
+
+    <div class="cart-items-column">
+        @if (Model != null && Model.Any())
+        {
+            <div class="cart-item-header">
+                <span class="header-select">
+                    <input type="checkbox" class="cart-checkbox" id="select-all-checkbox" checked>
+                </span>
+                <span class="header-product">Sản phẩm (@Model.Count)</span>
+                <span class="header-quantity">Số lượng</span>
+                <span class="header-total">Tạm tính</span>
+                <span></span>
+            </div>
+
+            <div class="cart-items-list" id="cart-items-list">
+                @foreach (var item in Model)
+                {
+                    var hinhAnh = item.ChiTietSanPham.SanPham.HinhAnhSanPhams
+                    .FirstOrDefault(h => h.LaAnhDaiDien == true);
+                    string imageUrl = (hinhAnh != null) ? hinhAnh.UrlHinhAnh : "/images/default-product.png";
+
+                    <div class="cart-item" data-id="@item.ChiTietGioHangId">
+                        <div class="item-select">
+                            <input type="checkbox"
+                                   class="cart-checkbox item-checkbox"
+                                   data-id="@item.ChiTietGioHangId"
+                                   checked>
+                        </div>
+
+                        <div class="item-image">
+                            <a asp-action ="Details" asp-controller="Shop" asp-route-id=@item.ChiTietSanPham.SanPham.Id>
+                                <img src="@imageUrl" alt="@item.ChiTietSanPham.SanPham.TenSanPham">
+                           </a>
+                            
+                        </div>
+
+                        <div class="item-details">
+                            <a asp-action="Details" asp-controller="Shop" asp-route-id=@item.ChiTietSanPham.SanPham.Id class="item-name">@item.ChiTietSanPham.SanPham.TenSanPham</a>
+                            <div class="item-variant">
+                                @item.ChiTietSanPham.MauSac.TenMau / @item.ChiTietSanPham.Size.TenSize
+                            </div>
+                            <div class="item-price" data-price="@item.ChiTietSanPham.Gia">
+                                @item.ChiTietSanPham.Gia.ToString("N0")đ
+                            </div>
+                        </div>
+
+                        <div class="item-quantity">
+                            <input type="number"
+                                   class="quantity-input"
+                                   value="@item.SoLuong"
+                                   min="1"
+                                   data-id="@item.ChiTietGioHangId">
+                        </div>
+
+                        <div class="item-subtotal">
+                            @((item.SoLuong * item.ChiTietSanPham.Gia).ToString("N0"))đ
+                        </div>
+
+                        <div class="item-remove">
+                            <button class="remove-btn" data-id="@item.ChiTietGioHangId">&times;</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p style="padding: 2rem; text-align: center;">Giỏ hàng của bạn đang trống.</p>
+        }
+    </div>
+
+    <aside class="cart-summary">
+        <h2>Tóm tắt đơn hàng</h2>
+
+        <div class="summary-line">
+            <span>Tạm tính</span>
+            <strong id="cart-subtotal">@tamTinh.ToString("N0")đ</strong>
+        </div>
+
+        <div class="summary-line">
+            <span>Phí vận chuyển</span>
+            <strong id="cart-shipping">@phiVanChuyen.ToString("N0")đ</strong>
+        </div>
+
+        <div class="summary-line total">
+            <span>Tổng cộng</span>
+            <strong class="total-price" id="cart-total">@tongCong.ToString("N0")đ</strong>
+        </div>
+
+        <button id="btn-proceed-to-checkout" class="btn-checkout">
+            TIẾN HÀNH THANH TOÁN
+        </button>
+
+        <a asp-action="Index" asp-controller="Home" class="continue-shopping-link">
+            &larr; Tiếp tục mua sắm
+        </a>
+    </aside>
+
+</div>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // --- KHAI BÁO BIẾN ---
+            const cartList = document.getElementById('cart-items-list');
+            const selectAllCheckbox = document.getElementById('select-all-checkbox');
+            const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+            const btnCheckout = document.getElementById('btn-proceed-to-checkout');
+
+            // --- HÀM HELPER ---
+            const formatCurrency = (value) => new Intl.NumberFormat('vi-VN').format(value) + 'đ';
+
+            // Hàm gọi API chung (chống lặp code)
+            async function fetchApi(url, body) {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Cần thêm RequestVerificationToken nếu có
+                    },
+                    body: JSON.stringify(body)
+                });
+                return response.json();
+            }
+
+            // --- HÀM LOGIC ---
+
+            // 1. HÀM CẬP NHẬT TÓM TẮT (GỌI API)
+            async function updateCartSummary() {
+                // Lấy danh sách ID của các checkbox ĐÃ ĐƯỢC CHỌN
+                const selectedIds = Array.from(itemCheckboxes)
+                                       .filter(cb => cb.checked)
+                                       .map(cb => parseInt(cb.dataset.id));
+
+                // Cập nhật trạng thái nút Thanh toán
+                btnCheckout.disabled = (selectedIds.length === 0);
+
+                // Gọi API để lấy Tạm tính, Tổng cộng mới
+                const data = await fetchApi('/Cart/GetCartSummary', selectedIds);
+
+                if (data) {
+                    document.getElementById('cart-subtotal').textContent = data.subtotal;
+                    document.getElementById('cart-shipping').textContent = data.shipping;
+                    document.getElementById('cart-total').textContent = data.total;
+                    btnCheckout.disabled = !data.checkoutEnabled;
+                }
+            }
+
+            // 2. HÀM CẬP NHẬT SỐ LƯỢNG (GỌI API)
+            async function updateCart(id, quantity) {
+                const data = await fetchApi('/Cart/UpdateQuantity', {
+                    ChiTietGioHangId: parseInt(id),
+                    NewQuantity: quantity
+                });
+
+                const cartItemRow = document.querySelector(`.cart-item[data-id="${id}"]`);
+
+                if (data.success) {
+                    // Cập nhật Tạm tính của dòng
+                    cartItemRow.querySelector('.item-subtotal').textContent = data.itemSubtotal;
+                    // Cập nhật lại Tóm tắt tổng
+                    updateCartSummary();
+                    toastr.success("Cập nhật số lượng thành công!");
+                } else {
+                    // Nếu lỗi (hết hàng), trả lại số lượng cũ
+                    Swal.fire('Lỗi', data.message, 'error');
+                    if(data.newQuantity) {
+                        cartItemRow.querySelector('.quantity-input').value = data.newQuantity;
+                    }
+                }
+            }
+
+            // 3. HÀM XÓA SẢN PHẨM (GỌI API)
+            async function removeItem(id) {
+                const data = await fetchApi('/Cart/RemoveItem', {
+                    ChiTietGioHangId: parseInt(id)
+                });
+
+                if (data.success) {
+                    // Xóa hàng đó khỏi HTML
+                    const cartItemRow = document.querySelector(`.cart-item[data-id="${id}"]`);
+                    if(cartItemRow) {
+                        cartItemRow.remove();
+                    }
+                    // Cập nhật lại Tóm tắt tổng
+                    updateCartSummary();
+                    toastr.success("Sản phẩm đã được xóa!");
+                } else {
+                    Swal.fire('Lỗi', data.message, 'error');
+                }
+            }
+
+            // 4. HÀM TIẾN HÀNH THANH TOÁN (GỌI API)
+            async function proceedToCheckout() {
+                btnCheckout.disabled = true;
+                btnCheckout.textContent = 'ĐANG XỬ LÝ...';
+
+                const selectedIds = Array.from(itemCheckboxes)
+                                       .filter(cb => cb.checked)
+                                       .map(cb => parseInt(cb.dataset.id));
+
+                if (selectedIds.length === 0) {
+                    Swal.fire('Lỗi', 'Bạn chưa chọn sản phẩm nào để thanh toán.', 'warning');
+                    btnCheckout.disabled = false;
+                    btnCheckout.textContent = 'TIẾN HÀNH THANH TOÁN';
+                    return;
+                }
+
+                // Gọi API để lưu danh sách vào Session
+                const data = await fetchApi('/Cart/PrepareCheckout', selectedIds);
+
+                if (data.success) {
+                    // Chuyển hướng đến trang Checkout
+                    window.location.href = data.redirectUrl;
+                } else {
+                    Swal.fire('Lỗi', data.message || 'Không thể tiến hành thanh toán.', 'error');
+                    btnCheckout.disabled = false;
+                    btnCheckout.textContent = 'TIẾN HÀNH THANH TOÁN';
+                }
+            }
+
+
+            // --- GÁN SỰ KIỆN (EVENT LISTENERS) ---
+
+            // 1. Khi thay đổi số lượng
+            cartList.addEventListener('change', function(e) {
+                if (e.target.classList.contains('quantity-input')) {
+                    const id = e.target.dataset.id;
+                    const newQuantity = parseInt(e.target.value);
+                    if (newQuantity <= 0) {
+                        e.target.value = 1; // Đặt lại là 1 nếu nhập số âm
+                    }
+                    updateCart(id, e.target.value);
+                }
+            });
+
+            // 2. Khi bấm nút Xóa
+            cartList.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-btn')) {
+                    const id = e.target.dataset.id;
+                    Swal.fire({
+                        title: 'Bạn chắc chắn?',
+                        text: "Bạn sẽ xóa sản phẩm này khỏi giỏ hàng!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Vâng, xóa nó!',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            removeItem(id);
+                        }
+                    });
+                }
+            });
+
+            // 3. Khi bấm checkbox "Chọn tất cả"
+            selectAllCheckbox.addEventListener('change', function() {
+                itemCheckboxes.forEach(cb => {
+                    cb.checked = selectAllCheckbox.checked;
+                });
+                updateCartSummary(); // Cập nhật lại tổng tiền
+            });
+
+            // 4. Khi bấm checkbox của 1 item
+            cartList.addEventListener('change', function(e) {
+                if (e.target.classList.contains('item-checkbox')) {
+                    // Nếu 1 item không được chọn, bỏ chọn "Select All"
+                    if (!e.target.checked) {
+                        selectAllCheckbox.checked = false;
+                    }
+                    // Kiểm tra xem tất cả đã được chọn chưa
+                    else {
+                        const allChecked = Array.from(itemCheckboxes).every(cb => cb.checked);
+                        selectAllCheckbox.checked = allChecked;
+                    }
+                    updateCartSummary(); // Cập nhật lại tổng tiền
+                }
+            });
+
+            // 5. Khi bấm nút "Thanh toán"
+            btnCheckout.addEventListener('click', proceedToCheckout);
+
+            // Cập nhật tổng tiền ngay khi tải trang
+            updateCartSummary();
+        });
+    </script>
+}

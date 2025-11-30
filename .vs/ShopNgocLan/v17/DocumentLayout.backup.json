@@ -1,0 +1,497 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\views\\shop\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:views\\shop\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\controllers\\shopcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:controllers\\shopcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\models\\productdetailsviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:models\\productdetailsviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\views\\checkout\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:views\\checkout\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\areas\\admin\\controllers\\hoadoncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:areas\\admin\\controllers\\hoadoncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\services\\inventoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:services\\inventoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\services\\iinventoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:services\\iinventoryservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\models\\lichsutonkho.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:models\\lichsutonkho.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\models\\chitietsanpham.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:models\\chitietsanpham.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\helpers\\datetimeextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:helpers\\datetimeextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\areas\\admin\\controllers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:areas\\admin\\controllers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\areas\\admin\\views\\inventory\\history.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:areas\\admin\\views\\inventory\\history.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\areas\\admin\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:areas\\admin\\controllers\\inventorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\views\\shared\\adminlayout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:views\\shared\\adminlayout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\models\\inventoryhistoryitemviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:models\\inventoryhistoryitemviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\models\\inventoryitemviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:models\\inventoryitemviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\areas\\admin\\views\\inventory\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:areas\\admin\\views\\inventory\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\areas\\admin\\views\\hoadon\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:areas\\admin\\views\\hoadon\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\areas\\admin\\views\\adminchat\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:areas\\admin\\views\\adminchat\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\wwwroot\\assets\\css\\account.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:wwwroot\\assets\\css\\account.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\views\\hoadon\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:views\\hoadon\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\views\\hoadon\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:views\\hoadon\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\models\\trangthaidonhang.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:models\\trangthaidonhang.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\controllers\\hoadoncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:controllers\\hoadoncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\areas\\admin\\views\\mausac\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:areas\\admin\\views\\mausac\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|c:\\users\\nguye\\source\\repos\\shopngoclan\\areas\\admin\\views\\products\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{23BACE1F-5714-4F48-ABC1-974CEF04B217}|ShopNgocLan.csproj|solutionrelative:areas\\admin\\views\\products\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 11,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{e8b06f53-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ProductDetailsViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\ProductDetailsViewModel.cs",
+              "RelativeDocumentMoniker": "Models\\ProductDetailsViewModel.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\ProductDetailsViewModel.cs",
+              "RelativeToolTip": "Models\\ProductDetailsViewModel.cs",
+              "ViewState": "AgIAAD0AAAAAAAAAAAAswE0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-26T14:21:30.754Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\Shop\\Details.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shop\\Details.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\Shop\\Details.cshtml",
+              "RelativeToolTip": "Views\\Shop\\Details.cshtml",
+              "ViewState": "AgIAANcBAAAAAAAAAAAwwOABAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-26T14:14:31.669Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\CheckOut\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\CheckOut\\Index.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\CheckOut\\Index.cshtml",
+              "RelativeToolTip": "Views\\CheckOut\\Index.cshtml",
+              "ViewState": "AgIAALgBAAAAAAAAAAAwwM8BAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-26T14:04:09.692Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CheckOutController.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Controllers\\CheckOutController.cs",
+              "RelativeDocumentMoniker": "Controllers\\CheckOutController.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Controllers\\CheckOutController.cs",
+              "RelativeToolTip": "Controllers\\CheckOutController.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-26T14:03:51.217Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "InventoryService.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Services\\InventoryService.cs",
+              "RelativeDocumentMoniker": "Services\\InventoryService.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Services\\InventoryService.cs",
+              "RelativeToolTip": "Services\\InventoryService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-26T13:18:35.286Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "IInventoryService.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Services\\IInventoryService.cs",
+              "RelativeDocumentMoniker": "Services\\IInventoryService.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Services\\IInventoryService.cs",
+              "RelativeToolTip": "Services\\IInventoryService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAABOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-26T13:17:59.855Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "OrderController.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Controllers\\OrderController.cs",
+              "RelativeDocumentMoniker": "Controllers\\OrderController.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Controllers\\OrderController.cs",
+              "RelativeToolTip": "Controllers\\OrderController.cs",
+              "ViewState": "AgIAAAgCAAAAAAAAAAAwwB8CAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-25T12:53:28.354Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ShopController.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Controllers\\ShopController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ShopController.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Controllers\\ShopController.cs",
+              "RelativeToolTip": "Controllers\\ShopController.cs",
+              "ViewState": "AgIAAFcBAAAAAAAAAAAwwGEBAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T08:02:53.029Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "LichSuTonKho.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\LichSuTonKho.cs",
+              "RelativeDocumentMoniker": "Models\\LichSuTonKho.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\LichSuTonKho.cs",
+              "RelativeToolTip": "Models\\LichSuTonKho.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAIwBkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-26T13:13:30.015Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ChiTietSanPham.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\ChiTietSanPham.cs",
+              "RelativeDocumentMoniker": "Models\\ChiTietSanPham.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\ChiTietSanPham.cs",
+              "RelativeToolTip": "Models\\ChiTietSanPham.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-26T13:10:45.935Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "History.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\Inventory\\History.cshtml",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Views\\Inventory\\History.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\Inventory\\History.cshtml",
+              "RelativeToolTip": "Areas\\Admin\\Views\\Inventory\\History.cshtml",
+              "ViewState": "AgIAAJwAAAAAAAAAAAAAADEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-25T15:05:14.291Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "HoaDonController.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Controllers\\HoaDonController.cs",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Controllers\\HoaDonController.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Controllers\\HoaDonController.cs",
+              "RelativeToolTip": "Areas\\Admin\\Controllers\\HoaDonController.cs",
+              "ViewState": "AgIAAJYBAAAAAAAAAIAwwKYBAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-25T13:18:49.299Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "InventoryController.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Controllers\\InventoryController.cs",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Controllers\\InventoryController.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Controllers\\InventoryController.cs",
+              "RelativeToolTip": "Areas\\Admin\\Controllers\\InventoryController.cs",
+              "ViewState": "AgIAACwAAAAAAAAAAADwvz8AAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-25T14:33:15.356Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "InventoryItemViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\InventoryItemViewModel.cs",
+              "RelativeDocumentMoniker": "Models\\InventoryItemViewModel.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\InventoryItemViewModel.cs",
+              "RelativeToolTip": "Models\\InventoryItemViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-25T14:25:56.346Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ProductsController.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Controllers\\ProductsController.cs",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Controllers\\ProductsController.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Controllers\\ProductsController.cs",
+              "RelativeToolTip": "Areas\\Admin\\Controllers\\ProductsController.cs",
+              "ViewState": "AgIAADQCAAAAAAAAAAAswEoCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-22T07:49:28.318Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "DateTimeExtensions.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Helpers\\DateTimeExtensions.cs",
+              "RelativeDocumentMoniker": "Helpers\\DateTimeExtensions.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Helpers\\DateTimeExtensions.cs",
+              "RelativeToolTip": "Helpers\\DateTimeExtensions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-25T13:00:58.957Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\Inventory\\Index.cshtml",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Views\\Inventory\\Index.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\Inventory\\Index.cshtml",
+              "RelativeToolTip": "Areas\\Admin\\Views\\Inventory\\Index.cshtml",
+              "ViewState": "AgIAAHgAAAAAAAAAAAAAAH0AAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-25T14:33:43.432Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "AdminLayout.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\Shared\\AdminLayout.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\AdminLayout.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\Shared\\AdminLayout.cshtml",
+              "RelativeToolTip": "Views\\Shared\\AdminLayout.cshtml",
+              "ViewState": "AgIAAOwAAAAAAAAAAADwv/0AAACBAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-25T15:00:57.345Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "InventoryHistoryItemViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\InventoryHistoryItemViewModel.cs",
+              "RelativeDocumentMoniker": "Models\\InventoryHistoryItemViewModel.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\InventoryHistoryItemViewModel.cs",
+              "RelativeToolTip": "Models\\InventoryHistoryItemViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-25T15:04:24.138Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\AdminChat\\Index.cshtml",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Views\\AdminChat\\Index.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\AdminChat\\Index.cshtml",
+              "RelativeToolTip": "Areas\\Admin\\Views\\AdminChat\\Index.cshtml",
+              "ViewState": "AgIAAAsCAAAAAAAAAAAwwCICAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-25T13:23:14.913Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "account.css",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\wwwroot\\assets\\css\\account.css",
+              "RelativeDocumentMoniker": "wwwroot\\assets\\css\\account.css",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\wwwroot\\assets\\css\\account.css",
+              "RelativeToolTip": "wwwroot\\assets\\css\\account.css",
+              "ViewState": "AgIAAEMCAAAAAAAAAAAIwFgCAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-11-25T13:06:29.335Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAMsAAAAAAAAAAADgv9YAAABdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-23T07:16:10.548Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\HoaDon\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\HoaDon\\Index.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\HoaDon\\Index.cshtml",
+              "RelativeToolTip": "Views\\HoaDon\\Index.cshtml",
+              "ViewState": "AgIAACcAAAAAAAAAAAAwwDIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-25T13:13:47.237Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "TrangThaiDonHang.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\TrangThaiDonHang.cs",
+              "RelativeDocumentMoniker": "Models\\TrangThaiDonHang.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Models\\TrangThaiDonHang.cs",
+              "RelativeToolTip": "Models\\TrangThaiDonHang.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-25T12:44:09.102Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\HoaDon\\Details.cshtml",
+              "RelativeDocumentMoniker": "Views\\HoaDon\\Details.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Views\\HoaDon\\Details.cshtml",
+              "RelativeToolTip": "Views\\HoaDon\\Details.cshtml",
+              "ViewState": "AgIAAMUBAAAAAAAAAADwv9sBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-25T12:43:18.986Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\HoaDon\\Index.cshtml",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Views\\HoaDon\\Index.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\HoaDon\\Index.cshtml",
+              "RelativeToolTip": "Areas\\Admin\\Views\\HoaDon\\Index.cshtml",
+              "ViewState": "AgIAACABAAAAAAAAAADwvzEBAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-25T12:29:49.107Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "HoaDonController.cs",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Controllers\\HoaDonController.cs",
+              "RelativeDocumentMoniker": "Controllers\\HoaDonController.cs",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Controllers\\HoaDonController.cs",
+              "RelativeToolTip": "Controllers\\HoaDonController.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAEoAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-25T12:30:35.705Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\Products\\Index.cshtml",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Views\\Products\\Index.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\Products\\Index.cshtml",
+              "RelativeToolTip": "Areas\\Admin\\Views\\Products\\Index.cshtml",
+              "ViewState": "AgIAAK4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-22T07:49:54.124Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "Delete.cshtml",
+              "DocumentMoniker": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\MauSac\\Delete.cshtml",
+              "RelativeDocumentMoniker": "Areas\\Admin\\Views\\MauSac\\Delete.cshtml",
+              "ToolTip": "C:\\Users\\nguye\\source\\repos\\ShopNgocLan\\Areas\\Admin\\Views\\MauSac\\Delete.cshtml",
+              "RelativeToolTip": "Areas\\Admin\\Views\\MauSac\\Delete.cshtml",
+              "ViewState": "AgIAAIsAAAAAAAAAAAAAAJsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-22T07:49:32.709Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+﻿@* File: Views/DanhMuc/_DanhMucItem.cshtml *@
+@model ShopNgocLan.Models.DanhMucSanPham
+
+@* Mỗi item là một "list-group-item" của Bootstrap *@
+<li class="list-group-item">
+
+    @* HÀNG 1: Hiển thị thông tin của item hiện tại *@
+    <div class="d-flex justify-content-between align-items-center">
+        <a asp-action="Details" asp-route-id="@Model.Id" class="text-dark fw-medium fs-15">
+            @Model.TenDanhMuc
+        </a>
+
+        <div class="d-flex gap-2 justify-content-center">
+            <a asp-action="Details" asp-controller="DanhMuc" asp-route-id="@Model.Id" class="btn btn-light btn-sm" title="Xem chi tiết"><iconify-icon icon="solar:eye-broken" class="align-middle fs-18"></iconify-icon></a>
+            <a asp-action="Edit" asp-controller="DanhMuc" asp-route-id="@Model.Id" class="btn btn-soft-primary btn-sm" title="Chỉnh sửa"><iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon></a>
+            <a asp-action="Delete" asp-controller="DanhMuc" asp-route-id="@Model.Id" class="btn btn-soft-danger btn-sm" title="Xóa"><iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon></a>
+        </div>
+    </div>
+
+    @* HÀNG 2: Đệ quy để hiển thị các con *@
+    @if (Model.InverseParent != null && Model.InverseParent.Any())
+    {
+        @* Thêm 1 danh sách <ul> lồng vào bên trong, thụt vào 1 chút (ms-4) *@
+        <ul class="list-group mt-3 ms-4">
+            @foreach (var child in Model.InverseParent.OrderBy(c => c.TenDanhMuc))
+            {
+                @* ĐÂY LÀ PHẦN ĐỆ QUY: Partial View tự gọi chính nó *@
+                @await Html.PartialAsync("_DanhMucItem", child)
+            }
+        </ul>
+    }
+</li>

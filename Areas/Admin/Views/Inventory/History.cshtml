@@ -1,0 +1,233 @@
+﻿@using ShopNgocLan.Models.Inventory
+@model List<InventoryHistoryItemViewModel>
+
+@{
+    ViewData["Title"] = "Lịch sử nhập/xuất kho";
+    Layout = "AdminLayout";
+
+    var fromDate = ViewBag.FromDate as string;
+    var toDate = ViewBag.ToDate as string;
+    var keyword = ViewBag.Keyword as string;
+    var loaiGiaoDich = ViewBag.LoaiGiaoDich as string;
+
+    string rangeLabel = Model != null && Model.Any() && !string.IsNullOrEmpty(Model.First().KhoangThoiGianLabel)
+        ? Model.First().KhoangThoiGianLabel!
+        : "";
+}
+
+<div class="page-content">
+    <div class="container-xxl">
+
+        <div class="pagetitle d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h1>Lịch sử nhập/xuất kho</h1>
+                <nav>
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">
+                            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-area="Admin" asp-controller="Inventory" asp-action="Index">Tồn kho</a>
+                        </li>
+                        <li class="breadcrumb-item active">Lịch sử</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <!-- BỘ LỌC -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <form method="get" asp-area="Admin" asp-controller="Inventory" asp-action="History" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Từ ngày</label>
+                        <input type="date" name="fromDate" class="form-control" value="@fromDate" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Đến ngày</label>
+                        <input type="date" name="toDate" class="form-control" value="@toDate" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Loại giao dịch</label>
+                        <select name="loaiGiaoDich" class="form-select">
+                            <option value="">-- Tất cả --</option>
+
+                            @* Option Nhập hàng *@
+                            @if (loaiGiaoDich == "NhapHang")
+                            {
+                                <option value="NhapHang" selected>Nhập hàng</option>
+                            }
+                            else
+                            {
+                                <option value="NhapHang">Nhập hàng</option>
+                            }
+
+                            @* Option Bán hàng *@
+                            @if (loaiGiaoDich == "BanHang")
+                            {
+                                <option value="BanHang" selected>Bán hàng</option>
+                            }
+                            else
+                            {
+                                <option value="BanHang">Bán hàng</option>
+                            }
+
+                            @* Option Trả hàng *@
+                            @if (loaiGiaoDich == "TraHang")
+                            {
+                                <option value="TraHang" selected>Trả hàng</option>
+                            }
+                            else
+                            {
+                                <option value="TraHang">Trả hàng</option>
+                            }
+
+                            @* Option Điều chỉnh *@
+                            @if (loaiGiaoDich == "DieuChinh")
+                            {
+                                <option value="DieuChinh" selected>Điều chỉnh</option>
+                            }
+                            else
+                            {
+                                <option value="DieuChinh">Điều chỉnh</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Từ khóa</label>
+                        <input type="text" name="keyword" class="form-control" value="@keyword" placeholder="Tên sản phẩm, danh mục, ghi chú..." />
+                    </div>
+
+                    <div class="col-12 d-flex justify-content-between align-items-center mt-2">
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                Lọc
+                            </button>
+                            <a asp-area="Admin" asp-controller="Inventory" asp-action="History" class="btn btn-outline-secondary ms-1">
+                                Reset
+                            </a>
+                        </div>
+                        <div>
+                            @if (!string.IsNullOrEmpty(rangeLabel))
+                            {
+                                <span class="badge bg-info text-dark">
+                                    Khoảng thời gian: @rangeLabel
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- BẢNG LỊCH SỬ -->
+        <div class="card">
+            <div class="card-body table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Thời gian</th>
+                            <th>Sản phẩm</th>
+                            <th>Danh mục</th>
+                            <th class="text-end">SL thay đổi</th>
+                            <th>Loại giao dịch</th>
+                            <th>Nhân viên</th>
+                            <th>Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    Chưa có lịch sử trong khoảng thời gian này.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                var isNhap = item.SoLuongThayDoi > 0;
+                                var slText = (isNhap ? "+" : "") + item.SoLuongThayDoi;
+                                var slClass = isNhap ? "text-success" : "text-danger";
+
+                                string badgeClass = "bg-secondary";
+                                string loaiText = item.LoaiGiaoDich;
+
+                                switch (item.LoaiGiaoDich)
+                                {
+                                    case "NhapHang":
+                                        badgeClass = "bg-success";
+                                        loaiText = "Nhập hàng";
+                                        break;
+                                    case "BanHang":
+                                        badgeClass = "bg-primary";
+                                        loaiText = "Bán hàng";
+                                        break;
+                                    case "TraHang":
+                                        badgeClass = "bg-warning text-dark";
+                                        loaiText = "Trả hàng";
+                                        break;
+                                    case "DieuChinh":
+                                        badgeClass = "bg-info text-dark";
+                                        loaiText = "Điều chỉnh";
+                                        break;
+                                }
+
+                                <tr>
+                                    <td>
+                                        <div class="small text-muted">
+                                            @item.NgayTao.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@item.AnhSanPham"
+                                                 class="me-2 rounded"
+                                                 style="width:40px;height:40px;object-fit:cover;border:1px solid #ddd;" />
+                                            <div>
+                                                <div class="fw-semibold">@item.TenSanPham</div>
+                                                <div class="text-muted small">
+                                                    @item.MauSac - @item.Size
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@item.DanhMuc</td>
+                                    <td class="text-end @slClass fw-semibold">@slText</td>
+                                    <td>
+                                        <span class="badge @badgeClass">@loaiText</span>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.TenNhanVien))
+                                        {
+                                            @item.TenNhanVien
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Không rõ</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.GhiChu))
+                                        {
+                                            @item.GhiChu
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">-</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,84 @@
+﻿@model List<ShopNgocLan.Models.DiaChiGiaoHang>
+@{
+    ViewData["Title"] = "Địa chỉ giao hàng ";
+    Layout = "_Layout";
+}
+<link rel="stylesheet" href="~/assets/css/account.css" asp-append-version="true">
+
+<div class="breadcrumbs_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">home</a></li>
+                        <li>Danh sách địa chỉ giao hàng</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="account-container">
+
+    <nav class="account-nav">
+        <h3>Địa chỉ giao hàng</h3>
+        <ul class="account-nav-list">
+            <li><a asp-action="Edit" asp-controller="Account">Thông tin tài khoản</a></li>
+            <li><a asp-action="Index" asp-controller="HoaDon">Lịch sử đơn hàng</a></li>
+            <li><a asp-action="Index" asp-controller="DiaChiGiaoHang" class="active">Địa chỉ giao hàng</a></li>
+            <li><a asp-action="Logout" asp-controller="Account">Đăng xuất</a></li>
+        </ul>
+    </nav>
+
+    <main class="account-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="content-header" style="border-bottom: none; margin-bottom: 0;">Sổ địa chỉ</h1>
+            <a asp-action="Create" class="btn btn-primary btn-sm">
+                <i class='bx bx-plus me-1'></i> Thêm địa chỉ mới
+            </a>
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="list-group list-group-flush address-list-container">
+                @foreach (var diaChi in Model.OrderByDescending(d => d.LaMacDinh))
+                {
+                    <div class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center address-item">
+
+                        <div class="address-details-content mb-2 mb-md-0 me-md-4">
+                            @if (diaChi.LaMacDinh == true)
+                            {
+                                <span class="badge status-delivered-bg" style="color: var(--status-delivered-text); font-weight: 600;">
+                                    Mặc định
+                                </span>
+                            }
+
+                            <p class="mb-0 mt-1">
+                                @diaChi.DiaChiChiTiet, @diaChi.PhuongXa, @diaChi.QuanHuyen, @diaChi.TinhThanhPho
+                            </p>
+                            <small class="text-muted">
+                                Người nhận: @diaChi.User.Ho @diaChi.User.Ten | @diaChi.User.SoDienThoai
+                            </small>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end align-self-end align-self-md-center">
+                            <a asp-action="Edit" asp-route-id="@diaChi.Id" class="btn btn-sm btn-outline-secondary">
+                                Sửa
+                            </a>
+                            <a asp-action="Delete"  asp-route-id="@diaChi.Id" class="btn btn-sm btn-outline-danger">
+                                Xóa
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mt-3" role="alert">
+                Bạn chưa lưu địa chỉ giao hàng nào. Vui lòng thêm địa chỉ.
+            </div>
+        }
+    </main>
+</div>

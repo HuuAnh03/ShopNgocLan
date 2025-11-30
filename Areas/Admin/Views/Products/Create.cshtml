@@ -1,0 +1,376 @@
+﻿@model ShopNgocLan.Models.ProductCreateViewModel
+
+@{
+    ViewData["Title"] = "Thêm Sản phẩm mới";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="pagetitle">
+            <h3>Thêm sản phẩm</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Products" asp-action="Index">Danh sách sản phẩm</a>
+                    </li>
+                    <li class="breadcrumb-item active">Thêm sản phẩm</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                    <h4 class="mb-sm-0">@ViewData["Title"]</h4>
+                    <div class="page-title-right">
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bx bx-chevron-left"></i> Danh sách Sản phẩm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="row">
+                <!-- CỘT TRÁI -->
+                <div class="col-lg-8">
+                    <!-- Thông tin chung -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Thông tin chung</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label asp-for="TenSanPham" class="form-label"></label>
+                                <input asp-for="TenSanPham" class="form-control" />
+                                <span asp-validation-for="TenSanPham" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="MoTa" class="form-label"></label>
+                                <textarea asp-for="MoTa" class="form-control" rows="5"></textarea>
+                                <span asp-validation-for="MoTa" class="text-danger"></span>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="ThuongHieu" class="form-label"></label>
+                                    <input asp-for="ThuongHieu" class="form-control" />
+                                    <span asp-validation-for="ThuongHieu" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="ChatLieu" class="form-label"></label>
+                                    <input asp-for="ChatLieu" class="form-control" />
+                                    <span asp-validation-for="ChatLieu" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phiên bản -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0 flex-grow-1">
+                                Phiên bản Sản phẩm (Màu, Size, Giá bán, Giá nhập, Kho)
+                            </h5>
+                            <button type="button" id="addVariantBtn" class="btn btn-sm btn-success">
+                                Thêm phiên bản
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="variantsContainer">
+                                @* Variants được thêm bằng JS *@
+                            </div>
+                            <span asp-validation-for="Variants" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Hình ảnh -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Hình ảnh Sản phẩm</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <input asp-for="ImageFiles" type="file" class="d-none" multiple accept="image/*" id="imageUploadInput" />
+
+                                <label for="imageUploadInput" class="btn btn-primary btn-sm mb-2">
+                                    <i class='bx bx-upload'></i> Chọn ảnh
+                                </label>
+                                <span asp-validation-for="ImageFiles" class="text-danger d-block"></span>
+                                <small class="form-text text-muted d-block">Bạn có thể chọn nhiều ảnh.</small>
+                            </div>
+
+                            <div id="imagePreviewContainer"
+                                 class="d-flex flex-wrap gap-2 mb-3 border p-2 rounded"
+                                 style="min-height: 120px; background-color: #f8f9fa;">
+                                <p class="text-muted small m-0 align-self-center" id="imagePreviewPlaceholder">
+                                    Chưa có ảnh nào được chọn.
+                                </p>
+                            </div>
+
+                            <input type="hidden" asp-for="MainImageIndex" id="mainImageIndexInput" />
+                            <small class="text-muted">Chọn ảnh đại diện bằng cách nhấp vào ảnh xem trước.</small> <br />
+                            <span asp-validation-for="MainImageIndex" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CỘT PHẢI -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Trạng thái & Danh mục</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label asp-for="IsActive" class="form-label"></label>
+                                <div class="form-check form-switch form-switch-lg">
+                                    <input asp-for="IsActive" class="form-check-input" />
+                                </div>
+                                <span asp-validation-for="IsActive" class="text-danger"></span>
+                            </div>
+                            <hr />
+                            <div class="mb-3">
+                                <label asp-for="DanhMucId" class="form-label"></label>
+                                <select asp-for="DanhMucId" class="form-select" asp-items="Model.DanhMucList">
+                                    <option value="">-- Chọn danh mục --</option>
+                                </select>
+                                <span asp-validation-for="DanhMucId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-end mb-3">
+                        <button type="submit" class="btn btn-success w-sm">Lưu Sản phẩm</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="https://cdn.tiny.cloud/1/ksnqdmxlxdf2t8b2o9e6q1dbacrw07encetcsg8bhm9i4yq3/tinymce/8/tinymce.min.js"
+            referrerpolicy="origin" crossorigin="anonymous"></script>
+
+    <script>
+        // ==== BUILD OPTIONS CHO MÀU & SIZE TỪ SERVER (RAZOR) ====
+        let mauSacOptions = '<option value="">-- Chọn Màu --</option>';
+        @if (Model.MauSacList != null)
+        {
+                foreach (var item in Model.MauSacList)
+                {
+                        @:mauSacOptions += '<option value="@item.Value">@item.Text</option>';
+                }
+        }
+
+        let sizeOptions = '<option value="">-- Chọn Size --</option>';
+        @if (Model.SizeList != null)
+        {
+                foreach (var item in Model.SizeList)
+                {
+                        @:sizeOptions += '<option value="@item.Value">@item.Text</option>';
+                }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const variantsContainer = document.getElementById('variantsContainer');
+            const addVariantBtn = document.getElementById('addVariantBtn');
+            let variantIndex = 0;
+
+            // Thêm 1 dòng variant
+            function addVariantRow() {
+                const index = variantIndex++;
+
+                const rowHtml = `
+        <div class="row variant-row mb-2 border-bottom pb-3" data-index="${index}">
+            <input type="hidden" name="Variants.Index" value="${index}" />
+
+            <div class="col-md-2 mb-2 mb-md-0">
+                <label class="form-label small">Màu sắc</label>
+                <select name="Variants[${index}].MauSacId"
+                        class="form-select form-select-sm" required
+                        data-val="true" data-val-required="Vui lòng chọn màu sắc.">
+                    ${mauSacOptions}
+                </select>
+                <span class="text-danger field-validation-valid"
+                      data-valmsg-for="Variants[${index}].MauSacId" data-valmsg-replace="true"></span>
+            </div>
+
+            <div class="col-md-2 mb-2 mb-md-0">
+                <label class="form-label small">Size</label>
+                <select name="Variants[${index}].SizeId"
+                        class="form-select form-select-sm" required
+                        data-val="true" data-val-required="Vui lòng chọn size.">
+                    ${sizeOptions}
+                </select>
+                <span class="text-danger field-validation-valid"
+                      data-valmsg-for="Variants[${index}].SizeId" data-valmsg-replace="true"></span>
+            </div>
+
+            <div class="col-md-2 mb-2 mb-md-0">
+                <label class="form-label small">Tồn kho</label>
+                <input type="number" min="0" name="Variants[${index}].SoLuongTon"
+                       class="form-control form-control-sm" required
+                       data-val="true" data-val-required="Số lượng tồn là bắt buộc.">
+                <span class="text-danger field-validation-valid"
+                      data-valmsg-for="Variants[${index}].SoLuongTon" data-valmsg-replace="true"></span>
+            </div>
+
+            <div class="col-md-2 mb-2 mb-md-0">
+                <label class="form-label small">Giá bán (VNĐ)</label>
+                <input type="number" step="1000" min="0" name="Variants[${index}].Gia"
+                       class="form-control form-control-sm" required
+                       data-val="true" data-val-required="Giá là bắt buộc.">
+                <span class="text-danger field-validation-valid"
+                      data-valmsg-for="Variants[${index}].Gia" data-valmsg-replace="true"></span>
+            </div>
+
+            <!-- GIÁ NHẬP: BẮT BUỘC PHẢI NHẬP -->
+            <div class="col-md-2 mb-2 mb-md-0">
+                <label class="form-label small">Giá nhập (VNĐ)</label>
+                <input type="number" min="0" name="Variants[${index}].GiaNhap"
+                       class="form-control form-control-sm" required
+                       data-val="true"
+                       data-val-required="Vui lòng nhập giá nhập."
+                       data-val-range="Giá nhập không được âm."
+                       data-val-range-min="0">
+                <span class="text-danger field-validation-valid"
+                      data-valmsg-for="Variants[${index}].GiaNhap" data-valmsg-replace="true"></span>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" class="btn btn-sm btn-outline-danger removeVariantBtn">Xóa</button>
+            </div>
+        </div>`;
+
+                variantsContainer.insertAdjacentHTML('beforeend', rowHtml);
+
+                // Re-parse validation cho form
+                const form = variantsContainer.closest('form');
+                if (form && window.jQuery && $.validator && $.validator.unobtrusive) {
+                    $(form).removeData("validator");
+                    $(form).removeData("unobtrusiveValidation");
+                    $.validator.unobtrusive.parse(form);
+                }
+            }
+
+            // Thêm ít nhất 1 dòng mặc định
+            addVariantRow();
+
+            addVariantBtn.addEventListener('click', addVariantRow);
+
+            // Xóa variant
+            variantsContainer.addEventListener('click', function (e) {
+                if (e.target && e.target.classList.contains('removeVariantBtn')) {
+                    e.target.closest('.variant-row').remove();
+                }
+            });
+
+            // --- Image Preview ---
+            const imageUploadInput = document.getElementById('imageUploadInput');
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const mainImageIndexInput = document.getElementById('mainImageIndexInput');
+            const placeholder = document.getElementById('imagePreviewPlaceholder');
+            let uploadedFiles = [];
+
+            imageUploadInput.addEventListener('change', function (event) {
+                previewContainer.innerHTML = '';
+                uploadedFiles = Array.from(event.target.files);
+                mainImageIndexInput.value = '';
+
+                if (uploadedFiles.length === 0) {
+                    previewContainer.appendChild(placeholder);
+                    placeholder.style.display = 'block';
+                    return;
+                }
+
+                placeholder.style.display = 'none';
+
+                uploadedFiles.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const previewWrapper = document.createElement('div');
+                        previewWrapper.classList.add('image-preview-wrapper', 'position-relative');
+                        previewWrapper.style.cursor = 'pointer';
+                        previewWrapper.dataset.index = index;
+
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('img-thumbnail');
+                        img.style.height = '100px';
+                        img.style.width = '100px';
+                        img.style.objectFit = 'cover';
+
+                        const overlay = document.createElement('div');
+                        overlay.classList.add('position-absolute', 'top-0', 'start-0',
+                            'w-100', 'h-100', 'bg-dark', 'bg-opacity-50',
+                            'd-flex', 'justify-content-center', 'align-items-center',
+                            'text-white', 'fw-bold', 'd-none', 'main-image-overlay');
+                        overlay.textContent = 'Đại diện';
+
+                        previewWrapper.appendChild(img);
+                        previewWrapper.appendChild(overlay);
+                        previewContainer.appendChild(previewWrapper);
+
+                        previewWrapper.addEventListener('click', function () {
+                            document.querySelectorAll('.image-preview-wrapper').forEach(wrapper => {
+                                wrapper.querySelector('img').style.border = '1px solid #dee2e6';
+                                const ov = wrapper.querySelector('.main-image-overlay');
+                                if (ov) ov.classList.add('d-none');
+                            });
+
+                            img.style.border = '3px solid #0ab39c';
+                            overlay.classList.remove('d-none');
+                            mainImageIndexInput.value = index;
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                // Auto chọn ảnh đầu tiên làm đại diện
+                setTimeout(() => {
+                    const firstPreview = previewContainer.querySelector('.image-preview-wrapper[data-index="0"]');
+                    if (firstPreview) firstPreview.click();
+                }, 100);
+            });
+
+            // TinyMCE
+            tinymce.init({
+                selector: 'textarea',
+                plugins: [
+                    'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link',
+                    'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+                    'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed',
+                    'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste',
+                    'advtable', 'advcode', 'advtemplate', 'ai', 'uploadcare', 'mentions',
+                    'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect',
+                    'typography', 'inlinecss', 'markdown', 'importword', 'exportword', 'exportpdf'
+                ],
+                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | ' +
+                    'link media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography uploadcare | ' +
+                    'align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+                tinycomments_mode: 'embedded',
+                tinycomments_author: 'Author name',
+                mergetags_list: [
+                    { value: 'First.Name', title: 'First Name' },
+                    { value: 'Email', title: 'Email' },
+                ],
+                ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
+                uploadcare_public_key: 'ksnqdmxlxdf2t8b2o9e6q1dbacrw07encetcsg8bhm9i4yq3',
+            });
+        });
+    </script>
+}

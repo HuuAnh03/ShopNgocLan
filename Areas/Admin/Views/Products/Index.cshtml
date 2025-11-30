@@ -1,0 +1,353 @@
+﻿@* BƯỚC 1: Change @model to use the ViewModel *@
+@model X.PagedList.IPagedList<ProductListViewModel>
+@using X.PagedList.Mvc.Core
+@using X.PagedList.Web.Common
+@using System.Linq
+
+@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    ViewData["Title"] = "Danh sách sản phẩm";
+
+    // danh sách sản phẩm sắp hết (tồn kho <= 5) trên TRANG HIỆN TẠI
+    var lowStockProducts = Model?.Where(p => p.TotalStock <= 5).ToList() ?? new List<ProductListViewModel>();
+    var hasLowStock = lowStockProducts.Any();
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="pagetitle">
+            <h3>Danh sách sản phẩm</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item active">Danh sách sản phẩm</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center gap-1">
+                        <h4 class="card-title flex-grow-1"></h4>
+                        <div class="d-flex gap-2">
+
+                            @* NÚT CẢNH BÁO SẢN PHẨM SẮP HẾT *@
+                            @if (hasLowStock)
+                            {
+                                <button type="button"
+                                        class="btn btn-soft-warning btn-sm d-flex align-items-center gap-1"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#lowStockModal">
+                                    <i class="bx bx-error-circle fs-16"></i>
+                                    <span>Sản phẩm sắp hết (@lowStockProducts.Count)</span>
+                                </button>
+                            }
+
+                            <a asp-action="Create" asp-controller="Products" class="btn btn-sm btn-primary">
+                                <i class='bx bx-plus'></i> Thêm Sản phẩm
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0 table-hover table-centered">
+                                <thead class="bg-light-subtle">
+                                    <tr>
+                                        
+                                        <th>Tên Sản phẩm & Ảnh</th>
+                                        <th>Giá</th>
+                                        <th>Tồn kho</th>
+                                        <th>Danh mục</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Trạng thái</th>
+                                        <th class="text-center">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @* BƯỚC 2: Loop through the ViewModel *@
+                                    @foreach (var productVM in Model)
+                                    {
+                                        // set class cho cả dòng nếu hết hàng / sắp hết
+                                        var rowClass = "";
+                                        if (productVM.TotalStock == 0)
+                                        {
+                                            rowClass = "table-danger-subtle";
+                                        }
+                                        else if (productVM.TotalStock > 0 && productVM.TotalStock <= 5)
+                                        {
+                                            rowClass = "table-warning-subtle";
+                                        }
+
+                                        <tr class="@rowClass">
+                                            
+
+                                            @* Tên SP + Ảnh + Size + Danh mục *@
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="rounded bg-light avatar-md d-flex align-items-center justify-content-center overflow-hidden">
+                                                        <img src="@(productVM.AnhDaiDienUrl ?? "/images/placeholder.jpg")"
+                                                             alt="@productVM.TenSanPham"
+                                                             class="avatar-md object-fit-cover" />
+                                                    </div>
+                                                    <div>
+                                                        <a asp-action="Edit"
+                                                           asp-route-id="@productVM.Id"
+                                                           class="fw-semibold text-dark text-decoration-none">
+                                                            @productVM.TenSanPham
+                                                        </a>
+                                                        <div class="d-flex flex-wrap gap-2 mt-1">
+                                                            <span class="badge bg-primary-subtle text-primary px-2 py-1">
+                                                                
+                                                                Size: @productVM.SizeString
+                                                            </span>
+                                                           
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            @* Giá *@
+                                            <td>
+                                                <span class="fw-semibold text-dark">@productVM.PriceString</span>
+                                            </td>
+
+                                            @* Tồn kho + cảnh báo *@
+                                            <td>
+                                                @{
+                                                    var stock = productVM.TotalStock;
+                                                    string stockText;
+                                                    string stockBadgeClass;
+
+                                                    if (stock == 0)
+                                                    {
+                                                        stockText = "Hết hàng";
+                                                        stockBadgeClass = "badge bg-danger-subtle text-danger";
+                                                    }
+                                                    else if (stock <= 5)
+                                                    {
+                                                        stockText = $"Sắp hết ({stock})";
+                                                        stockBadgeClass = "badge bg-warning-subtle text-warning";
+                                                    }
+                                                    else
+                                                    {
+                                                        stockText = stock.ToString();
+                                                        stockBadgeClass = "badge bg-success-subtle text-success";
+                                                    }
+                                                }
+
+                                                <span class="@stockBadgeClass px-2 py-1">
+                                                    <i class="bx bx-package align-middle me-1"></i>@stockText
+                                                </span>
+                                            </td>
+
+                                            @* Danh mục *@
+                                            <td>
+                                                <span class="text-muted">@productVM.TenDanhMuc</span>
+                                            </td>
+
+                                            @* Ngày tạo *@
+                                            <td>
+                                                <span class="text-muted fs-13">
+                                                    <i class="bx bx-time-five align-middle me-1"></i>@productVM.NgayTaoFormatted
+                                                </span>
+                                            </td>
+
+                                            @* Trạng thái *@
+                                            <td>
+                                                @if (productVM.IsActive)
+                                                {
+                                                    <span class="badge bg-success-subtle text-success px-2 py-1">
+                                                        <i class="bx bx-check-circle align-middle me-1"></i>Đang bán
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary-subtle text-secondary px-2 py-1">
+                                                        <i class="bx bx-pause-circle align-middle me-1"></i>Ngừng bán
+                                                    </span>
+                                                }
+                                            </td>
+
+                                            @* Hành động *@
+                                            <td class="text-center">
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    <a asp-area="Admin"
+                                                        asp-action="Edit"
+                                                       asp-route-id="@productVM.Id"
+                                                       class="btn btn-soft-primary btn-sm"
+                                                       title="Chỉnh sửa">
+                                                        <iconify-icon icon="solar:pen-2-broken"
+                                                                      class="align-middle fs-18"></iconify-icon>
+                                                    </a>
+                                                    <a asp-area="Admin"
+                                                        asp-action="Delete"
+                                                       asp-route-id="@productVM.Id"
+                                                       class="btn btn-soft-danger btn-sm"
+                                                       title="Xóa">
+                                                        <iconify-icon icon="solar:trash-bin-minimalistic-2-broken"
+                                                                      class="align-middle fs-18"></iconify-icon>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+
+                                    @if (!Model.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted py-4">
+                                                Không có sản phẩm nào.
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer border-top">
+                        <nav aria-label="Page navigation example">
+                            @* Chỉ hiển thị thanh phân trang nếu có nhiều hơn 1 trang *@
+                            @if (Model.PageCount > 1)
+                            {
+                                <ul class="pagination justify-content-end mb-0">
+
+                                    @* B1: Previous *@
+                                    @if (Model.HasPreviousPage)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber - 1 })">Previous</a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                        </li>
+                                    }
+
+                                    @* B2: Số trang *@
+                                    @for (int i = 1; i <= Model.PageCount; i++)
+                                    {
+                                        if (i == Model.PageNumber)
+                                        {
+                                            <li class="page-item active" aria-current="page">
+                                                <a class="page-link" href="#">@i</a>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a>
+                                            </li>
+                                        }
+                                    }
+
+                                    @* B3: Next *@
+                                    @if (Model.HasNextPage)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Index", new { page = Model.PageNumber + 1 })">Next</a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#">Next</a>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* MODAL: DANH SÁCH SẢN PHẨM SẮP HẾT *@
+@if (hasLowStock)
+{
+    <div class="modal fade" id="lowStockModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning-subtle">
+                    <h5 class="modal-title">
+                        <i class="bx bx-error-circle me-2"></i>Sản phẩm sắp hết hàng (≤ 5)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Ảnh</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Danh mục</th>
+                                    <th>Tồn kho</th>
+                                    <th style="width: 120px;">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in lowStockProducts)
+                                {
+                                    <tr>
+                                        <td>
+                                            <img src="@(p.AnhDaiDienUrl ?? "/images/placeholder.jpg")"
+                                                 alt="@p.TenSanPham"
+                                                 class="rounded"
+                                                 style="width:56px;height:56px;object-fit:cover;" />
+                                        </td>
+                                        <td>@p.TenSanPham</td>
+                                        <td>@p.TenDanhMuc</td>
+                                        <td>
+                                            <span class="badge bg-warning-subtle text-warning px-2 py-1">
+                                                @p.TotalStock
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a asp-action="Edit"
+                                               asp-route-id="@p.Id"
+                                               class="btn btn-soft-primary btn-sm w-100">
+                                                Chỉnh sửa
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if (!lowStockProducts.Any())
+                    {
+                        <p class="text-muted mb-0">Không có sản phẩm sắp hết trên trang hiện tại.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Styles {
+    <style>
+        .avatar-md {
+            width: 56px;
+            height: 56px;
+        }
+
+        .object-fit-cover {
+            object-fit: cover;
+        }
+
+        .table-hover tbody tr.table-warning-subtle:hover,
+        .table-hover tbody tr.table-danger-subtle:hover {
+            filter: brightness(0.97);
+        }
+    </style>
+}

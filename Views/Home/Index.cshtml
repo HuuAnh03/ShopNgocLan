@@ -1,0 +1,740 @@
+﻿@model HomeViewModel
+
+@{
+    Layout = "_Layout";
+}
+
+@functions {
+    // ====== HELPER CÂY DANH MỤC ======
+
+    // Hàm helper để tìm tất cả ID con/cháu của một danh mục
+    private HashSet<int> GetAllDescendantIds(string rootCategoryName, List<DanhMucSanPham> allCategories)
+    {
+        var ids = new HashSet<int>();
+        var root = allCategories.FirstOrDefault(c => c.TenDanhMuc == rootCategoryName);
+
+        if (root != null)
+        {
+            FindChildren(root, allCategories, ids);
+        }
+        return ids;
+    }
+
+    // Đệ quy lấy con/cháu
+    private void FindChildren(DanhMucSanPham parent, List<DanhMucSanPham> allCategories, HashSet<int> ids)
+    {
+        ids.Add(parent.Id);
+
+        var children = allCategories.Where(c => c.ParentId == parent.Id);
+
+        foreach (var child in children)
+        {
+            FindChildren(child, allCategories, ids);
+        }
+    }
+
+    // ====== HELPER GIÁ & HÌNH ẢNH ======
+
+    private class HomePriceInfo
+    {
+        public string CurrentPrice { get; set; }      // Giá đang bán (min-max)
+        public string OriginalPrice { get; set; }     // Giá gốc (nếu có KM)
+        public decimal? BestDiscountPercent { get; set; }  // % giảm cao nhất
+
+        public bool HasPromotion =>
+            BestDiscountPercent.HasValue &&
+            BestDiscountPercent.Value > 0 &&
+            !string.IsNullOrEmpty(OriginalPrice);
+    }
+
+    private HomePriceInfo GetPriceInfo(SanPham sp)
+    {
+        var info = new HomePriceInfo();
+
+        if (sp.ChiTietSanPhams == null || !sp.ChiTietSanPhams.Any())
+        {
+            info.CurrentPrice = "N/A";
+            return info;
+        }
+
+        var minGia = sp.ChiTietSanPhams.Min(ct => ct.Gia);
+        var maxGia = sp.ChiTietSanPhams.Max(ct => ct.Gia);
+
+        if (minGia == maxGia)
+            info.CurrentPrice = $"{minGia:N0} đ";
+        else
+            info.CurrentPrice = $"{minGia:N0} - {maxGia:N0} đ";
+
+        var ctKm = sp.ChiTietSanPhams
+            .Where(ct => ct.GiaGoc > 0 && ct.GiaGoc > ct.Gia)
+            .ToList();
+
+        if (!ctKm.Any())
+            return info;
+
+        var minGoc = ctKm.Min(ct => ct.GiaGoc);
+        var maxGoc = ctKm.Max(ct => ct.GiaGoc);
+
+        if (minGoc == maxGoc)
+            info.OriginalPrice = $"{minGoc:N0} đ";
+        else
+            info.OriginalPrice = $"{minGoc:N0} - {maxGoc:N0} đ";
+
+        info.BestDiscountPercent = ctKm
+            .Select(ct => 100m * (1 - ct.Gia / ct.GiaGoc))
+            .DefaultIfEmpty(0m)
+            .Max();
+
+        return info;
+    }
+
+    private string GetMainImage(SanPham sp)
+    {
+        var img = sp.HinhAnhSanPhams?
+            .FirstOrDefault(h => h.LaAnhDaiDien == true);
+
+        return string.IsNullOrEmpty(img?.UrlHinhAnh)
+            ? "/images/avatars/default.jpg"
+            : img.UrlHinhAnh;
+    }
+
+    private string GetSecondaryImage(SanPham sp)
+    {
+        var img = sp.HinhAnhSanPhams?
+            .FirstOrDefault(h => h.LaAnhDaiDien == false);
+
+        if (img == null || string.IsNullOrEmpty(img.UrlHinhAnh))
+            return GetMainImage(sp);
+
+        return img.UrlHinhAnh;
+    }
+}
+
+@{
+    var sanPhams = Model.SanPhams ?? new List<SanPham>();
+    var allCategories = Model.AllCategories ?? new List<DanhMucSanPham>();
+
+    var namCategoryIds = GetAllDescendantIds("Thời Trang Nam", allCategories);
+    var nuCategoryIds = GetAllDescendantIds("Thời Trang Nữ", allCategories);
+    var phuKienCategoryIds = GetAllDescendantIds("Phụ Kiện", allCategories);
+
+    // Sản phẩm mới
+    var sanPhamMoi = sanPhams
+        .OrderByDescending(sp => sp.NgayTao)
+        .Take(8)
+        .ToList();
+
+    // Sản phẩm khuyến mãi (Flash Sale)
+    var spKhuyenMai = sanPhams
+        .Where(sp => sp.ChiTietSanPhams != null &&
+                     sp.ChiTietSanPhams.Any(ct => ct.GiaGoc > 0 && ct.GiaGoc > ct.Gia))
+        .Take(8)
+        .ToList();
+
+    // Danh mục gốc nổi bật
+    var rootCategories = allCategories
+        .Where(c => c.ParentId == null)
+        .Take(6)
+        .ToList();
+}
+
+<!-- ================== SLIDER ================== -->
+<section class="slider_banner_area7 mb-30">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-md-9">
+                <div class="slider_area slider_s_seven owl-carousel">
+                    <div class="single_slider d-flex align-items-center" data-bgimg="../assets/img/slider/slider13.jpg">
+                        <div class="slider_content">
+                            <h1>Baby & kids</h1>
+                            <h2>Color ful childhood</h2>
+                            <a class="button" asp-action="Index" asp-controller="Shop">Đọc thêm</a>
+                        </div>
+                    </div>
+                    <div class="single_slider d-flex align-items-center" data-bgimg="../assets/img/slider/slider14.jpg">
+                        <div class="slider_content">
+                            <h1>Boys fashion</h1>
+                            <h2>Now on sale</h2>
+                            <a class="button" asp-action="Index" asp-controller="Shop">Đọc thêm</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3">
+                <div class="banner_thumb sidebar-bthumb">
+                    <a href="@Url.Action("Index", "Shop")"><img src="../assets/img/bg/banner24.jpg" alt=""></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--slider area end-->
+
+<!-- ================== SHIPPING ================== -->
+<div class="shipping_area shipping_five mb-68 mt-30">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 col-md-6">
+                <div class="single_shipping">
+                    <div class="shipping_icone">
+                        <i class="zmdi zmdi-replay-30"></i>
+                    </div>
+                    <div class="shipping_content">
+                        <h3>Hoàn trả & đổi hàng</h3>
+                        <p>Cam kết hoàn tiền trong 30 ngày</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="single_shipping">
+                    <div class="shipping_icone">
+                        <i class="zmdi zmdi-boat"></i>
+                    </div>
+                    <div class="shipping_content">
+                        <h3>Nhận thẻ quà tặng</h3>
+                        <p>Cho đơn hàng đầu tiên</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="single_shipping col_3">
+                    <div class="shipping_icone">
+                        <i class="zmdi zmdi-phone-in-talk"></i>
+                    </div>
+                    <div class="shipping_content">
+                        <h3>Hỗ trợ trực tuyến 24/7</h3>
+                        <p>Nhận hỗ trợ trực tuyến 24/7 luôn sẵn sàng</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--shipping area end-->
+<!-- ================== SẢN PHẨM THỊNH HÀNH (NAM / NỮ / PHỤ KIỆN) ================== -->
+<div class="product_area color_seven mb-62">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="product_header_four">
+                    <div class="section_title">
+                        <h2>Sản phẩm thịnh hành</h2>
+                        <p>Danh sách các sản phẩm thịnh hành nhất</p>
+                    </div>
+                    <div class="product_tab_btn product_tab-seven">
+                        <ul class="nav" role="tablist">
+                            <li>
+                                <a class="active" data-bs-toggle="tab" href="#nam" role="tab" aria-controls="nam" aria-selected="true">
+                                    Thời Trang Nam
+                                </a>
+                            </li>
+                            <li>
+                                <a data-bs-toggle="tab" href="#nu" role="tab" aria-controls="nu" aria-selected="false">
+                                    Thời Trang Nữ
+                                </a>
+                            </li>
+                            <li>
+                                <a data-bs-toggle="tab" href="#phukien" role="tab" aria-controls="phukien" aria-selected="false">
+                                    Phụ Kiện
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content">
+
+            <!-- ===== TAB NAM ===== -->
+            <div class="tab-pane fade show active" id="nam" role="tabpanel">
+                <div class="row">
+                    <div class="product_carousel product_column4 owl-carousel">
+                        @{
+                            var spNam = sanPhams
+                            .Where(p => p.DanhMucId != null && namCategoryIds.Contains(p.DanhMucId))
+                            .OrderByDescending(p => p.NgayTao)
+                            .Take(12)
+                            .ToList();
+                        }
+
+                        @foreach (var item in spNam)
+                        {
+                            var price = GetPriceInfo(item);
+                            <div class="col-lg-3">
+                                <article class="single_product">
+                                    <figure>
+                                        <div class="product_thumb">
+                                            <a class="primary_img" asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                <img src="@GetMainImage(item)" alt="@item.TenSanPham" />
+                                            </a>
+                                            <a class="secondary_img" asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                <img src="@GetSecondaryImage(item)" alt="@item.TenSanPham" />
+                                            </a>
+
+                                            @if (price.HasPromotion)
+                                            {
+                                                <span class="discount-badge">-@price.BestDiscountPercent.Value.ToString("0")%</span>
+                                            }
+                                        </div>
+                                        <figcaption class="product_content">
+                                            <div class="product_content-header">
+                                                <h4 class="product_name">
+                                                    <a asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                        @item.TenSanPham
+                                                    </a>
+                                                </h4>
+                                                <div class="wishlist-btn">
+                                                    <a href="#"><i class="zmdi zmdi-favorite-outline"></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="product_price_rating">
+                                                <div class="price_box">
+                                                    @if (price.HasPromotion)
+                                                    {
+                                                        <span class="current_price">@price.CurrentPrice</span>
+                                                        <span class="old_price">@price.OriginalPrice</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="current_price">@price.CurrentPrice</span>
+                                                    }
+                                                </div>
+                                                <div class="product_rating">
+                                                    <ul>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </figcaption>
+                                    </figure>
+                                </article>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAB NỮ ===== -->
+            <div class="tab-pane fade" id="nu" role="tabpanel">
+                <div class="row">
+                    <div class="product_carousel product_column4 owl-carousel">
+                        @{
+                            var spNu = sanPhams
+                            .Where(p => p.DanhMucId != null && nuCategoryIds.Contains(p.DanhMucId))
+                            .OrderByDescending(p => p.NgayTao)
+                            .Take(12)
+                            .ToList();
+                        }
+
+                        @foreach (var item in spNu)
+                        {
+                            var price = GetPriceInfo(item);
+                            <div class="col-lg-3">
+                                <article class="single_product">
+                                    <figure>
+                                        <div class="product_thumb">
+                                            <a class="primary_img" asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                <img src="@GetMainImage(item)" alt="@item.TenSanPham" />
+                                            </a>
+                                            <a class="secondary_img" asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                <img src="@GetSecondaryImage(item)" alt="@item.TenSanPham" />
+                                            </a>
+                                            @if (price.HasPromotion)
+                                            {
+                                                <span class="discount-badge">-@price.BestDiscountPercent.Value.ToString("0")%</span>
+                                            }
+                                        </div>
+                                        <figcaption class="product_content">
+                                            <div class="product_content-header">
+                                                <h4 class="product_name">
+                                                    <a asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                        @item.TenSanPham
+                                                    </a>
+                                                </h4>
+                                                <div class="wishlist-btn">
+                                                    <a href="#"><i class="zmdi zmdi-favorite-outline"></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="product_price_rating">
+                                                <div class="price_box">
+                                                    @if (price.HasPromotion)
+                                                    {
+                                                        <span class="current_price">@price.CurrentPrice</span>
+                                                        <span class="old_price">@price.OriginalPrice</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="current_price">@price.CurrentPrice</span>
+                                                    }
+                                                </div>
+                                                <div class="product_rating">
+                                                    <ul>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </figcaption>
+                                    </figure>
+                                </article>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TAB PHỤ KIỆN ===== -->
+            <div class="tab-pane fade" id="phukien" role="tabpanel">
+                <div class="row">
+                    <div class="product_carousel product_column4 owl-carousel">
+                        @{
+                            var spPK = sanPhams
+                            .Where(p => p.DanhMucId != null && phuKienCategoryIds.Contains(p.DanhMucId))
+                            .OrderByDescending(p => p.NgayTao)
+                            .Take(12)
+                            .ToList();
+                        }
+
+                        @foreach (var item in spPK)
+                        {
+                            var price = GetPriceInfo(item);
+                            <div class="col-lg-3">
+                                <article class="single_product">
+                                    <figure>
+                                        <div class="product_thumb">
+                                            <a class="primary_img" asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                <img src="@GetMainImage(item)" alt="@item.TenSanPham" />
+                                            </a>
+                                            <a class="secondary_img" asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                <img src="@GetSecondaryImage(item)" alt="@item.TenSanPham" />
+                                            </a>
+                                            @if (price.HasPromotion)
+                                            {
+                                                <span class="discount-badge">-@price.BestDiscountPercent.Value.ToString("0")%</span>
+                                            }
+                                        </div>
+                                        <figcaption class="product_content">
+                                            <div class="product_content-header">
+                                                <h4 class="product_name">
+                                                    <a asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                        @item.TenSanPham
+                                                    </a>
+                                                </h4>
+                                                <div class="wishlist-btn">
+                                                    <a href="#"><i class="zmdi zmdi-favorite-outline"></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="product_price_rating">
+                                                <div class="price_box">
+                                                    @if (price.HasPromotion)
+                                                    {
+                                                        <span class="current_price">@price.CurrentPrice</span>
+                                                        <span class="old_price">@price.OriginalPrice</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="current_price">@price.CurrentPrice</span>
+                                                    }
+                                                </div>
+                                                <div class="product_rating">
+                                                    <ul>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                        <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </figcaption>
+                                    </figure>
+                                </article>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================== SẢN PHẨM MỚI ================== -->
+@if (sanPhamMoi.Any())
+{
+    <section class="product_area mb-62">
+        <div class="container">
+            <div class="section_title">
+                <h2>Sản phẩm mới</h2>
+                <p>Những sản phẩm vừa cập nhật gần đây</p>
+            </div>
+
+            <div class="row">
+                <div class="product_carousel product_column4 owl-carousel">
+                    @foreach (var item in sanPhamMoi)
+                    {
+                        var price = GetPriceInfo(item);
+                        <div class="col-lg-3">
+                            <article class="single_product">
+                                <figure>
+                                    <div class="product_thumb">
+                                        <a class="primary_img" asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                            <img src="@GetMainImage(item)" alt="@item.TenSanPham" />
+                                        </a>
+                                        <a class="secondary_img" asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                            <img src="@GetSecondaryImage(item)" alt="@item.TenSanPham" />
+                                        </a>
+
+                                        <span class="new-badge">Mới</span>
+
+                                        @if (price.HasPromotion)
+                                        {
+                                            <span class="discount-badge">-@price.BestDiscountPercent.Value.ToString("0")%</span>
+                                        }
+                                    </div>
+                                    <figcaption class="product_content">
+                                        <div class="product_content-header">
+                                            <h4 class="product_name">
+                                                <a asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                    @item.TenSanPham
+                                                </a>
+                                            </h4>
+                                            <div class="wishlist-btn">
+                                                <a href="#"><i class="zmdi zmdi-favorite-outline"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="product_price_rating">
+                                            <div class="price_box">
+                                                @if (price.HasPromotion)
+                                                {
+                                                    <span class="current_price">@price.CurrentPrice</span>
+                                                    <span class="old_price">@price.OriginalPrice</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="current_price">@price.CurrentPrice</span>
+                                                }
+                                            </div>
+                                            <div class="product_rating">
+                                                <ul>
+                                                    <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </figcaption>
+                                </figure>
+                            </article>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- ================== FLASH SALE / KHUYẾN MÃI ================== -->
+@if (spKhuyenMai.Any())
+{
+    <section class="product_area mb-62">
+        <div class="container">
+            <div class="section_title">
+                <h2>Giảm giá mạnh</h2>
+                <p>Sản phẩm đang giảm giá hấp dẫn</p>
+            </div>
+
+            <div class="row">
+                <div class="product_carousel product_column4 owl-carousel">
+                    @foreach (var item in spKhuyenMai)
+                    {
+                        var price = GetPriceInfo(item);
+                        <div class="col-lg-3">
+                            <article class="single_product">
+                                <figure>
+                                    <div class="product_thumb">
+                                        <a class="primary_img" asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                            <img src="@GetMainImage(item)" alt="@item.TenSanPham" />
+                                        </a>
+                                        <a class="secondary_img" asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                            <img src="@GetSecondaryImage(item)" alt="@item.TenSanPham" />
+                                        </a>
+
+                                        @if (price.HasPromotion)
+                                        {
+                                            <span class="discount-badge">-@price.BestDiscountPercent.Value.ToString("0")%</span>
+                                        }
+                                    </div>
+                                    <figcaption class="product_content">
+                                        <div class="product_content-header">
+                                            <h4 class="product_name">
+                                                <a asp-action="Details" asp-controller="Shop" asp-route-id="@item.Id">
+                                                    @item.TenSanPham
+                                                </a>
+                                            </h4>
+                                            <div class="wishlist-btn">
+                                                <a href="#"><i class="zmdi zmdi-favorite-outline"></i></a>
+                                            </div>
+                                        </div>
+                                        <div class="product_price_rating">
+                                            <div class="price_box">
+                                                <span class="current_price">@price.CurrentPrice</span>
+                                                <span class="old_price">@price.OriginalPrice</span>
+                                            </div>
+                                            <div class="product_rating">
+                                                <ul>
+                                                    <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                    <li><a href="#"><i class="fa fa-star" aria-hidden="true"></i></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </figcaption>
+                                </figure>
+                            </article>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@* <!-- ================== BLOG / GÓC THỜI TRANG ================== -->
+<section class="blog_area mb-60">
+    <div class="container">
+        <div class="section_title">
+            <h2>Góc thời trang</h2>
+            <p>Tips phối đồ, xu hướng mới nhất</p>
+        </div>
+        <div class="row">
+            <div class="col-lg-4">
+                <article class="single_blog">
+                    <a href="#">
+                        <img src="/images/blog/blog1.jpg" alt="Xu hướng thu đông" />
+                    </a>
+                    <h4><a href="#">5 tips phối đồ thu đông cho chàng</a></h4>
+                    <p>Một vài gợi ý đơn giản nhưng hiệu quả giúp bạn nổi bật hơn trong những ngày se lạnh...</p>
+                </article>
+            </div>
+            <div class="col-lg-4">
+                <article class="single_blog">
+                    <a href="#">
+                        <img src="/images/blog/blog2.jpg" alt="Phong cách tối giản" />
+                    </a>
+                    <h4><a href="#">Phong cách tối giản cho nàng công sở</a></h4>
+                    <p>Kết hợp các item basic nhưng vẫn giữ được sự thanh lịch, hiện đại...</p>
+                </article>
+            </div>
+            <div class="col-lg-4">
+                <article class="single_blog">
+                    <a href="#">
+                        <img src="/images/blog/blog3.jpg" alt="Phụ kiện" />
+                    </a>
+                    <h4><a href="#">Phụ kiện nhỏ - Điểm nhấn lớn</a></h4>
+                    <p>Làm sao để chọn phụ kiện phù hợp với từng set đồ hàng ngày...</p>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================== THƯƠNG HIỆU ================== -->
+<section class="brand_area mb-40">
+    <div class="container">
+        <div class="section_title">
+            <h2>Thương hiệu</h2>
+        </div>
+        <div class="brand_carousel owl-carousel">
+            <div class="single_brand"><img src="/images/brands/nike.png" alt="Nike" /></div>
+            <div class="single_brand"><img src="/images/brands/adidas.png" alt="Adidas" /></div>
+            <div class="single_brand"><img src="/images/brands/zara.png" alt="Zara" /></div>
+            <div class="single_brand"><img src="/images/brands/hm.png" alt="H&M" /></div>
+            <div class="single_brand"><img src="/images/brands/uniqlo.png" alt="Uniqlo" /></div>
+        </div>
+    </div>
+</section>
+ *@
+<style>
+    .old_price {
+        text-decoration: line-through;
+        color: #999;
+        margin-left: 6px;
+        font-size: 0.9em;
+    }
+
+    .product_thumb {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .discount-badge {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: #e3342f;
+        color: #fff;
+        padding: 4px 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 4px;
+        z-index: 5;
+    }
+
+    .new-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #38c172;
+        color: #fff;
+        padding: 4px 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 4px;
+        z-index: 5;
+    }
+
+    .single_category_box .category_thumb img {
+        max-width: 100%;
+        border-radius: 6px;
+    }
+
+    .single_category_box h4 {
+        font-size: 14px;
+        margin-top: 8px;
+    }
+
+    .single_blog img {
+        width: 100%;
+        border-radius: 6px;
+        margin-bottom: 10px;
+    }
+
+    .single_blog h4 {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .single_blog p {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .single_brand img {
+        max-height: 60px;
+        margin: 0 auto;
+        display: block;
+    }
+</style>

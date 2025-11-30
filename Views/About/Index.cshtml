@@ -1,0 +1,338 @@
+﻿@{
+    ViewBag.Title = "Về chúng tôi - Shop Ngọc Lan";
+    Layout = "_Layout";
+}
+
+<section class="about-page py-5">
+    <div class="container">
+
+        <!-- Hero -->
+        <div class="about-hero text-center mb-5">
+            <span class="about-badge">Shop Ngọc Lan</span>
+            <h1 class="mb-3">Về chúng tôi</h1>
+            <p class="lead mb-4">
+                Shop Ngọc Lan là cửa hàng thời trang nam nữ, mang đến những thiết kế trẻ trung, hiện đại,
+                dễ phối đồ, giúp bạn tự tin trong mọi khoảnh khắc.
+            </p>
+            <a href="@Url.Action("Index", "Shop")" class="btn btn-light btn-lg about-cta">
+                Khám phá sản phẩm
+            </a>
+        </div>
+
+        <!-- Câu chuyện + hình ảnh -->
+        <div class="row g-4 align-items-center about-section mb-5">
+            <div class="col-md-6">
+                <div class="about-text-card h-100">
+                    <h3 class="mb-3">Câu chuyện của Shop Ngọc Lan</h3>
+                    <p>
+                        Bắt đầu từ một shop nhỏ tại Đông Anh - Hà Nội, Shop Ngọc Lan được tạo nên với mong muốn
+                        đem lại những sản phẩm chất lượng, kiểu dáng hợp xu hướng nhưng vẫn phù hợp với phong cách
+                        hàng ngày của người Việt.
+                    </p>
+                    <p>
+                        Chúng tôi tập trung vào quần áo nam nữ: từ đồ công sở, đi chơi, hẹn hò cho đến các set đồ basic
+                        dễ kết hợp. Mỗi sản phẩm đều được chọn lọc kỹ càng về chất liệu, form dáng và màu sắc.
+                    </p>
+                    <ul class="about-list mt-3">
+                        <li>👔 Thời trang nam lịch sự, năng động</li>
+                        <li>👗 Thời trang nữ nữ tính, hiện đại</li>
+                        <li>🎯 Phù hợp nhiều độ tuổi & phong cách</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="about-image-card text-center">
+                    <div class="about-image-wrapper">
+                        <img src="~/assets/img/blog/aboutanh.jpg"
+                             alt="Shop Ngọc Lan"
+                             class="img-fluid rounded-4" />
+                    </div>
+                    <p class="about-image-caption mt-3">
+                        “Trang phục không chỉ là quần áo, mà là cách bạn kể câu chuyện về chính mình.”
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sứ mệnh - Giá trị - Phong cách -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="about-card h-100">
+                    <div class="about-card-icon">🎯</div>
+                    <h4>Sứ mệnh</h4>
+                    <p>
+                        Mang đến cho khách hàng những bộ trang phục đẹp, dễ mặc, dễ phối, giúp bạn tự tin thể hiện
+                        cá tính trong mọi hoàn cảnh.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="about-card h-100">
+                    <div class="about-card-icon">💎</div>
+                    <h4>Giá trị</h4>
+                    <p>
+                        Chúng tôi luôn đặt chất lượng, trải nghiệm mua sắm và sự hài lòng của khách hàng lên hàng đầu.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="about-card h-100">
+                    <div class="about-card-icon">✨</div>
+                    <h4>Phong cách</h4>
+                    <p>
+                        Thiết kế đa dạng: từ thanh lịch, tối giản đến năng động, cá tính – phù hợp cho cả nam và nữ
+                        trong nhiều độ tuổi.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vì sao chọn chúng tôi -->
+        <div class="about-why mb-5">
+            <div class="row mb-4">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h3 class="mb-3">Vì sao nên chọn Shop Ngọc Lan?</h3>
+                    <p class="text-muted">
+                        Chúng tôi không chỉ bán quần áo, mà còn mang đến trải nghiệm thời trang trọn vẹn.
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="about-feature">
+                        <div class="about-feature-icon">✔</div>
+                        <div>
+                            <h5>Sản phẩm đa dạng cho cả nam & nữ</h5>
+                            <p class="mb-0">
+                                Áo sơ mi, váy, quần jeans, áo phông, đồ công sở, đồ dạo phố… liên tục cập nhật xu hướng.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="about-feature">
+                        <div class="about-feature-icon">✔</div>
+                        <div>
+                            <h5>Chất liệu được chọn lọc</h5>
+                            <p class="mb-0">
+                                Ưu tiên sự thoải mái, thấm hút tốt, form đẹp, phù hợp thời tiết Việt Nam.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="about-feature">
+                        <div class="about-feature-icon">✔</div>
+                        <div>
+                            <h5>Dịch vụ chăm sóc khách hàng tận tâm</h5>
+                            <p class="mb-0">
+                                Tư vấn nhiệt tình, hỗ trợ đổi size, đổi mẫu (theo quy định) để bạn luôn hài lòng.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="about-feature">
+                        <div class="about-feature-icon">✔</div>
+                        <div>
+                            <h5>Giá cả hợp lý</h5>
+                            <p class="mb-0">
+                                Cân bằng giữa chất lượng và giá thành, thường xuyên có ưu đãi, khuyến mãi hấp dẫn.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin liên hệ -->
+        <div class="row g-4 align-items-stretch">
+            <div class="col-lg-6">
+                <div class="about-contact-card h-100">
+                    <h3 class="mb-3">Thông tin liên hệ</h3>
+                    <p><strong>Shop thời trang Ngọc Lan</strong></p>
+                    <p><strong>Địa chỉ:</strong> Đông Anh - Hà Nội</p>
+                    <p><strong>Email:</strong> <a href="mailto:lienhe@ngoclan.com">lienhe@ngoclan.com</a></p>
+                    <p><strong>Điện thoại:</strong> <a href="tel:0345343040">0345 343 040</a></p>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="about-contact-card h-100">
+                    <h3 class="mb-3">Đồng hành cùng bạn</h3>
+                    <p>
+                        Shop Ngọc Lan luôn mong muốn trở thành người bạn đồng hành trong hành trình xây dựng phong cách
+                        cá nhân của bạn. Hãy ghé thăm shop hoặc đặt hàng online để trải nghiệm nhé!
+                    </p>
+                    <a href="@Url.Action("Index", "Shop")" class="btn btn-dark mt-2">
+                        Xem  sản phẩm
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+<style>
+    .about-page {
+    background: #f8f9fb;
+    }
+
+    /* Hero */
+    .about-hero {
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    color: #fff;
+    padding: 40px 30px;
+    border-radius: 24px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .about-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    }
+
+    .about-hero h1 {
+    font-weight: 700;
+    }
+
+    .about-hero .lead {
+    max-width: 650px;
+    margin: 0 auto;
+    }
+
+    .about-cta {
+    border-radius: 999px;
+    padding-inline: 28px;
+    }
+
+    /* Câu chuyện + ảnh */
+    .about-section {
+    margin-top: 40px;
+    }
+
+    .about-text-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px 24px 20px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+    }
+
+    .about-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+    }
+
+    .about-list li {
+    margin-bottom: 6px;
+    font-size: 14px;
+    }
+
+    .about-image-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .about-image-wrapper {
+    overflow: hidden;
+    border-radius: 20px;
+    }
+
+    .about-image-wrapper img {
+    transition: transform 0.4s ease;
+    }
+
+    .about-image-wrapper img:hover {
+    transform: scale(1.04);
+    }
+
+    .about-image-caption {
+    font-size: 14px;
+    color: #6c757d;
+    font-style: italic;
+    }
+
+    /* Card Sứ mệnh - Giá trị - Phong cách */
+    .about-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 22px 20px;
+    text-align: left;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .about-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12);
+    }
+
+    .about-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: #ffecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    font-size: 22px;
+    }
+
+    /* Vì sao chọn chúng tôi */
+    .about-why h3 {
+    font-weight: 600;
+    }
+
+    .about-feature {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .about-feature-icon {
+    font-size: 20px;
+    line-height: 1;
+    margin-top: 4px;
+    color: #28a745;
+    }
+
+    /* Liên hệ */
+    .about-contact-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 22px 20px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Responsive nhẹ */
+    @@media (max-width: 767.98px) {
+    .about-hero {
+    padding: 28px 18px;
+    }
+
+    .about-feature {
+    padding: 12px 13px;
+    }
+    }
+</style>

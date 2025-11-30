@@ -1,0 +1,112 @@
+﻿@model ShopNgocLan.Models.AddToCartViewModel
+
+<div class="mini_cart_wrapper">
+    <a href="javascript:void(0)">
+        <img src="~/assets/img/icon/icon-cart.png" alt="">
+
+        @* 1. Hiển thị tổng số lượng item (đếm số dòng) *@
+        <span class="item_count">@Model.Items.Count</span>
+        <span class="item_text"></span>
+    </a>
+    <div class="mini_cart">
+        <div class="cart_gallery">
+
+            @* 2. Kiểm tra xem giỏ hàng có rỗng không *@
+            @if (!Model.Items.Any())
+            {
+                <p style="padding: 20px; text-align: center; color:white;font-size:16px">Giỏ hàng của bạn đang trống</p>
+            }
+            else
+            {
+                @* 3. Lặp qua danh sách Model.Items *@
+                @foreach (var item in Model.Items)
+                {
+                    <div class="cart_item">
+                        <div class="cart_img">
+                            <a asp-action="Details" asp-controller="Shop" asp-route-id=@item.Id><img width="80" src="@item.AnhDaiDienUrl" alt="@item.TenSanPham"></a>
+                        </div>
+                        <div class="cart_info">
+                            <a asp-action="Details" asp-controller="Shop" asp-route-id=@item.Id>@item.TenSanPham</a>
+                            <p>Size :<span> @item.Size </span>  Màu :<span> @item.Mau</span> 
+            
+                    </p>
+                            <p><span>@item.SoLuong </span> x <span> @item.DonGia.ToString("N0") đ</span></p>
+                        </div>
+                        
+                    </div>
+                }
+            }
+        </div>
+
+        @* 4. Chỉ hiển thị tổng tiền nếu giỏ hàng CÓ sản phẩm *@
+        @if (Model.Items.Any())
+        {
+            <div class="mini_cart_table">
+                <div class="cart_table_border">
+                    <div class="cart_total">
+                        <span>TẠM TÍNH :</span>
+                        <span class="price">@Model.Subtotal.ToString("N0") đ</span>
+                    </div>
+                    <div class="cart_total mt-10">
+                        <span>TỔNG :</span>
+                        <span class="price">@Model.Total.ToString("N0") đ</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mini_cart_footer">
+                <div class="cart_button">
+                    <a asp-action="Index" asp-controller="Cart"><i class="fa fa-shopping-cart"></i> Xem giỏ hàng</a>
+                </div>
+                
+            </div>
+        }
+    </div>
+</div>
+<script>
+    $(".mini_cart_wrapper > a").on("click", function() {
+        $(this).toggleClass('active');
+        $('.mini_cart').slideToggle('medium');
+    });
+</script>
+<style>
+    /* --- CSS cho Mini Cart Scrollable --- */
+
+    .cart_gallery {
+        /* * Đặt chiều cao tối đa cho khu vực lặp sản phẩm.
+         * Bạn có thể thay đổi 300px thành con số bạn muốn.
+         */
+        max-height: 360px;
+        /* * Tự động hiển thị thanh cuộn (scroll)
+         * CHỈ KHI nào nội dung vượt quá max-height.
+         */
+        overflow-y: auto;
+    }
+        /* Tùy chỉnh thanh cuộn cho đẹp hơn (Webkit) */
+        .cart_gallery::-webkit-scrollbar {
+            width: 6px; /* Độ rộng thanh cuộn */
+        }
+
+        .cart_gallery::-webkit-scrollbar-track {
+            background: #f1f1f1; /* Màu nền của rãnh */
+        }
+
+        .cart_gallery::-webkit-scrollbar-thumb {
+            background: #888; /* Màu của con trượt */
+            border-radius: 6px; /* Bo góc con trượt */
+        }
+
+            .cart_gallery::-webkit-scrollbar-thumb:hover {
+                background: #555; /* Màu khi di chuột vào */
+            }
+        /* Thêm vào file .css của bạn */
+        .cart_gallery .cart_item {
+            /* Đẩy nội dung (bao gồm nút xóa) sang trái
+           để chừa chỗ cho thanh cuộn.
+           Bạn có thể tăng/giảm 10px cho vừa mắt. */
+            padding-right: 10px;
+            /* (Quan trọng) Đảm bảo padding không làm tăng kích thước
+           của box nếu bạn có set width/height */
+            box-sizing: border-box;
+        }
+
+</style>

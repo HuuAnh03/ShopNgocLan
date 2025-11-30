@@ -1,0 +1,546 @@
+﻿@using ShopNgocLan.Models
+@model AdminChatIndexViewModel
+
+@{
+    ViewData["Title"] = "Quản trị Chat";
+    Layout = "AdminLayout";
+
+    var selected = Model.SelectedConversation;
+    string selectedCustomerName = "";
+    string selectedCustomerAvatar = "~/admin/images/users/avatar-1.jpg";
+
+    if (selected != null)
+    {
+        selectedCustomerName = ((selected.Customer?.Ho + " " + selected.Customer?.Ten) ?? $"Khách #{selected.CustomerId}").Trim();
+        selectedCustomerAvatar = selected.Customer?.AvatarUrl ?? "~/admin/images/users/avatar-1.jpg";
+    }
+}
+
+<style>
+    /* Khung danh sách tin nhắn cuộn */
+    .chat-conversation-list.chatbox-height {
+        max-height: 520px;
+        overflow-y: auto;
+    }
+
+    /* Bong bóng chat của USER (bên trái) – nền sáng, chữ đậm */
+    .chat-ctext-wrap {
+        background-color: #FFA500;
+        padding: 10px 14px;
+        border-radius: 12px;
+        max-width: 75%;
+        color: #000;
+    }
+
+    /* Bong bóng chat của STAFF/BOT (bên phải) – giữ màu cam */
+    .odd .chat-ctext-wrap {
+        background: #FFA500;
+        color: #ff6600;
+    }
+
+    .msg-sender-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 2px;
+    }
+
+    .bot-status-badge {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 999px;
+    }
+</style>
+
+<div class="page-content">
+    <div class="container-fluid">
+
+        <div class="pagetitle">
+            <h3>Trò chuyện</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item active">Trò chuyện</li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="container-xxl">
+            <div class="row g-1">
+
+                <!-- ========== SIDEBAR: DANH SÁCH CONVERSATIONS ========== -->
+                <div class="col-xxl-3">
+                    <div class="offcanvas-xxl offcanvas-start h-100 show"
+                         tabindex="-1"
+                         id="Contactoffcanvas"
+                         aria-labelledby="ContactoffcanvasLabel"
+                         style="visibility: visible; position: static; transform: none;">
+
+                        <div class="card position-relative overflow-hidden">
+                            <div class="card-header border-0 d-flex justify-content-between align-items-center">
+                                <h4 class="card-title">Chat</h4>
+                            </div>
+
+                            <ul class="nav nav-tabs nav-justified nav-bordered border-top mt-2">
+                                <li class="nav-item">
+                                    <a href="#chat-list" data-bs-toggle="tab" class="nav-link active py-2">
+                                        Chat
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#group-list" data-bs-toggle="tab" class="nav-link py-2">
+                                        Group
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#contact-list" data-bs-toggle="tab" class="nav-link py-2">
+                                        Contact
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <!-- ========== TAB CHAT LIST (DYNAMIC) ========== -->
+                                <div class="tab-pane show active" id="chat-list">
+                                    <div class="px-3 mb-3 chat-setting-height" data-simplebar>
+                                        @if (!Model.Conversations.Any())
+                                        {
+                                            <div class="text-center text-muted py-3">
+                                                Chưa có cuộc hội thoại nào.
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            foreach (var c in Model.Conversations)
+                                            {
+                                                var customerName = ((c.Customer?.Ho + " " + c.Customer?.Ten) ?? $"Khách #{c.CustomerId}").Trim();
+                                                var customerImageUrl = c.Customer?.AvatarUrl ?? Url.Content("~/admin/images/users/avatar-1.jpg");
+
+                                                var lastMsg = c.ChatMessages
+                                                .OrderByDescending(m => m.SentAt)
+                                                .FirstOrDefault();
+
+                                                var lastTime = lastMsg?.SentAt ?? c.LastMessageAt ?? c.CreatedAt;
+                                                var timeStr = lastTime.ToString("dd/MM HH:mm");
+
+                                                var preview = lastMsg?.Content ?? "(Chưa có tin nhắn)";
+                                                if (preview.Length > 40) preview = preview.Substring(0, 40) + "...";
+
+                                                bool isActive = (Model.SelectedConversation != null && c.Id == Model.SelectedConversation.Id);
+
+                                                <a asp-area="Admin"
+                                                   asp-controller="AdminChat"
+                                                   asp-action="Index"
+                                                   asp-route-id="@c.Id"
+                                                   class="text-body">
+                                                    <div class="d-flex align-items-center p-2 @(isActive ? "bg-light bg-opacity-50 rounded-1" : "")">
+                                                        <div class="flex-shrink-0 position-relative">
+                                                            <img src="@customerImageUrl" class="me-2 rounded-circle" height="36" />
+                                                        </div>
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <h5 class="my-0">
+                                                                <span class="float-end text-muted fs-13">@timeStr</span>
+                                                                @customerName
+                                                            </h5>
+                                                            <p class="mt-1 mb-0 fs-13 text-muted d-flex align-items-end justify-content-between">
+                                                                <span class="w-75 text-truncate">@preview</span>
+                                                                @if (c.AssignedStaffId == null)
+                                                                {
+                                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1">
+                                                                        New
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <i class="bx bx-check-double text-success"></i>
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane" id="group-list">
+                                    <div class="px-3 mb-3 chat-setting-height" data-simplebar>
+                                        <p class="text-muted mt-3">Group list (tùy bạn bổ sung sau).</p>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane" id="contact-list">
+                                    <div class="px-3 mb-3 chat-setting-height" data-simplebar>
+                                        <p class="text-muted mt-3">Contact list (tùy bạn bổ sung sau).</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========== MAIN CHAT AREA ========== -->
+                <div class="col-xxl-9">
+                    <div class="card position-relative overflow-hidden">
+
+                        <!-- HEADER -->
+                        <div class="card-header d-flex align-items-center mh-100">
+                            <button class="btn btn-light d-xxl-none d-flex align-items-center px-2 me-2"
+                                    type="button"
+                                    data-bs-toggle="offcanvas"
+                                    data-bs-target="#Contactoffcanvas">
+                                <i class="bx bx-menu fs-18"></i>
+                            </button>
+
+                            @if (selected != null)
+                            {
+                                <div class="d-flex align-items-center">
+                                    <img src="@selectedCustomerAvatar" class="me-2 rounded" height="36" />
+                                    <div class="d-none d-md-flex flex-column">
+                                        <h5 class="my-0 fs-16 fw-semibold text-dark">@selectedCustomerName</h5>
+                                        <small class="text-muted">
+                                            <span id="admin-bot-status-text">
+                                                @(selected.IsBotActive
+                                                                                            ? "Chatbot đang bật cho cuộc trò chuyện này."
+                                                                                            : "Chatbot đang tắt, nhân viên sẽ xử lý tin nhắn.")
+                                        </span>
+                                    </small>
+                                </div>
+                            </div>
+
+                                <div class="flex-grow-1"></div>
+
+                                <!-- TOGGLE BOT BÊN ADMIN -->
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="bot-status-badge @(selected.IsBotActive ? "bg-success-subtle text-success" : "bg-secondary-subtle text-secondary")" id="admin-bot-status-badge">
+                                        @(selected.IsBotActive ? "Bot: Bật" : "Bot: Tắt")
+                                    </span>
+                                    <div class="form-check form-switch m-0">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               id="admin-toggle-bot"
+                                               @(selected.IsBotActive ? "checked" : "") />
+                                        <label class="form-check-label small" for="admin-toggle-bot">
+                                            Chatbot
+                                        </label>
+                                    </div>
+                                </div>
+                                                        }
+                            else
+                            {
+                                <h5 class="my-0 fs-16 fw-semibold text-muted">Chọn một cuộc hội thoại bên trái</h5>
+                                <div class="flex-grow-1"></div>
+                            }
+
+                        </div>
+
+                        <!-- CHAT BOX -->
+                        <div class="chat-box">
+                            <ul class="chat-conversation-list p-3 chatbox-height">
+                                @if (selected == null)
+                                {
+                                    <li><p class="text-muted">Hãy chọn một cuộc hội thoại.</p></li>
+                                }
+                                else if (!selected.ChatMessages.Any())
+                                {
+                                    <li><p class="text-muted">Chưa có tin nhắn nào.</p></li>
+                                }
+                                else
+                                {
+                                    @foreach (var msg in selected.ChatMessages.OrderBy(m => m.SentAt))
+                                    {
+                                        bool isCustomer = msg.SenderType == "KhachHang";
+                                        bool isBot = msg.SenderType == "Bot";
+                                        var avatar = msg.Sender?.AvatarUrl ?? Url.Content("~/admin/images/users/avatar-1.jpg");
+                                        var senderNameFull = ((msg.Sender?.Ho + " " + msg.Sender?.Ten) ?? "").Trim();
+                                        if (string.IsNullOrWhiteSpace(senderNameFull))
+                                            senderNameFull = isCustomer ? "Khách hàng" : (isBot ? "Bot" : "Hỗ trợ");
+
+                                        if (isCustomer)
+                                        {
+                                            <!-- Tin nhắn KHÁCH: bên trái -->
+                                            <li class="clearfix">
+                                                <div class="d-flex align-items-start mb-2">
+                                                    <img src="@avatar"
+                                                         class="rounded-circle me-2"
+                                                         style="width:34px; height:34px;" />
+
+                                                    <div>
+                                                        <p class="msg-sender-name">
+                                                            @senderNameFull
+                                                        </p>
+
+                                                        <div class="chat-conversation-text">
+                                                            <div class="chat-ctext-wrap">
+                                                                <p>@Html.Raw((msg.Content ?? "").Replace("\n", "<br/>"))</p>
+                                                            </div>
+                                                            <p class="text-muted fs-12 mb-0 mt-1">
+                                                                @msg.SentAt.ToString("dd/MM HH:mm")
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <!-- Tin nhắn STAFF / BOT: bên phải -->
+                                            <li class="clearfix odd">
+                                                <div class="d-flex align-items-start justify-content-end mb-2">
+                                                    <div class="text-end">
+                                                        <p class="msg-sender-name">
+                                                            @senderNameFull @if (isBot)
+                                                            {
+                                                                <span>(Bot)</span>
+                                                            }
+                                                        </p>
+
+                                                        <div class="chat-conversation-text">
+                                                            <div class="chat-ctext-wrap">
+                                                                <p>@Html.Raw((msg.Content ?? "").Replace("\n", "<br/>"))</p>
+                                                            </div>
+                                                            <p class="text-muted fs-12 mb-0 mt-1">
+                                                                @msg.SentAt.ToString("dd/MM HH:mm")
+                                                                <i class="bx bx-check-double ms-1 text-primary"></i>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <img src="@avatar"
+                                                         class="rounded-circle ms-2"
+                                                         style="width:34px; height:34px;" />
+                                                </div>
+                                            </li>
+                                        }
+                                    }
+                                }
+                            </ul>
+
+                            <!-- FORM GỬI TIN (SignalR, không post MVC nữa) -->
+                            <div class="bg-light bg-opacity-50 p-2">
+                                @if (selected != null)
+                                {
+                                    <form id="admin-chat-form" class="needs-validation" autocomplete="off">
+                                        <input type="hidden" id="admin-conversation-id" value="@selected.Id" />
+
+                                        <div class="row align-items-center">
+                                            <div class="col d-flex">
+                                                <div class="input-group">
+                                                    <a href="javascript:void(0);" class="btn btn-sm btn-light input-group-text">
+                                                        <i class="bx bx-smile fs-18"></i>
+                                                    </a>
+                                                    <input type="text"
+                                                           id="admin-chat-input"
+                                                           name="content"
+                                                           class="form-control border-0"
+                                                           placeholder="Nhập tin nhắn..."
+                                                           autocomplete="off" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-auto">
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    <i class="bx bx-send fs-18"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AntiForgery cho Ajax phía Admin -->
+<form id="admin-antiForgery" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Auto scroll xuống cuối
+            var chatListElem = document.querySelector(".chat-conversation-list.chatbox-height");
+            if (chatListElem) {
+                chatListElem.scrollTop = chatListElem.scrollHeight;
+            }
+
+            function getAdminAntiForgeryToken() {
+                var tokenInput = document.querySelector('#admin-antiForgery input[name="__RequestVerificationToken"]')
+                    || document.querySelector('input[name="__RequestVerificationToken"]');
+                return tokenInput ? tokenInput.value : '';
+            }
+
+            // Xử lý toggle bot bên admin
+            var toggleBot = document.getElementById("admin-toggle-bot");
+            var convIdInput = document.getElementById("admin-conversation-id");
+            var botStatusText = document.getElementById("admin-bot-status-text");
+            var botStatusBadge = document.getElementById("admin-bot-status-badge");
+
+            if (toggleBot && convIdInput) {
+                var conversationIdToggle = parseInt(convIdInput.value || "0");
+
+                toggleBot.addEventListener("change", function () {
+                    var isActive = toggleBot.checked;
+                    var token = getAdminAntiForgeryToken();
+
+                    fetch('@Url.Action("ToggleBot", "AdminChat", new { area = "Admin" })', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                            'RequestVerificationToken': token
+                        },
+                        body:
+                            'conversationId=' + encodeURIComponent(conversationIdToggle) +
+                            '&isActive=' + encodeURIComponent(isActive)
+                    })
+                        .then(r => r.json())
+                        .then(res => {
+                            if (res && res.success) {
+                                if (botStatusText) {
+                                    botStatusText.textContent = isActive
+                                        ? "Chatbot đang bật cho cuộc trò chuyện này."
+                                        : "Chatbot đang tắt, nhân viên sẽ xử lý tin nhắn.";
+                                }
+                                if (botStatusBadge) {
+                                    botStatusBadge.textContent = isActive ? "Bot: Bật" : "Bot: Tắt";
+                                    botStatusBadge.className = "bot-status-badge " +
+                                        (isActive ? "bg-success-subtle text-success" : "bg-secondary-subtle text-secondary");
+                                }
+                            } else {
+                                toggleBot.checked = !isActive;
+                                alert((res && res.message) || "Không thể cập nhật trạng thái chatbot.");
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            toggleBot.checked = !isActive;
+                            alert("Lỗi hệ thống khi cập nhật chatbot.");
+                        });
+                });
+            }
+
+            // Nếu chưa chọn conversation thì thôi phần chat
+            if (!convIdInput) return;
+
+            var conversationId = parseInt(convIdInput.value || "0");
+            if (!conversationId) return;
+
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chathub")
+                .build();
+
+            // Nhận tin nhắn realtime
+            connection.on("ReceiveMessage", function (msg) {
+                if (msg.conversationId !== conversationId) return;
+                appendMessage(msg);
+            });
+
+            function appendMessage(msg) {
+                var isCustomer = msg.senderType === "KhachHang";
+                var isBot = msg.senderType === "Bot";
+
+                var ul = document.querySelector(".chat-conversation-list.chatbox-height");
+                if (!ul) return;
+
+                var li = document.createElement("li");
+                li.classList.add("clearfix");
+                if (!isCustomer) li.classList.add("odd");
+
+                var wrapper = document.createElement("div");
+                wrapper.classList.add("d-flex", "align-items-start", "mb-2");
+                if (!isCustomer) wrapper.classList.add("justify-content-end");
+
+                var avatar = document.createElement("img");
+                avatar.classList.add("rounded-circle");
+                avatar.style.width = "34px";
+                avatar.style.height = "34px";
+
+                var avatarUrl = msg.avatarUrl || "/admin/images/users/avatar-1.jpg";
+                avatar.setAttribute("src", avatarUrl);
+
+                var senderName = msg.senderName || (isCustomer ? "Khách hàng" : (isBot ? "Bot" : "Hỗ trợ"));
+
+                var nameP = document.createElement("p");
+                nameP.classList.add("msg-sender-name");
+                nameP.textContent = senderName + (isBot && !isCustomer ? " (Bot)" : "");
+
+                var bubbleWrapper = document.createElement("div");
+                bubbleWrapper.classList.add("chat-conversation-text");
+
+                var bubble = document.createElement("div");
+                bubble.classList.add("chat-ctext-wrap");
+
+                var p = document.createElement("p");
+                p.innerHTML = (msg.content || "").replace(/\n/g, "<br/>");
+                bubble.appendChild(p);
+
+                var timeP = document.createElement("p");
+                timeP.classList.add("text-muted", "fs-12", "mb-0", "mt-1");
+                timeP.textContent = msg.sentAt || "";
+
+                bubbleWrapper.appendChild(bubble);
+                bubbleWrapper.appendChild(timeP);
+
+                var infoDiv = document.createElement("div");
+                infoDiv.appendChild(nameP);
+                infoDiv.appendChild(bubbleWrapper);
+
+                if (isCustomer) {
+                    // KHÁCH: avatar trái
+                    wrapper.appendChild(avatar);
+                    wrapper.appendChild(infoDiv);
+                } else {
+                    // STAFF/BOT: nội dung trước, avatar sau
+                    wrapper.appendChild(infoDiv);
+                    wrapper.appendChild(avatar);
+                }
+
+                li.appendChild(wrapper);
+                ul.appendChild(li);
+
+                // scroll xuống cuối
+                ul.scrollTop = ul.scrollHeight;
+            }
+
+            // Kết nối & join group
+            connection.start()
+                .then(function () {
+                    return connection.invoke("JoinConversation", conversationId);
+                })
+                .catch(function (err) {
+                    console.error(err.toString());
+                });
+
+            // Gửi tin qua Hub (không post form)
+            var form = document.getElementById("admin-chat-form");
+            var input = document.getElementById("admin-chat-input");
+
+            if (form && input) {
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    var text = input.value.trim();
+                    if (!text) return;
+
+                    connection.invoke("SendMessage", conversationId, text)
+                        .then(function () {
+                            input.value = "";
+                            input.focus();
+                        })
+                        .catch(function (err) {
+                            console.error(err.toString());
+                        });
+                });
+            }
+        });
+    </script>
+}

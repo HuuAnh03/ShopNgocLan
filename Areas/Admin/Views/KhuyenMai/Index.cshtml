@@ -1,0 +1,367 @@
+﻿@model List<ShopNgocLan.Models.KhuyenMai>
+@{
+    ViewData["Title"] = "Quản lý Khuyến mãi";
+    Layout = "AdminLayout";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" />
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="pagetitle">
+    <h3>Quản lý khuyến mãi</h3>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+            </li>
+            
+            <li class="breadcrumb-item active">Quản lý khuyễn mãi</li>
+        </ol>
+    </nav>
+</div>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    DANH SÁCH KHUYẾN MÃI (@Model.Count)
+                </h6>
+
+                <div class="search-box ms-auto me-3">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Tìm khuyến mãi..."
+                           id="searchInput" />
+                </div>
+
+                <button type="button" id="btn-create-km" class="btn btn-primary btn-sm">
+                    <i class="fa fa-plus"></i> Thêm khuyến mãi
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="kmTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th style="width:5%;">ID</th>
+                                <th style="width:20%;">Tên KM</th>
+                                <th style="width:25%;">Mô tả</th>
+                                <th style="width:10%;">Giảm (%)</th>
+                                <th style="width:15%;">Ngày bắt đầu</th>
+                                <th style="width:15%;">Ngày kết thúc</th>
+                                <th style="width:10%;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @* DataTables sẽ render từ serverData *@
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@* MODAL TẠO / SỬA *@
+<div class="modal fade" id="kmModal" tabindex="-1" aria-labelledby="kmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="kmModalLabel">Thêm / Sửa khuyến mãi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <form id="kmForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="Km_Id" name="Id" value="0" />
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+
+                            <div class="mb-3">
+                                <label for="Km_TenKhuyenMai" class="form-label">Tên khuyến mãi (*)</label>
+                                <input type="text" class="form-control" id="Km_TenKhuyenMai" name="TenKhuyenMai" required />
+                                <div class="text-danger" id="errorTenKm"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Km_MoTa" class="form-label">Mô tả</label>
+                                <textarea class="form-control" id="Km_MoTa" name="MoTa" rows="3"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Km_PhanTramGiam" class="form-label">Phần trăm giảm (%) (*)</label>
+                                <input type="number" class="form-control" id="Km_PhanTramGiam" name="PhanTramGiam" min="1" max="100" required />
+                            </div>
+
+                        </div>
+                        <div class="col-md-6">
+
+                            <div class="mb-3">
+                                <label for="Km_NgayBatDau" class="form-label">Ngày bắt đầu (*)</label>
+                                <input type="datetime-local" class="form-control" id="Km_NgayBatDau" name="NgayBatDau" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="Km_NgayKetThuc" class="form-label">Ngày kết thúc (*)</label>
+                                <input type="datetime-local" class="form-control" id="Km_NgayKetThuc" name="NgayKetThuc" required />
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Lưu khuyến mãi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        var dataTable;
+        const antiForgeryToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
+        function formatDate(iso) {
+            if (!iso) return 'N/A';
+            const d = new Date(iso);
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = d.getFullYear();
+            return dd + '/' + mm + '/' + yyyy;
+        }
+
+        // DATA TỪ SERVER
+        const serverData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                                    Model,
+                                    new System.Text.Json.JsonSerializerOptions {
+                                        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+                                    }));
+
+        $(document).ready(function () {
+            loadDataTable();
+
+            $('#searchInput').on('keyup', function () {
+                dataTable.search(this.value).draw();
+            });
+
+            // 👉 THÊM MỚI KHUYẾN MÃI
+            $('#btn-create-km').click(function () {
+                resetForm();
+                $('#Km_Id').val(0);              // ✅ THÊM MỚI => Id = 0
+                $('#kmModalLabel').text('Thêm khuyến mãi mới');
+                $('#modalSubmitBtn').text('Thêm khuyến mãi');
+
+                var kmModal = new bootstrap.Modal(document.getElementById('kmModal'));
+                kmModal.show();
+            });
+
+            $('#kmForm').submit(function (e) {
+                e.preventDefault();
+                saveKhuyenMai();
+            });
+
+            $('#kmModal').on('hidden.bs.modal', function () {
+                resetForm();
+            });
+        });
+
+        function loadDataTable() {
+            if ($.fn.DataTable.isDataTable('#kmTable')) {
+                $('#kmTable').DataTable().destroy();
+            }
+
+            dataTable = $('#kmTable').DataTable({
+                data: serverData,
+                columns: [
+                    { data: 'Id', width: '5%' },
+                    { data: 'TenKhuyenMai', width: '20%' },
+                    { data: 'MoTa', width: '25%' },
+                    {
+                        data: 'PhanTramGiam',
+                        render: function (data) {
+                            return data + ' %';
+                        },
+                        width: '10%'
+                    },
+                    {
+                        data: 'NgayBatDau',
+                        render: function (data) { return formatDate(data); },
+                        width: '15%'
+                    },
+                    {
+                        data: 'NgayKetThuc',
+                        render: function (data) { return formatDate(data); },
+                        width: '15%'
+                    },
+                    {
+                        data: 'Id',
+                        render: function (id, type, row) {
+                            const detailsUrl = '@Url.Action("Details", "KhuyenMai", new { Area = "Admin" })/' + id;
+                            return `
+                                <a href="${detailsUrl}" class="btn btn-sm btn-info mb-1">Sản phẩm</a>
+                                <button onclick="openEditModal(${id})" class="btn btn-sm btn-warning mb-1">Sửa</button>
+                                <button onclick="deleteKm(${id})" class="btn btn-sm btn-danger mb-1">Xóa</button>
+                            `;
+                        },
+                        orderable: false,
+                        width: '10%'
+                    }
+                ],
+                language: {
+                    "sProcessing": "Đang xử lý...",
+                    "sLengthMenu": "Xem _MENU_ mục",
+                    "sZeroRecords": "Không tìm thấy kết quả nào",
+                    "sInfo": "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                    "sInfoEmpty": "Đang xem 0 đến 0 trong tổng số 0 mục",
+                    "sInfoFiltered": "(Được lọc từ tổng số _MAX_ mục)",
+                    "sSearch": "",
+                    "oPaginate": {
+                        "sFirst": "Đầu",
+                        "sPrevious": "Trước",
+                        "sNext": "Tiếp",
+                        "sLast": "Cuối"
+                    }
+                },
+                dom: 'lrtip',
+                order: [[0, "desc"]]
+            });
+        }
+
+        function resetForm() {
+            $('#kmForm')[0].reset();
+            $('#Km_Id').val(0);
+            $('#errorTenKm').text('');
+            $('#modalSubmitBtn').text('Lưu khuyến mãi');
+        }
+
+        // ✅ GIỐNG VOUCHER: DÙNG Create / Edit RIÊNG, GỬI JSON
+        function saveKhuyenMai() {
+            var rawId = $('#Km_Id').val();
+            var id = parseInt(rawId);
+            if (isNaN(id)) id = 0;
+
+            var isCreating = (id === 0);
+
+            var endpoint = isCreating
+                ? '@Url.Action("Create", "KhuyenMai", new { Area = "Admin" })'
+                : '@Url.Action("Edit", "KhuyenMai", new { Area = "Admin" })';
+
+            var kmData = {
+                Id: id,
+                TenKhuyenMai: $('#Km_TenKhuyenMai').val(),
+                MoTa: $('#Km_MoTa').val(),
+                PhanTramGiam: parseFloat($('#Km_PhanTramGiam').val()),
+                NgayBatDau: $('#Km_NgayBatDau').val(),
+                NgayKetThuc: $('#Km_NgayKetThuc').val()
+            };
+
+            // Thêm mới thì bỏ Id đi cho sạch (giống voucher)
+            if (isCreating) {
+                delete kmData.Id;
+            }
+
+            $.ajax({
+                url: endpoint,
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': antiForgeryToken
+                },
+                data: JSON.stringify(kmData),
+                beforeSend: function () {
+                    $('#modalSubmitBtn')
+                        .attr('disabled', true)
+                        .text(isCreating ? 'Đang thêm...' : 'Đang lưu...');
+                },
+                success: function (res) {
+                    $('#modalSubmitBtn')
+                        .attr('disabled', false)
+                        .text(isCreating ? 'Thêm khuyến mãi' : 'Lưu khuyến mãi');
+
+                    if (res.success) {
+                        Swal.fire('Thành công', res.message, 'success')
+                            .then(() => window.location.reload());
+                    } else {
+                        Swal.fire('Thất bại', res.message, 'error');
+                    }
+                },
+                error: function () {
+                    $('#modalSubmitBtn')
+                        .attr('disabled', false)
+                        .text(isCreating ? 'Thêm khuyến mãi' : 'Lưu khuyến mãi');
+
+                    Swal.fire('Lỗi', 'Lỗi hệ thống. Vui lòng thử lại.', 'error');
+                }
+            });
+        }
+
+        function openEditModal(id) {
+            var km = serverData.find(x => x.Id === id);
+            if (!km) return;
+
+            $('#Km_Id').val(km.Id);
+            $('#Km_TenKhuyenMai').val(km.TenKhuyenMai);
+            $('#Km_MoTa').val(km.MoTa);
+            $('#Km_PhanTramGiam').val(km.PhanTramGiam);
+
+            if (km.NgayBatDau) {
+                $('#Km_NgayBatDau').val(new Date(km.NgayBatDau).toISOString().slice(0, 16));
+            }
+            if (km.NgayKetThuc) {
+                $('#Km_NgayKetThuc').val(new Date(km.NgayKetThuc).toISOString().slice(0, 16));
+            }
+
+            $('#kmModalLabel').text('Sửa khuyến mãi: ' + km.TenKhuyenMai);
+            $('#modalSubmitBtn').text('Lưu khuyến mãi');
+
+            var kmModal = new bootstrap.Modal(document.getElementById('kmModal'));
+            kmModal.show();
+        }
+
+        function deleteKm(id) {
+            Swal.fire({
+                title: 'Bạn chắc chắn?',
+                text: 'Khuyến mãi sẽ bị xóa. Nếu có sản phẩm thuộc khuyến mãi này thì cần xóa sản phẩm trước.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "KhuyenMai", new { Area = "Admin" })',
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            __RequestVerificationToken: antiForgeryToken
+                        },
+                        success: function (res) {
+                            if (res.success) {
+                                Swal.fire('Đã xóa', res.message, 'success')
+                                    .then(() => window.location.reload());
+                            } else {
+                                Swal.fire('Không thể xóa', res.message, 'error');
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error(xhr.responseText);
+                            Swal.fire('Lỗi', 'Lỗi hệ thống. Vui lòng thử lại.', 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+    </script>
+}

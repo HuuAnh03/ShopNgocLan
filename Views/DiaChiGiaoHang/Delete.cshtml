@@ -1,0 +1,120 @@
+﻿@model ShopNgocLan.Models.DiaChiGiaoHang
+
+@{
+    ViewData["Title"] = "Sửa Địa Chỉ";
+    Layout = "_Layout";
+}
+<link rel="stylesheet" href="~/assets/css/account.css" asp-append-version="true">
+
+<div class="breadcrumbs_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">home</a></li>
+                        <li><a asp-action="Index" asp-controller="DiaChiGiaoHang">Địa chỉ giao hàng</a></li>
+                        <li>Xóa</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="account-container">
+
+    <nav class="account-nav">
+        <h3>Tài khoản</h3>
+        <ul class="account-nav-list">
+            <li><a asp-action="Edit" asp-controller="Account">Thông tin tài khoản</a></li>
+            <li><a asp-action="Index" asp-controller="HoaDon">Lịch sử đơn hàng</a></li>
+            <li><a asp-action="Index" asp-controller="DiaChiGiaoHang" class="active">Địa chỉ giao hàng</a></li>
+            <li><a asp-action="Logout" asp-controller="Account">Đăng xuất</a></li>
+        </ul>
+    </nav>
+
+    <main class="account-content">
+        <div class="page-content">
+            <div class="container-xxl">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title text-danger">Xác Nhận Xóa Địa Chỉ</h4>
+                            </div>
+                            <div class="card-body">
+
+                                <h3 class="text-danger">Bạn có chắc chắn muốn xóa địa chỉ này không?</h3>
+                                <p>Hành động này không thể hoàn tác.</p>
+
+                                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                                <hr />
+
+                                <div>
+                                    <h4>Thông tin địa chỉ</h4>
+                                    <dl class="row">
+                                        <dt class="col-sm-3">
+                                            Người dùng:
+                                        </dt>
+                                        <dd class="col-sm-9">
+                                            @Model.User?.Ho @Model.User?.Ten
+                                        </dd>
+
+                                        <dt class="col-sm-3">
+                                            Địa chỉ:
+                                        </dt>
+                                        <dd class="col-sm-9">
+                                            @Model.DiaChiChiTiet
+                                        </dd>
+
+                                        <dt class="col-sm-3">
+                                            Phường/Xã:
+                                        </dt>
+                                        <dd class="col-sm-9">
+                                            @Model.PhuongXa
+                                        </dd>
+
+                                        <dt class="col-sm-3">
+                                            Quận/Huyện:
+                                        </dt>
+                                        <dd class="col-sm-9">
+                                            @Model.QuanHuyen
+                                        </dd>
+
+                                        <dt class="col-sm-3">
+                                            Tỉnh/Thành:
+                                        </dt>
+                                        <dd class="col-sm-9">
+                                            @Model.TinhThanhPho
+                                        </dd>
+                                    </dl>
+                                </div>
+
+                                <hr />
+
+                                <form asp-action="Delete" method="post">
+                                    <input type="hidden" asp-for="Id" />
+
+                                    <div class="mt-4">
+                                        <input type="submit" value="XÁC NHẬN XÓA" class="btn btn-danger" />
+                                        <a asp-controller="DiaChiGiaoHang" asp-action="Index" asp-route-id="@Model.UserId" class="btn btn-light">Hủy</a>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

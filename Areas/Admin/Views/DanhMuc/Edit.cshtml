@@ -1,0 +1,72 @@
+﻿@model ShopNgocLan.Models.DanhMucSanPham
+
+@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    ViewData["Title"] = "Chỉnh sửa Danh mục";
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between mb-3">
+                    <h4 class="mb-0">@ViewData["Title"]: @Model.TenDanhMuc</h4>
+                    <div class="page-title-right">
+                        <a asp-action="Index" class="btn btn-light btn-sm">
+                            <i class="bx bx-arrow-back me-1"></i> Quay lại
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+
+                        @* BƯỚC 1: Sửa asp-action="Edit" và thêm asp-route-id *@
+                        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            @* BƯỚC 2: Thêm input hidden cho Id. Rất quan trọng! *@
+                            <input type="hidden" asp-for="Id" />
+
+                            @* Vùng hiển thị lỗi chung *@
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="TenDanhMuc" class="form-label">Tên Danh mục</label>
+                                <input asp-for="TenDanhMuc" class="form-control" />
+                                <span asp-validation-for="TenDanhMuc" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="ParentId" class="form-label">Danh mục cha</label>
+
+                                <select asp-for="ParentId" class="form-select" asp-items="@ViewBag.ParentId">
+
+                                    @* Lựa chọn rỗng: Cho phép đổi về làm danh mục GỐC *@
+                                    <option value="">-- (Không có) --</option>
+
+                                </select>
+                                <span asp-validation-for="ParentId" class="text-danger"></span>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bx bx-save me-1"></i> Lưu thay đổi
+                                </button>
+                                <a asp-action="Index" class="btn btn-light">Hủy</a>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

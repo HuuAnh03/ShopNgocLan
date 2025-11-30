@@ -1,0 +1,380 @@
+﻿@model ShopNgocLan.Models.ChatConversation
+
+@{
+    Layout = null;
+
+    var customerName = ((Model.Customer?.Ho + " " + Model.Customer?.Ten) ?? "Bạn").Trim();
+    var customerAvatar = Model.Customer?.AvatarUrl ?? Url.Content("~/admin/images/users/avatar-1.jpg");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Chat với shop</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            padding: 8px;
+            background: #f3f4f6;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .chat-wrapper {
+            height: 100%;
+            display: flex;
+        }
+
+        .chat-box {
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        }
+
+        #chat-body {
+            max-height: 100%;
+        }
+
+        .bubble {
+            border-radius: 16px;
+            padding: 8px 12px;
+            max-width: 80%;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* KHÁCH HÀNG (bên phải, cam nhạt) */
+        .msg-customer .bubble {
+            background: #ffe8d2;
+            color: #111827;
+        }
+
+        /* STAFF / BOT (bên trái, xám nhạt) */
+        .msg-staff .bubble {
+            background: #f1f5f9;
+            color: #111827;
+            border: 1px solid #e5e7eb;
+        }
+
+        .msg-meta {
+            font-size: 11px;
+            opacity: .7;
+            margin-top: 2px;
+        }
+
+        .msg-customer .msg-meta {
+            text-align: right;
+        }
+
+        .msg-staff .msg-meta {
+            text-align: left;
+        }
+
+        .msg-sender-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+
+        .msg-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            object-fit: cover;
+        }
+
+        .chat-header {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+        }
+
+        .chat-header-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .chat-header-sub {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-wrapper">
+        <div class="chat-box border-0 rounded-3 p-2 w-100 d-flex flex-column" style="height:100%;">
+
+            <!-- HEADER + TOGGLE CHATBOT -->
+            <div class="chat-header d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="chat-header-title">Chat với Shop Ngọc Lan</div>
+                    <div id="chatbot-status-text" class="chat-header-sub text-muted">
+                        @(Model.IsBotActive
+                                                ? "Chatbot đang bật: Shop sẽ trả lời tự động các câu hỏi phổ biến."
+                                                : "Chatbot đang tắt: Tin nhắn của bạn sẽ được nhân viên chăm sóc khách hàng xử lý.")
+                    </div>
+                </div>
+                <div class="form-check form-switch m-0">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           id="toggleChatbot"
+                           @(Model.IsBotActive ? "checked" : "") />
+                    <label class="form-check-label small" for="toggleChatbot">
+                        Dùng Chatbot
+                    </label>
+                </div>
+            </div>
+
+            <!-- Khung tin nhắn -->
+            <div id="chat-body" class="messages flex-grow-1 mb-2" style="overflow-y:auto;">
+                @foreach (var m in Model.ChatMessages.OrderBy(m => m.SentAt))
+                {
+                    var isCustomer = m.SenderType == "KhachHang";
+                    var isBot = m.SenderType == "Bot";
+
+                    var senderName = ((m.Sender?.Ho + " " + m.Sender?.Ten) ?? (isCustomer ? customerName : "Hỗ trợ")).Trim();
+                    if (string.IsNullOrWhiteSpace(senderName))
+                    {
+                        senderName = isCustomer ? customerName : (isBot ? "Bot" : "Hỗ trợ");
+                    }
+
+                    var avatar = m.Sender?.AvatarUrl
+                    ?? (isCustomer ? customerAvatar : Url.Content("~/admin/images/users/avatar-1.jpg"));
+
+                    if (isCustomer)
+                    {
+                        <!-- KHÁCH: bên phải -->
+                        <div class="msg msg-customer d-flex justify-content-end mb-2">
+                            <div class="text-end me-2">
+                                <div class="msg-sender-name">@senderName</div>
+                                <div class="bubble">
+                                    @Html.Raw((m.Content ?? "").Replace("\n", "<br/>"))
+                                </div>
+                                <div class="msg-meta">
+                                    @m.SentAt.ToLocalTime().ToString("HH:mm dd/MM")
+                                </div>
+                            </div>
+                            <img src="@avatar" class="msg-avatar ms-1" />
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- STAFF / BOT: bên trái -->
+                        <div class="msg msg-staff d-flex justify-content-start mb-2">
+                            <img src="@avatar" class="msg-avatar me-1" />
+                            <div class="text-start ms-2">
+                                <div class="msg-sender-name">
+                                    @senderName
+                                    @if (isBot)
+                                    {
+                                        <span>(Bot)</span>
+                                    }
+                                </div>
+                                <div class="bubble">
+                                    @Html.Raw((m.Content ?? "").Replace("\n", "<br/>"))
+                                </div>
+                                <div class="msg-meta">
+                                    @m.SentAt.ToLocalTime().ToString("HH:mm dd/MM")
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Form gửi tin -->
+            <form id="chat-form" class="d-flex gap-2 mt-1">
+                <input type="hidden" id="conversation-id" value="@Model.Id" />
+                <input type="text"
+                       id="chat-input"
+                       class="form-control"
+                       placeholder="Nhập tin nhắn..."
+                       autocomplete="off" />
+                <button type="submit" class="btn btn-dark">
+                    Gửi
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- form ẩn để lấy AntiForgeryToken cho Ajax -->
+    <form id="antiForgeryForm" style="display:none;">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        (function () {
+            var chatBody = document.getElementById('chat-body');
+
+            // Thông tin KH hiện tại
+            var currentCustomerName = '@customerName';
+            var currentCustomerAvatar = '@customerAvatar';
+
+            function scrollToBottom() {
+                if (!chatBody) return;
+                setTimeout(function () {
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, 0);
+            }
+
+            window.scrollToBottomChat = scrollToBottom;
+
+            function getAntiForgeryToken() {
+                var tokenInput =
+                    document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]') ||
+                    document.querySelector('input[name="__RequestVerificationToken"]');
+                return tokenInput ? tokenInput.value : '';
+            }
+
+            var conversationId = @Model.Id;
+
+            document.addEventListener("DOMContentLoaded", function () {
+                scrollToBottom();
+
+                // Gắn event cho toggle chatbot
+                var toggle = document.getElementById('toggleChatbot');
+                var statusText = document.getElementById('chatbot-status-text');
+
+                if (toggle && statusText) {
+                    toggle.addEventListener('change', function () {
+                        var isActive = toggle.checked;
+                        var token = getAntiForgeryToken();
+
+                        fetch('@Url.Action("ToggleBot", "Chat")', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                                'RequestVerificationToken': token
+                            },
+                            body:
+                                'conversationId=' + encodeURIComponent(conversationId) +
+                                '&isActive=' + encodeURIComponent(isActive)
+                        })
+                            .then(response => response.json())
+                            .then(res => {
+                                if (res && res.success) {
+                                    if (isActive) {
+                                        statusText.textContent =
+                                            "Chatbot đang bật: Shop sẽ trả lời tự động các câu hỏi phổ biến.";
+                                    } else {
+                                        statusText.textContent =
+                                            "Chatbot đang tắt: Tin nhắn của bạn sẽ được nhân viên chăm sóc khách hàng xử lý.";
+                                    }
+                                } else {
+                                    // revert lại nếu lỗi
+                                    toggle.checked = !isActive;
+                                    alert((res && res.message) || "Không thể cập nhật trạng thái chatbot.");
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                toggle.checked = !isActive;
+                                alert("Lỗi hệ thống khi cập nhật chatbot.");
+                            });
+                    });
+                }
+            });
+
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chathub")
+                .build();
+
+            // Nhận tin nhắn mới từ server
+            connection.on("ReceiveMessage", function (msg) {
+                // Lọc đúng cuộc hội thoại
+                if (msg.conversationId !== conversationId) return;
+                appendMessage(msg);
+            });
+
+            function appendMessage(msg) {
+                var isCustomer = msg.senderType === "KhachHang";
+                var isBot = msg.senderType === "Bot";
+
+                var senderName = msg.senderName || (isCustomer ? currentCustomerName : (isBot ? "Bot" : "Hỗ trợ"));
+                var avatar = msg.avatarUrl || (isCustomer ? currentCustomerAvatar : "@Url.Content("~/admin/images/users/avatar-1.jpg")");
+
+                var row = document.createElement("div");
+                row.classList.add("msg", "mb-2", "d-flex");
+
+                var avatarImg = document.createElement("img");
+                avatarImg.classList.add("msg-avatar");
+                avatarImg.src = avatar;
+
+                var nameEl = document.createElement("div");
+                nameEl.classList.add("msg-sender-name");
+                nameEl.textContent = senderName + (isBot && !isCustomer ? " (Bot)" : "");
+
+                var bubble = document.createElement("div");
+                bubble.classList.add("bubble");
+                bubble.innerHTML = (msg.content || "").replace(/\n/g, "<br/>");
+
+                var meta = document.createElement("div");
+                meta.classList.add("msg-meta");
+                meta.textContent = msg.sentAt || "";
+
+                var textBox = document.createElement("div");
+
+                if (isCustomer) {
+                    row.classList.add("msg-customer", "justify-content-end");
+                    textBox.classList.add("text-end", "me-2");
+
+                    textBox.appendChild(nameEl);
+                    textBox.appendChild(bubble);
+                    textBox.appendChild(meta);
+
+                    row.appendChild(textBox);
+                    row.appendChild(avatarImg);
+                } else {
+                    row.classList.add("msg-staff", "justify-content-start");
+                    textBox.classList.add("text-start", "ms-2");
+
+                    textBox.appendChild(nameEl);
+                    textBox.appendChild(bubble);
+                    textBox.appendChild(meta);
+
+                    row.appendChild(avatarImg);
+                    row.appendChild(textBox);
+                }
+
+                chatBody.appendChild(row);
+                scrollToBottom();
+            }
+
+            // Kết nối & join group
+            connection.start().then(function () {
+                connection.invoke("JoinConversation", conversationId);
+                scrollToBottom();
+            }).catch(function (err) {
+                console.error(err.toString());
+            });
+
+            // Gửi tin
+            var form = document.getElementById("chat-form");
+            var input = document.getElementById("chat-input");
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                var text = input.value.trim();
+                if (!text) return;
+
+                connection.invoke("SendMessage", conversationId, text)
+                    .then(function () {
+                        input.value = "";
+                        input.focus();
+                    })
+                    .catch(function (err) {
+                        console.error(err.toString());
+                    });
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+﻿@model IEnumerable<DanhMucSanPham>
+@functions {
+    // Hàm helper để tìm tất cả ID con/cháu của một danh mục
+    private HashSet<int> GetAllDescendantIds(string rootCategoryName, List<DanhMucSanPham> allCategories)
+    {
+        var ids = new HashSet<int>();
+        var root = allCategories.FirstOrDefault(c => c.TenDanhMuc == rootCategoryName);
+
+        if (root != null)
+        {
+            FindChildren(root, allCategories, ids);
+        }
+        return ids;
+    }
+
+    // Hàm đệ quy
+    private void FindChildren(DanhMucSanPham parent, List<DanhMucSanPham> allCategories, HashSet<int> ids)
+    {
+        ids.Add(parent.Id); // Thêm ID của chính nó
+
+        // Tìm tất cả con trực tiếp từ danh sách
+        var children = allCategories.Where(c => c.ParentId == parent.Id);
+
+        foreach (var child in children)
+        {
+            FindChildren(child, allCategories, ids); // Lặp lại cho các cháu
+        }
+    }
+}
+<li class="mega_items">
+    <a asp-action="Index" asp-controller="Shop" asp-route-idDanhMuc=0">Sản Phẩm<i class="fa fa-angle-down"></i></a>
+    <div class="mega_menu" >
+        <ul class="mega_menu_inner">
+            @{
+                var alldanhmuc = Model.ToList();
+                foreach (var danhmuc in Model)
+                {
+                    if (danhmuc.ParentId == null)
+                    {
+                        var danhMucCha = GetAllDescendantIds(danhmuc.TenDanhMuc, alldanhmuc);
+                        var listDanhMucCon = Model.Where(p => p.Id != null &&
+                        danhMucCha.Contains(p.Id) && p.Id != danhmuc.Id)
+                        .ToList();
+                        
+                        <li>
+                            <a asp-action="Index" asp-controller="Shop" asp-route-idDanhMuc="@danhmuc.Id">@danhmuc.TenDanhMuc</a>
+                            <ul>
+                                @foreach (var item in listDanhMucCon)
+                                {
+                                    <li><a asp-action="Index" asp-controller="Shop" asp-route-idDanhMuc="@item.Id">@item.TenDanhMuc</a></li>
+                                }
+
+
+                            </ul>
+                        </li>
+                    }
+                }
+            }
+        </ul>
+    </div>
+</li>

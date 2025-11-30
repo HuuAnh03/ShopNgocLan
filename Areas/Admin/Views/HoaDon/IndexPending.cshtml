@@ -1,0 +1,300 @@
+﻿@model List<ShopNgocLan.Models.HoaDon>
+@{
+    ViewData["Title"] = "Xử lý đơn hàng";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+   
+}
+<link rel="stylesheet" href="~/assets/css/account.css" asp-append-version="true">
+@* QUAN TRỌNG: Đảm bảo link SweetAlert2 được tải *@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+@functions {
+    // Hàm hiển thị trạng thái (giữ nguyên logic)
+    public (string CssClass, string DisplayText) GetStatus(string maTrangThai)
+    {
+        switch (maTrangThai)
+        {
+            case "AwaitingPayment":
+                return ("status-chothanhtoan", "Chờ thanh toán trực tuyến");
+            case "Pending":
+                return ("status-pending", "Chờ xác nhận");
+            case "Confirmed":
+                return ("status-confirmed", "Đã xác nhận");
+            case "Processing":
+                return ("status-processing", "Đang xử lý");
+            case "Shipped":
+                return ("status-shipped", "Đang giao");
+            case "Delivered":
+                return ("status-success", "Hoàn thành");
+            case "PaymentFailed":
+                return ("status-failed", "Thanh toán thất bại");
+            case "Cancelled":
+                return ("status-danger", "Đã hủy");
+            default:
+                return ("status-default", "Trạng thái không xác định: " + maTrangThai);
+        }
+    }
+}
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="pagetitle">
+            <h3>Hóa đơn cần xử lý</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="HoaDon" asp-action="Index">Danh sách hóa đơn</a>
+                    </li>
+                    <li class="breadcrumb-item active">Hóa đơn cần xử lý</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">DANH SÁCH HÓA ĐƠN CẦN XỬ LÝ(@Model.Count)</h6>
+
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Mã ĐH</th>
+                                <th>Ngày tạo</th>
+                                <th>Người mua hàng</th>
+                                <th>Người nhận</th>
+                                <th>Tổng tiền</th>
+                                <th>PT Thanh toán</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                var status = GetStatus(item.TrangThai.MaTrangThai);
+
+                                <tr>
+                                    <td>#@item.Id</td>
+                                    <td>@item.NgayTao</td>
+
+                                    <td>
+                                        @if (item.User != null)
+                                        {
+                                            <strong>@item.User.Ho @item.User.Ten</strong>
+                                            <br />
+                                            <small>(@item.User.Email)</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-secondary">Khách vãng lai</span>
+                                        }
+                                    </td>
+
+                                    <td>@item.TenKhachHang</td>
+                                    <td>@item.ThanhTien.ToString("N0") đ</td>
+                                    <td>@item.PhuongThucThanhToan.TenPhuongThuc</td>
+                                    <td class="text-center">
+                                        <span class="status-badge @status.CssClass">
+                                            @status.DisplayText
+                                        </span>
+                                    </td>
+                                    <td>
+                                        
+                                        <form class="d-inline" data-order-id="@item.Id">
+                                            @* Thêm Anti-Forgery Token (quan trọng cho Controller) *@
+                                            @Html.AntiForgeryToken()
+                                            <button type="button" class="btn btn-danger btn-sm">Xác nhận đơn</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @* Đảm bảo tải jQuery và DataTables trước phần script này *@
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> @* Tải thư viện SweetAlert2 *@
+
+    <script>
+        $(document).ready(function() {
+
+            // --- 1. KHỞI TẠO DATA TABLES (CLIENT-SIDE) ---
+            const table = $('#dataTable').DataTable({
+                "language": {
+                    // Tùy chỉnh tiếng Việt
+                    "sProcessing": "Đang xử lý...", "sLengthMenu": "Xem _MENU_ mục",
+                    "sZeroRecords": "Không tìm thấy kết quả nào",
+                    "sInfo": "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                    "sInfoEmpty": "Đang xem 0 đến 0 trong tổng số 0 mục",
+                    "sInfoFiltered": "(Được lọc từ tổng số _MAX_ mục)",
+                    "sSearch": "",
+                    "oPaginate": { "sFirst": "Đầu", "sPrevious": "Trước", "sNext": "Tiếp", "sLast": "Cuối" }
+                },
+                "paging": true,
+                "ordering": true,
+                "searching": true,
+                "dom": 'lrtip',
+                "order": [[ 1, "desc" ]]
+            });
+
+            // ----------------------------------------------------------------------
+            // 2. GẮN TÍNH NĂNG TÌM KIẾM TÙY CHỈNH
+            // ----------------------------------------------------------------------
+
+            const searchInput = document.getElementById('searchInput');
+
+            if (searchInput) {
+                $(searchInput).on('keyup', function() {
+                    table.search(this.value).draw();
+                });
+            }
+
+
+            // -----------------------------------------------------
+            // 3. LỌC BẰNG NÚT TRẠNG THÁI (Nếu có)
+            // -----------------------------------------------------
+
+            const statusColumnIndex = 6;
+
+            $('.filter-status-btn').on('click', function() {
+                const statusName = $(this).data('status-name');
+
+                $('.filter-status-btn').removeClass('active-filter');
+                $(this).addClass('active-filter');
+
+                table.column(statusColumnIndex).search('');
+
+                if (statusName) {
+                    table.column(statusColumnIndex).search(statusName).draw();
+                } else {
+                    table.draw();
+                }
+            });
+
+            // -----------------------------------------------------
+            // 4. XỬ LÝ xác nhận ĐƠN HÀNG (SweetAlert2 và AJAX) - ĐÃ SỬA LỖI
+            // -----------------------------------------------------
+
+            // Lấy Anti-Forgery Token
+            const antiForgeryToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
+            // Sử dụng Event Delegation vì bảng DataTables có thể bị tải lại
+            $('#dataTable').on('click', 'button.btn-danger', function(e) {
+                e.preventDefault();
+
+                // Lấy form cha đã gắn data-order-id
+                const deleteForm = $(this).closest('form');
+                const orderId = deleteForm.data('order-id');
+
+                if (!orderId) {
+                    console.error("Lỗi: Không tìm thấy ID đơn hàng.");
+                    Swal.fire('Lỗi!', 'Không tìm thấy ID đơn hàng để xác nhận.', 'error');
+                    return;
+                }
+
+                const confirmationMessage = `Bạn có chắc chắn muốn xác nhận đơn hàng #${orderId}?`;
+
+                Swal.fire({
+                    title: `Xác nhận đơn hàng #${orderId}`,
+                    text: confirmationMessage,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Đồng ý, Hủy!',
+                    cancelButtonText: 'Không'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        Swal.fire({
+                            title: 'Đang xác nhận...',
+                            text: 'Đang xác nhận đơn hàng.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading()
+                            }
+                        });
+
+                        // GỌI API XÓA BẰNG FETCH API
+                        fetch(`/Admin/HoaDon/XacNhanDon?id=${orderId}`, {
+                            method: 'POST',
+                            headers: {
+                                'RequestVerificationToken': antiForgeryToken,
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Lỗi máy chủ: ' + response.status);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            Swal.close();
+                            if (data.success) {
+                                Swal.fire(
+                                    'Xác nhận thành công!',
+                                    data.message,
+                                    'success'
+                                ).then(() => {
+                                    // Tải lại trang để cập nhật danh sách
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Thất bại!',
+                                    'Lỗi: ' + data.message,
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            Swal.close();
+                            console.error('Lỗi khi gọi API:', error);
+                            Swal.fire('Lỗi kết nối!', 'Không thể kết nối đến máy chủ: ' + error.message, 'error');
+                        });
+                    }
+                });
+            });
+
+        });
+    </script>
+}
+<style>
+    /* Thiết lập cho thẻ bao ngoài (div hoặc form có class search-box) */
+    .search-box {
+        display: flex; /* Kích hoạt Flexbox */
+        align-items: center; /* Căn giữa dọc */
+        position: relative; /* Quan trọng: Cho phép định vị icon tuyệt đối */
+        max-width: 300px; /* Giới hạn chiều rộng nếu cần */
+        margin-left: auto; /* Dùng để đẩy ô tìm kiếm sang phải (nếu cần) */
+    }
+        /* Định vị icon (sử dụng bx bx-search search-icon) */
+        .search-box .search-icon {
+            position: absolute;
+            right: 10px; /* Khoảng cách từ lề phải */
+            top: 50%; /* Căn giữa theo chiều dọc */
+            transform: translateY(-50%); /* Dịch chuyển lên 50% chiều cao của nó */
+            color: var(--text-light, #767676);
+            font-size: 1.1rem;
+            pointer-events: none; /* Cho phép click xuyên qua icon để gõ vào input */
+            z-index: 2; /* Đảm bảo icon nằm trên input */
+        }
+        /* Đảm bảo input có khoảng trống cho icon */
+        .search-box .form-control {
+            /* Đã được định nghĩa trong style chung của bạn, chỉ cần đảm bảo có padding */
+            padding-right: 35px; /* Thêm padding đủ chỗ cho icon (tùy thuộc font size) */
+            width: 100%; /* Đảm bảo input chiếm hết chiều rộng container */
+        }
+</style>

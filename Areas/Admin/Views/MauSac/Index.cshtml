@@ -1,0 +1,289 @@
+﻿@model List<ShopNgocLan.Models.MauSac>
+
+@{
+    ViewData["Title"] = "Quản lý Màu Sắc";
+    Layout = "AdminLayout";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+
+<style>
+    .color-preview {
+        width: 35px;
+        height: 35px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+</style>
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="pagetitle">
+            <h3>Quản lý màu sắc</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item active">Quản lý màu sắc</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">DANH SÁCH MÀU SẮC (@Model.Count)</h6>
+
+                <div class="search-box ms-auto me-3">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Tìm tên màu...">
+                </div>
+
+                <button type="button" class="btn btn-primary btn-sm" id="btn-create-color">
+                    <i class="fa fa-plus"></i> Thêm Màu
+                </button>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="colorTable" width="100%">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">ID</th>
+                                <th style="width: 30%;">Tên Màu</th>
+                                <th style="width: 20%;">Mã HEX</th>
+                                <th style="width: 20%;">Preview</th>
+                                <th style="width: 20%;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @* DataTables fill *@
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Thêm / Sửa Màu -->
+<div class="modal fade" id="colorModal" tabindex="-1" aria-labelledby="colorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="colorModalLabel">Thêm / Sửa Màu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="colorForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="Color_Id" />
+
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Tên Màu (*)</label>
+                        <input type="text" class="form-control" id="Color_TenMau" required>
+                        <div class="text-danger" id="errorTenMau"></div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Mã Màu HEX (VD: #ff0000)</label>
+                        <input type="text" class="form-control" id="Color_MaMauHex" maxlength="10">
+
+                        <div class="mt-2">
+                            <span>Xem trước:</span>
+                            <div id="colorPreview" class="color-preview"></div>
+                        </div>
+                    </div>
+
+                </div> <!-- modal-body -->
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" id="modalSubmitBtn" class="btn btn-primary">Lưu</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    var dataTable;
+    const antiForgeryToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
+    // dữ liệu từ server
+    const serverData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model,
+        new System.Text.Json.JsonSerializerOptions() {
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+        }
+    ));
+
+    $(document).ready(function () {
+        loadDataTable();
+
+        $('#searchInput').on('keyup', function () {
+            dataTable.search(this.value).draw();
+        });
+
+        $('#btn-create-color').click(function () {
+            resetForm();
+            $('#colorModalLabel').text('Thêm Màu Mới');
+            new bootstrap.Modal('#colorModal').show();
+        });
+
+        $('#Color_MaMauHex').on('input', function () {
+            $('#colorPreview').css('background', $(this).val());
+        });
+
+        $('#colorForm').submit(function (e) {
+            e.preventDefault();
+            saveColor();
+        });
+    });
+
+    // ================= Load table =================
+    function loadDataTable() {
+        dataTable = $('#colorTable').DataTable({
+            data: serverData,
+            columns: [
+                { data: "Id", width: "10%" },
+                { data: "TenMau", width: "30%" },
+                { data: "MaMauHex", width: "20%" },
+                {
+                    data: "MaMauHex",
+                    render: function (color) {
+                        return `<div class="color-preview" style="background:${color || '#fff'}"></div>`;
+                    },
+                    width: "20%"
+                },
+                {
+                    data: "Id",
+                    render: function (id) {
+                        return `
+                        <button class="btn btn-sm btn-warning me-1" onclick="openEditModal(${id})">Sửa</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteColor(${id})">Xóa</button>`;
+                    },
+                    orderable: false,
+                    width: "20%"
+                }
+            ],
+            dom: "lrtip",
+            language: {
+                "sZeroRecords": "Không có dữ liệu",
+                "oPaginate": {
+                    "sPrevious": "Trước",
+                    "sNext": "Tiếp"
+                }
+            }
+        });
+    }
+
+    // ================= Reset Form =================
+    function resetForm() {
+        $('#colorForm')[0].reset();
+        $('#Color_Id').val(0);
+        $('#errorTenMau').text('');
+        $('#colorPreview').css('background', '#fff');
+    }
+
+    // ================= Save =================
+    function saveColor() {
+        var isCreate = $('#Color_Id').val() == 0;
+
+        var endpoint = isCreate
+            ? '@Url.Action("Create", "MauSac", new { Area = "Admin" })'
+            : '@Url.Action("Edit", "MauSac", new { Area = "Admin" })';
+
+        var data = {
+            Id: parseInt($('#Color_Id').val()),
+            TenMau: $('#Color_TenMau').val(),
+            MaMauHex: $('#Color_MaMauHex').val() || null
+        };
+
+        if (isCreate) delete data.Id;
+
+        $.ajax({
+            url: endpoint,
+            type: "POST",
+            contentType: "application/json",
+            headers: {
+                "RequestVerificationToken": antiForgeryToken
+            },
+            data: JSON.stringify(data),
+
+            beforeSend: () => {
+                $('#modalSubmitBtn').attr('disabled', true).text('Đang lưu...');
+            },
+
+            success: function (res) {
+                $('#modalSubmitBtn').attr('disabled', false).text('Lưu');
+
+                if (res.success) {
+                    Swal.fire("Thành công", res.message, "success")
+                        .then(() => window.location.reload());
+                } else {
+                    if (res.message.includes("đã tồn tại"))
+                        $('#errorTenMau').text(res.message);
+                    else
+                        Swal.fire("Lỗi", res.message, "error");
+                }
+            }
+        });
+    }
+
+    // ================= Edit =================
+    function openEditModal(id) {
+        var row = serverData.find(x => x.Id == id);
+
+        if (!row) return;
+
+        resetForm();
+
+        $('#Color_Id').val(row.Id);
+        $('#Color_TenMau').val(row.TenMau);
+        $('#Color_MaMauHex').val(row.MaMauHex || '');
+        $('#colorPreview').css('background', row.MaMauHex || '#fff');
+
+        $('#colorModalLabel').text("Sửa Màu: " + row.TenMau);
+
+        new bootstrap.Modal('#colorModal').show();
+    }
+
+    // ================= Delete =================
+    function deleteColor(id) {
+        Swal.fire({
+            title: "Bạn chắc không?",
+            text: "Màu sẽ bị xóa (nếu chưa dùng trong sản phẩm).",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy"
+        }).then(res => {
+            if (res.isConfirmed) {
+                $.ajax({
+                    url: '@Url.Action("Delete", "MauSac", new { Area = "Admin" })',
+                    type: "POST",
+                    contentType: "application/json",
+                    headers: { "RequestVerificationToken": antiForgeryToken },
+                    data: JSON.stringify(id),
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire("Đã xóa!", response.message, "success")
+                                .then(() => window.location.reload());
+                        } else {
+                            Swal.fire("Lỗi", response.message, "error");
+                        }
+                    }
+                });
+            }
+        });
+    }
+</script>
+}

@@ -1,0 +1,46 @@
+﻿@model IEnumerable<ShopNgocLan.Models.DanhMucSanPham>
+
+@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    ViewData["Title"] = "Danh sách Danh mục";
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center gap-1">
+                        <h4 class="card-title flex-grow-1">@ViewData["Title"]</h4>
+
+                        <a asp-action="Create" asp-controller="DanhMuc" class="btn btn-sm btn-primary">
+                            <i class='bx bx-plus'></i> Thêm Danh mục
+                        </a>
+                    </div>
+
+                    @* BƯỚC 1: Bỏ <table>, thay bằng <ul> (danh sách) *@
+                    <div class="card-body">
+                        @if (Model.Any())
+                        {
+                            @* Dùng list-group của Bootstrap cho đẹp *@
+                            <ul class="list-group">
+                                @* BƯỚC 2: Gọi Partial View đệ quy cho mỗi mục GỐC.
+                                  Tên file partial là "_DanhMucItem" (xem bước 3)
+                                *@
+                                @foreach (var item in Model)
+                                {
+                                    @await Html.PartialAsync("_DanhMucItem", item)
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">Không có danh mục nào.</div>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

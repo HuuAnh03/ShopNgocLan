@@ -1,0 +1,453 @@
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    var fullName = Context.Session.GetString("FullUserName") ?? "Quản trị viên";
+    var avatarUrl = Context.Session.GetString("AvartarUrl") ?? "~/admin/images/users/avatar-1.jpg";
+}
+
+<!DOCTYPE html>
+<html lang="vi" dir="ltr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Trang quản trị hệ thống Ngọc Lan Shop" />
+    <meta name="author" content="Ngọc Lan Shop" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>@ViewData["Title"] - Ngọc Lan Shop Admin</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="~/admin/images/favicon.ico">
+
+    <!-- Vendor css -->
+    <link href="~/admin/css/vendor.min.css" rel="stylesheet" />
+    <link href="~/admin/css/icons.min.css" rel="stylesheet" />
+    <link href="~/admin/css/app.min.css" rel="stylesheet" />
+
+    <!-- SweetAlert & DataTables (dùng chung nhiều trang) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+
+    <!-- Config js -->
+    <script src="~/admin/js/config.js"></script>
+
+    <style>
+        /* Chữ nhấp nháy đổi màu ở footer */
+        .footer-animated-text {
+            font-weight: 600;
+            animation: footerColorPulse 4s ease-in-out infinite;
+        }
+
+        .admin-title {
+            font-size: 15px; /* to hơn (bạn có thể tăng thành 22px, 24px) */
+            font-weight: 600; /* đậm vừa phải */
+            color: #333; /* màu chữ khi chế độ sáng */
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .logo-light .admin-title {
+            color: #fff !important; /* chữ màu trắng cho background tối */
+        }
+
+        @@keyframes footerColorPulse {
+            0%
+
+        {
+            color: #ff4b5c;
+        }
+
+        25% {
+            color: #ffb347;
+        }
+
+        50% {
+            color: #4dd0e1;
+        }
+
+        75% {
+            color: #7e57c2;
+        }
+
+        100% {
+            color: #ff4b5c;
+        }
+
+        }
+
+        footer {
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        /* Cho topbar gọn hơn một chút */
+        .topbar .navbar-header {
+            padding-top: 6px;
+            padding-bottom: 6px;
+        }
+
+        .topbar-user-name {
+            max-width: 160px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <div class="wrapper">
+
+        <!-- ========== Topbar Start ========== -->
+        <header class="topbar">
+            <div class="container-fluid">
+                <div class="navbar-header d-flex justify-content-between align-items-center">
+
+                    <!-- Bên trái: Toggle + Quay lại -->
+                    <div class="d-flex align-items-center">
+                        <div class="topbar-item me-2">
+                            <button type="button" class="button-toggle-menu">
+                                <iconify-icon icon="solar:hamburger-menu-broken" class="fs-24 align-middle"></iconify-icon>
+                            </button>
+                        </div>
+
+                        <a href="javascript:history.back()" title="Quay lại"
+                           class="btn btn-outline-secondary btn-sm d-none d-sm-flex align-items-center">
+                            <i class="bx bx-chevron-left fs-16 me-1"></i>
+                            <span class="d-none d-md-block">Quay lại</span>
+                        </a>
+
+                        <a href="javascript:history.back()" title="Quay lại"
+                           class="btn btn-outline-secondary btn-sm d-flex d-sm-none align-items-center px-2 py-1 ms-1">
+                            <i class="bx bx-chevron-left fs-18"></i>
+                        </a>
+                    </div>
+
+                    <!-- Bên phải: Chế độ sáng/tối + User -->
+                    <div class="d-flex align-items-center gap-2">
+
+                        <!-- Nút đổi theme (giữ lại nếu bạn dùng) -->
+                        <div class="topbar-item">
+                            <button type="button" class="topbar-button" id="light-dark-mode" title="Chế độ sáng / tối">
+                                <iconify-icon icon="solar:moon-bold-duotone" class="fs-22 align-middle"></iconify-icon>
+                            </button>
+                        </div>
+
+                        <!-- User Dropdown -->
+                        <div class="dropdown topbar-item">
+                            <a type="button"
+                               class="topbar-button d-flex align-items-center"
+                               id="page-header-user-dropdown"
+                               data-bs-toggle="dropdown"
+                               aria-haspopup="true"
+                               aria-expanded="false">
+                                <img class="rounded-circle me-2" width="32" height="32"
+                                     src="@Url.Content(avatarUrl)" alt="avatar" style="object-fit:cover;">
+                                <span class="topbar-user-name">@fullName</span>
+                            </a>
+
+                            <div class="dropdown-menu dropdown-menu-end">
+                                <h6 class="dropdown-header">Xin chào, @fullName</h6>
+
+
+                                <div class="dropdown-divider my-1">
+                                    
+                                </div>
+                                <a class="dropdown-item text-danger"
+                                   asp-area=""
+                                   asp-controller="Home"
+                                   asp-action="Index">
+                                    
+                                    Trang chủ người dùng
+                                </a>
+                                <a class="dropdown-item text-danger"
+                                   asp-area=""
+                                   asp-controller="Account"
+                                   asp-action="Logout">
+                                    <i class="bx bx-log-out fs-18 align-middle me-1"></i>
+                                    <span class="align-middle">Đăng xuất</span>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </header>
+        <!-- ========== Topbar End ========== -->
+        <!-- ========== Sidebar (giữ nguyên như bạn đang dùng) ========== -->
+        <div class="main-nav">
+            <!-- Sidebar Logo -->
+            <div class="logo-box">
+                <a asp-action="Index" asp-controller="Dashboard" class="logo-dark">
+                    <img src="~/assets/img/logo/logo3.png" alt="logo sm" width="100">
+                    <span class="admin-title ms-2">TRANG QUẢN TRỊ</span>
+                </a>
+
+                <a asp-action="Index" asp-controller="Dashboard" class="logo-light">
+                    <img src="~/assets/img/logo/logo3.png" alt="logo sm" width="100">
+                    <span class="admin-title ms-2">TRANG QUẢN TRỊ</span>
+                </a>
+            </div>
+
+            <div class="scrollbar" data-simplebar>
+                
+                <ul class="navbar-nav" id="navbar-nav">
+                    @if (User.IsInRole("Admin") || User.IsInRole("NhanVien"))
+                    {
+                        <li class="nav-item">
+                            <a asp-controller="Dashboard" asp-action="Index" class="nav-link"   aria-expanded="false">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="solar:widget-2-bold-duotone"></iconify-icon>
+                                </span>
+                                <span class="nav-text">Trang tổng quan </span>
+                            </a>
+                            
+                        </li>
+                    }
+
+                    @* ============ MENU QUẢN LÝ SẢN PHẨM ============ *@
+                    @if (User.IsInRole("Admin") || User.IsInRole("NhanVien"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link menu-arrow" href="#sidebarProducts" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarProducts">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="solar:t-shirt-bold-duotone"></iconify-icon>
+                                </span>
+                                <span class="nav-text"> Quản lý sản phẩm </span>
+                            </a>
+                            <div class="collapse" id="sidebarProducts">
+                                <ul class="nav sub-navbar-nav">
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="Products" asp-action="Index">Quản lý sản phẩm</a>
+                                    </li>
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="DanhMuc" asp-action="Index">Quản lý danh mục</a>
+                                    </li>
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="Size" asp-action="Index">Quản lý kích thước</a>
+                                    </li>
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="MauSac" asp-action="Index">Quản lý màu sắc</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    }
+                    @* ============ MENU QUẢN LÝ SẢN PHẨM ============ *@
+                    @if (User.IsInRole("Admin") || User.IsInRole("NhanVien"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link menu-arrow" href="#sidebarInventory" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarInventory">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="solar:t-shirt-bold-duotone"></iconify-icon>
+                                </span>
+                                <span class="nav-text"> Quản lý kho </span>
+                            </a>
+                            <div class="collapse" id="sidebarInventory">
+                                <ul class="nav sub-navbar-nav">
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="Inventory" asp-action="Index">Nhập kho</a>
+                                    </li>
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="Inventory" asp-action="History">Lịch sử nhập xuất</a>
+                                    </li>
+                                   
+                                </ul>
+                            </div>
+                        </li>
+                    }
+
+                    @* ============ MENU QUẢN LÝ NGƯỜI DÙNG ============ *@
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link menu-arrow" href="#sidebarUsers" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarUsers">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
+                                </span>
+                                <span class="nav-text"> Quản lý người dùng </span>
+                            </a>
+                            <div class="collapse" id="sidebarUsers">
+                                <ul class="nav sub-navbar-nav">
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="Users" asp-action="Index">Danh sách người dùng</a>
+                                    </li>
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="Users" asp-action="Create">Thêm người dùng mới</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    }
+
+                    @* ============ MENU HÓA ĐƠN (Admin + Nhân viên) ============ *@
+                    @if (User.IsInRole("Admin") || User.IsInRole("NhanVien"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link menu-arrow" href="#sidebarHoaDon" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarHoaDon">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="solar:bill-list-bold-duotone"></iconify-icon>
+                                </span>
+                                <span class="nav-text"> Quản lý hóa đơn </span>
+                            </a>
+                            <div class="collapse" id="sidebarHoaDon">
+                                <ul class="nav sub-navbar-nav">
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="HoaDon" asp-action="Index">Danh sách hóa đơn</a>
+                                    </li>
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="HoaDon" asp-action="IndexPending">Đơn hàng cần xử lý</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    }
+
+                    @* ============ MENU ĐÁNH GIÁ (Admin + Nhân viên) ============ *@
+                    @if (User.IsInRole("Admin") || User.IsInRole("NhanVien"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link menu-arrow" href="#sidebarReview" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarReview">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="solar:chat-square-like-bold-duotone"></iconify-icon>
+                                </span>
+                                <span class="nav-text"> Quản lý đánh giá </span>
+                            </a>
+                            <div class="collapse" id="sidebarReview">
+                                <ul class="nav sub-navbar-nav">
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="Review" asp-action="Index">Danh sách đánh giá</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    }
+
+                    @* ============ VOUCHER & KHUYẾN MÃI (Admin) ============ *@
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link menu-arrow" href="#sidebarVoucher" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarVoucher">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="solar:ticket-bold-duotone"></iconify-icon>
+                                </span>
+                                <span class="nav-text"> Quản lý mã giảm giá </span>
+                            </a>
+                            <div class="collapse" id="sidebarVoucher">
+                                <ul class="nav sub-navbar-nav">
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="Voucher" asp-action="Index">Danh sách mã giảm giá</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link menu-arrow" href="#sidebarKhuyenMai" data-bs-toggle="collapse"
+                               role="button" aria-expanded="false" aria-controls="sidebarKhuyenMai">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="solar:ticket-bold-duotone"></iconify-icon>
+                                </span>
+                                <span class="nav-text"> Quản lý khuyến mãi </span>
+                            </a>
+
+                            <div class="collapse" id="sidebarKhuyenMai">
+                                <ul class="nav sub-navbar-nav">
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="KhuyenMai" asp-action="Index">
+                                            Danh sách khuyến mãi
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    }
+
+                    @* ============ CHATBOT (Admin) ============ *@
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link menu-arrow" href="#sidebarChatBot" data-bs-toggle="collapse"
+                               role="button" aria-expanded="false" aria-controls="sidebarChatBot">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="solar:chat-square-code-bold-duotone"></iconify-icon>
+                                </span>
+                                <span class="nav-text"> Quản trị Chatbot </span>
+                            </a>
+
+                            <div class="collapse" id="sidebarChatBot">
+                                <ul class="nav sub-navbar-nav">
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="ChatBot" asp-action="Index" asp-area="Admin">
+                                            Quản lý Intent / Pattern / Reply
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    }
+
+                    @* ============ TRÒ CHUYỆN (Admin + Nhân viên) ============ *@
+                    @if (User.IsInRole("Admin") || User.IsInRole("NhanVien"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link menu-arrow" href="#sidebarChat" data-bs-toggle="collapse"
+                               role="button" aria-expanded="false" aria-controls="sidebarChat">
+                                <span class="nav-icon">
+                                    <iconify-icon icon="solar:chat-square-code-bold-duotone"></iconify-icon>
+                                </span>
+                                <span class="nav-text"> Trò chuyện </span>
+                            </a>
+
+                            <div class="collapse" id="sidebarChat">
+                                <ul class="nav sub-navbar-nav">
+                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" asp-controller="AdminChat" asp-action="Index" asp-area="Admin">
+                                            Trò chuyện
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    }
+
+
+
+                </ul>
+            </div>
+        </div>
+        <!-- ========== Sidebar End ========== -->
+        <!-- ========== Nội dung chính ========== -->
+        @RenderBody()
+
+    </div>
+
+    <!-- Scripts chung -->
+    <script src="~/admin/js/vendor.js"></script>
+    <script src="~/admin/js/app.js"></script>
+    <script src="~/admin/js/function.js"></script>
+    
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+    <!-- Footer -->
+    <footer>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <span class="footer-animated-text">
+                        © <script>document.write(new Date().getFullYear())</script> Ngọc Lan Shop – Quản trị hệ thống
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

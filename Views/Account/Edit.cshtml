@@ -1,0 +1,175 @@
+﻿@model ShopNgocLan.Models.User
+@using ShopNgocLan.Models 
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Chỉnh sửa tài khoản: " + Model.Ten;
+    Layout = "_Layout"; 
+}
+<link rel="stylesheet" href="~/assets/css/account.css" asp-append-version="true">
+<div class="breadcrumbs_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">home</a></li>
+						<li>Thông tin tài khoản</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="account-container">
+
+    <nav class="account-nav">
+        <h3>Tài khoản</h3>
+        <ul class="account-nav-list">
+            <li><a asp-action="Profile" asp-controller="Account" class="active">Thông tin tài khoản</a></li>
+            <li><a asp-action="Index" asp-controller="HoaDon" >Lịch sử đơn hàng</a></li>
+            <li><a asp-action="Index" asp-controller="DiaChiGiaoHang">Địa chỉ nhận hàng</a></li>
+            <li><a asp-action="Logout" asp-controller="Account">Đăng xuất</a></li>
+        </ul>
+    </nav>
+
+    <main class="order-detail-content">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Chỉnh Sửa: @Model.Ho @Model.Ten (#@Model.Id)</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="Id" />
+                    <div class="mb-3 text-center">
+                        <label class="form-label">Ảnh đại diện</label>
+                        <br />
+                        <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/avatars/default.jpg" : Model.AvatarUrl)"
+                             id="avatarPreview" @* Thêm ID để JS có thể cập nhật ảnh xem trước (nếu muốn) *@
+                             alt="Avatar Mặc định"
+                             class="img-thumbnail rounded-circle mb-2"
+                             style="width: 150px; height: 150px; object-fit: cover;">
+
+                        <input type="file" name="avatarFile"
+                               id="avatarFileInput" class="form-control d-none" accept="image/*"
+                               onchange="previewAvatar(event)" />
+                        <br />
+                        <label for="avatarFileInput" class="btn btn-primary btn-sm"> <i class='bx bx-upload'></i> Chọn ảnh </label>
+
+
+
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Ho" class="form-label">Họ</label>
+                                <input asp-for="Ho" class="form-control" />
+                                <span asp-validation-for="Ho" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Ten" class="form-label">Tên</label>
+                                <input asp-for="Ten" class="form-control" />
+                                <span asp-validation-for="Ten" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" type="email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SoDienThoai" class="form-label">Số Điện Thoại</label>
+                        <input asp-for="SoDienThoai" class="form-control" type="tel" />
+                        <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MatKhau" class="form-label">Mật Khẩu Mới</label>
+                        <input asp-for="MatKhau" class="form-control" type="password"
+                               placeholder="Để trống nếu không muốn thay đổi"
+                                /> <span asp-validation-for="MatKhau" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="NgaySinh" class="form-label">Ngày Sinh</label>
+                                <input asp-for="NgaySinh" class="form-control" type="date" />
+                                <span asp-validation-for="NgaySinh" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="GioiTinh" class="form-label">Giới Tính</label>
+                                <select asp-for="GioiTinh" class="form-select">
+                                    <option value="">-- Chọn --</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+
+                    <hr />
+                    <div class="mt-4">
+                        <input type="submit" value="Lưu Thông Tin User" class="btn btn-primary" />
+                        
+                    </div>
+                </form>
+            </div>
+        </div>
+       
+
+    </main>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+
+        // === HÀM XEM TRƯỚC ẢNH AVATAR (Dựa trên onchange="previewAvatar(event)") ===
+        function previewAvatar(event) {
+            const fileInput = event.target;
+            const previewImage = document.getElementById('avatarPreview');
+
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    // Cập nhật thuộc tính src của thẻ <img>
+                    previewImage.src = e.target.result;
+                };
+
+                // Đọc file vừa chọn thành chuỗi Data URL
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        // === HIỂN THỊ THÔNG BÁO SAU KHI REDIRECT ===
+        // Nếu bạn dùng TempData["SuccessMessage"] (như code Controller)
+        // Code này sẽ tự động chạy khi trang tải xong
+        document.addEventListener('DOMContentLoaded', function () {
+            const successMessage = '@TempData["SuccessMessage"]';
+            if (successMessage) {
+                // Giả sử bạn đang dùng thư viện Toastr hoặc một thư viện thông báo tương tự
+                // Nếu chưa cài Toastr, bạn cần dùng alert()
+                if (typeof toastr !== 'undefined') {
+                    toastr.success(successMessage);
+                } else {
+                    console.log(successMessage);
+                }
+            }
+        });
+        
+    </script>
+}

@@ -1,0 +1,797 @@
+﻿@{
+    Layout = "_Layout";
+}
+@model ProductDetailsViewModel
+@using System.Text.Json;
+
+<!--breadcrumbs area start-->
+<div class="breadcrumbs_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">Trang chủ</a></li>
+                        <li>Thông tin sản phẩm</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--breadcrumbs area end-->
+@{
+    var anh = Model.ExistingImages.ToList();
+    var anhdaidien = anh.FirstOrDefault(p => p.LaAnhDaiDien == true) ?? anh.FirstOrDefault();
+    var mainImageUrl = (anhdaidien == null || string.IsNullOrEmpty(anhdaidien.UrlHinhAnh))
+        ? "/images/avatars/default.jpg"
+        : anhdaidien.UrlHinhAnh;
+}
+
+<!--product details start-->
+<div class="product_details variable_product mt-60 mb-60">
+    <div class="container">
+        <div class="row">
+            <!-- HÌNH ẢNH -->
+            <div class="col-lg-6 col-md-6">
+                <div class="product-details-tab">
+                    <div id="img-1" class="zoomWrapper single-zoom">
+                        <a href="#">
+                            <img id="zoom1"
+                                 src="@mainImageUrl"
+                                 data-zoom-image="@mainImageUrl"
+                                 alt="@Model.TenSanPham">
+                        </a>
+                    </div>
+                    <div class="single-zoom-thumb">
+                        <ul class="s-tab-zoom owl-carousel single-product-active" id="gallery_01">
+                            @foreach (var item in anh)
+                            {
+                                var thumbUrl = string.IsNullOrEmpty(item.UrlHinhAnh)
+                                ? "/images/avatars/default.jpg"
+                                : item.UrlHinhAnh;
+
+                                <li>
+                                    <a href="#"
+                                       class="elevatezoom-gallery active"
+                                       data-update=""
+                                       data-image="@thumbUrl"
+                                       data-zoom-image="@thumbUrl">
+                                        <img src="@thumbUrl" alt="@Model.TenSanPham" />
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- THÔNG TIN SẢN PHẨM -->
+            <div class="col-lg-6 col-md-6">
+                <div class="product_d_right">
+                    <input type="hidden" id="selectedColorId" name="selectedColorId" />
+                    <input type="hidden" id="selectedSizeId" name="selectedSizeId" />
+                    <input type="hidden" id="selectedVariantId" name="variantId" />
+
+                    <h1><a href="#">@Model.TenSanPham</a></h1>
+
+                    <div class="product_nav">
+                        @* thêm prev / next / share nếu muốn *@
+                    </div>
+
+                    <!-- RATING -->
+                    <div class="product_ratting">
+                        <ul>
+                            @{
+                                int fullStars = (int)Math.Floor(Model.DiemDanhGia);
+                                bool hasHalfStar = (Model.DiemDanhGia - fullStars) >= 0.5;
+                                const int maxStars = 5;
+                            }
+
+                            @for (int i = 1; i <= maxStars; i++)
+                            {
+                                <li>
+                                    <a href="#">
+                                        @if (i <= fullStars)
+                                        {
+                                            <i class="fa fa-star"></i>
+                                        }
+                                        else if (i == fullStars + 1 && hasHalfStar)
+                                        {
+                                            <i class="fa fa-star-half-o"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fa fa-star-o"></i>
+                                        }
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="review">
+                                <a href="#reviews">
+                                    (@Model.ReviewCount @(Model.ReviewCount == 1 ? "lượt đánh giá" : "lượt đánh giá"))
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- GIÁ -->
+                    <div class="price_box">
+                        @{
+                            var giaMin = Model.Variants.Min(p => p.Gia);
+                            var giaMax = Model.Variants.Max(p => p.Gia);
+                            var gia = giaMax == giaMin
+                            ? giaMin.ToString("N0") + "đ"
+                            : giaMin.ToString("N0") + "đ - " + giaMax.ToString("N0") + "đ";
+                        }
+                        <span class="current_price">@gia</span>
+                    </div>
+
+                    <!-- MÀU -->
+                    <h4>Màu</h4>
+                    <ul class="product-color-swatches">
+                        @if (Model.Variants != null)
+                        {
+                            @foreach (var color in Model.Variants.DistinctBy(v => v.MauSacId))
+                            {
+                                <li class="color-swatch-item"
+                                    data-color-id="@color.MauSacId"
+                                    data-color-name="@color.MauSacName">
+                                    <a href="#"
+                                       style="background-color:@(color.MaMauHex ?? "transparent");"></a>
+                                </li>
+                            }
+                        }
+                    </ul>
+
+                    <!-- SIZE -->
+                    <h4>Kích cỡ</h4>
+                    <ul class="product-size-swatches">
+                    </ul>
+
+                    <!-- SỐ LƯỢNG -->
+                    <div class="product_variant quantity">
+                        <label>Số lượng</label>
+                        <input id="quantity" min="1" value="1" type="number" name="quantity">
+                        <span id="stock_display_message" style="margin-left: 10px;"></span>
+                    </div>
+
+                    <!-- NÚT -->
+                    <div class="product_variant quantity">
+                        <button class="button" type="button" id="add-to-cart-btn">Thêm vào giỏ hàng</button>
+                        <button class="button" type="button" id="buy-now-btn">Mua ngay</button>
+                    </div>
+
+                    <div class="product_d_action">
+                        <ul>
+                            <li><a href="#" title="Add to wishlist">+ Thêm vào danh sách yêu thích</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- DANH MỤC -->
+                    <div class="product_d_meta">
+                        @{
+                            var iddanhmuc = Model.DanhMucId;
+                            var listdanhmuc = Model.DanhMucList;
+                            foreach (var item in listdanhmuc)
+                            {
+                                if (item.Id == iddanhmuc)
+                                {
+                                    <span>
+                                        Danh Mục:
+                                        <a asp-action="Index"
+                                           asp-controller="Shop"
+                                           asp-route-idDanhMuc="@item.Id">
+                                            @item.TenDanhMuc
+                                        </a>
+                                    </span>
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!--product details end-->
+<!--product info (MÔ TẢ + ĐÁNH GIÁ) start-->
+<div class="product_d_info mb-60">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="product_d_inner">
+                    <div class="product_info_button">
+                        <ul class="nav" role="tablist">
+                            <li>
+                                <a class="active"
+                                   data-bs-toggle="tab"
+                                   href="#info"
+                                   role="tab">
+                                    Mô tả
+                                </a>
+                            </li>
+
+                            <li>
+                                <a data-bs-toggle="tab"
+                                   href="#reviews"
+                                   role="tab">
+                                    Đánh giá (<span id="tab-review-count">@Model.ReviewCount</span>)
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-content">
+                        <!-- TAB MÔ TẢ -->
+                        <div class="tab-pane fade show active" id="info" role="tabpanel">
+                            <div class="product_info_content">
+                                @Html.Raw(Model.MoTa)
+                            </div>
+                        </div>
+
+                        <!-- TAB ĐÁNH GIÁ -->
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            <div class="reviews_wrapper">
+                                <h2>Danh sách đánh giá (<span id="list-review-count">Đang tải...</span>)</h2>
+
+                                <div id="reviews-list-container">
+                                    <p class="text-center">Vui lòng đợi...</p>
+                                </div>
+
+                                <div class="comment_title mt-4">
+                                    <h2>Gửi đánh giá của bạn</h2>
+                                    <p>Vui lòng đăng nhập và mua sản phẩm để có thể đánh giá.</p>
+                                </div>
+
+                                <div class="product_review_form">
+                                    <form asp-controller="Review"
+                                          asp-action="AddReview"
+                                          method="post"
+                                          id="addReviewForm">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="SanPhamId" value="@Model.Id" />
+
+                                        <div class="row">
+                                            <div class="col-12 mb-3">
+                                                <label for="DiemDanhGia" class="required">Điểm đánh giá (*)</label>
+
+                                                <input type="hidden"
+                                                       name="DiemDanhGia"
+                                                       id="DiemDanhGia"
+                                                       value=""
+                                                       data-required-message="Vui lòng chọn số sao đánh giá." />
+
+                                                <div class="product_ratting rating-input-stars">
+                                                    <ul class="star-rating-list">
+                                                        @for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            <li data-rating="@i"><i class="fa fa-star-o"></i></li>
+                                                        }
+                                                    </ul>
+                                                    <span id="rating-text" class="ms-3 text-muted">Chưa chọn</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 mb-3">
+                                                <label for="review_comment">Nội dung đánh giá </label>
+                                                <textarea name="NoiDung"
+                                                          id="review_comment"
+                                                          class="form-control"
+                                                          rows="4"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit"
+                                                class="btn btn-primary"
+                                                id="submitReviewBtn">
+                                            Gửi đánh giá
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div> <!-- /.tab-content -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--product info end-->
+<!-- SẢN PHẨM LIÊN QUAN – NẰM DƯỚI CÙNG, NGOÀI PHẦN MÔ TẢ/ĐÁNH GIÁ -->
+@if (Model.RelatedProducts != null && Model.RelatedProducts.Any())
+{
+    <section class="product_area mb-60 related_products">
+        <div class="container">
+            <div class="section_title">
+                <h2>Sản phẩm liên quan</h2>
+                <p>Các sản phẩm cùng danh mục với "@Model.TenSanPham"</p>
+            </div>
+
+            <div class="row">
+                <div class="product_carousel product_column4 owl-carousel">
+                    @foreach (var item in Model.RelatedProducts)
+                    {
+                        var hasRange = item.GiaMax > item.GiaMin;
+                        <div class="col-lg-3">
+                            <article class="single_product">
+                                <figure>
+                                    <div class="product_thumb">
+                                        <a class="primary_img"
+                                           asp-action="Details"
+                                           asp-controller="Shop"
+                                           asp-route-id="@item.Id">
+                                            <img src="@item.AnhDaiDienUrl" alt="@item.TenSanPham" />
+                                        </a>
+
+                                        <span class="new-badge">Liên quan</span>
+                                    </div>
+                                    <figcaption class="product_content">
+                                        <div class="product_content-header">
+                                            <h4 class="product_name">
+                                                <a asp-action="Details"
+                                                   asp-controller="Shop"
+                                                   asp-route-id="@item.Id">
+                                                    @item.TenSanPham
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div class="product_price_rating">
+                                            <div class="price_box">
+                                                @if (hasRange)
+                                                {
+                                                    <span class="current_price">
+                                                        @item.GiaMin.ToString("N0")đ - @item.GiaMax.ToString("N0")đ
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="current_price">
+                                                        @item.GiaMin.ToString("N0")đ
+                                                    </span>
+                                                }
+                                            </div>
+                                            <div class="product_rating">
+                                                <ul>
+                                                    <li><i class="fa fa-star"></i></li>
+                                                    <li><i class="fa fa-star"></i></li>
+                                                    <li><i class="fa fa-star"></i></li>
+                                                    <li><i class="fa fa-star"></i></li>
+                                                    <li><i class="fa fa-star"></i></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </figcaption>
+                                </figure>
+                            </article>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}
+else
+{
+    @* Nếu muốn ẩn hẳn thì bỏ else này đi *@
+    <div class="container mb-60">
+        <p>Hiện chưa có sản phẩm liên quan.</p>
+    </div>
+}
+
+<style>
+    .product-color-swatches {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .color-swatch-item {
+        border: 1px solid #c0c0c0;
+        padding: 2px;
+        background-color: #fff;
+        width: 40px;
+        height: 40px;
+        box-sizing: border-box;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .color-swatch-item a {
+            display: block;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+        }
+
+        .color-swatch-item.selected {
+            border: 2px solid red;
+            padding: 1px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+
+    .product-size-swatches {
+        list-style: none;
+        padding: 0;
+        margin: 10px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .size-swatch-item {
+        border: 1px solid #c0c0c0;
+        padding: 5px 10px;
+        background-color: #fff;
+        cursor: pointer;
+        min-width: 40px;
+        text-align: center;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+
+        .size-swatch-item:hover {
+            border-color: #888;
+        }
+
+        .size-swatch-item.selected {
+            border: 2px solid #000;
+            background-color: #f0f0f0;
+            font-weight: bold;
+            padding: 4px 9px;
+        }
+
+    /* Card sản phẩm liên quan */
+    .related_products .single_product {
+        margin-bottom: 20px;
+        border: 1px solid #eee;
+        padding: 10px;
+        text-align: center;
+        transition: box-shadow 0.2s ease;
+    }
+
+        .related_products .single_product:hover {
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+
+    .related_products .product_thumb img {
+        max-width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .rating-input-stars {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .star-rating-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: inline-flex;
+        font-size: 24px;
+    }
+
+        .star-rating-list li {
+            padding: 0 2px;
+            color: #ccc;
+            transition: color 0.1s ease-in-out;
+        }
+
+            .star-rating-list li:hover,
+            .star-rating-list li:hover ~ li,
+            .star-rating-list li.selected,
+            .star-rating-list li.selected ~ li {
+                color: #ffc107;
+            }
+
+    .product_ratting ul {
+        margin-bottom: 0 !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        var allVariants = @Html.Raw(JsonSerializer.Serialize(Model.Variants));
+        var reviewsLoaded = false;
+        var sanPhamId = @Model.Id;
+
+        $(document).ready(function () {
+
+            // === Load danh sách đánh giá ===
+            function loadReviewsContent() {
+                var container = $('#reviews-list-container');
+                container.html('<p class="text-center"><i class="fa fa-spinner fa-spin"></i> Đang tải đánh giá...</p>');
+
+                $.ajax({
+                    url: '@Url.Action("_GetReviewsPartial", "Review")',
+                    type: 'GET',
+                    data: { sanPhamId: sanPhamId },
+                    success: function (data) {
+                        container.html(data);
+                        var reviewCount = $(data).filter('.reviews_comment_box').length;
+                        $('#tab-review-count, #list-review-count').text(reviewCount);
+                        reviewsLoaded = true;
+                    },
+                    error: function () {
+                        container.html('<p class="text-danger">Không thể tải đánh giá. Vui lòng thử lại.</p>');
+                    }
+                });
+            }
+
+            // === Cập nhật size theo màu ===
+            function updateSizeSwatches(selectedColorId) {
+                var $sizeList = $('.product-size-swatches');
+                $sizeList.empty();
+                $('#selectedSizeId').val('');
+
+                var sizesForSelectedColor = allVariants.filter(function (variant) {
+                    return parseInt(variant.MauSacId) == parseInt(selectedColorId);
+                });
+
+                var uniqueSizes = [];
+                var seenSizeIds = new Set();
+                sizesForSelectedColor.forEach(function (variant) {
+                    if (!seenSizeIds.has(variant.SizeId)) {
+                        seenSizeIds.add(variant.SizeId);
+                        uniqueSizes.push(variant);
+                    }
+                });
+
+                if (uniqueSizes.length > 0) {
+                    uniqueSizes.forEach(function (variant) {
+                        var html = '<li class="size-swatch-item" data-size-id="' + variant.SizeId + '">' +
+                            variant.SizeName +
+                            '</li>';
+                        $sizeList.append(html);
+                    });
+                } else {
+                    $sizeList.append('<li>Không có size cho màu này</li>');
+                }
+
+                updateVariantAndStock();
+            }
+
+            // === Cập nhật tồn kho & variant ===
+            function updateVariantAndStock() {
+                var selectedColorId = parseInt($('#selectedColorId').val());
+                var selectedSizeId = parseInt($('#selectedSizeId').val());
+
+                var $quantityInput = $('#quantity');
+                var $addToCartBtn = $('#add-to-cart-btn');
+                var $buyNowBtn = $('#buy-now-btn');
+                var $stockDisplay = $('#stock_display_message');
+
+                $('#selectedVariantId').val(null);
+
+                if (isNaN(selectedColorId) || isNaN(selectedSizeId)) {
+                    $quantityInput.attr('disabled', true);
+                    $addToCartBtn.attr('disabled', true);
+                    $buyNowBtn.attr('disabled', true);
+                    $stockDisplay.text('Vui lòng chọn Màu và Size');
+                    $stockDisplay.css('color', 'red');
+                    return;
+                }
+
+                var finalVariant = allVariants.find(function (v) {
+                    return parseInt(v.MauSacId) == selectedColorId && parseInt(v.SizeId) == selectedSizeId;
+                });
+
+                if (finalVariant) {
+                    var soLuongTon = parseInt(finalVariant.SoLuongTon);
+                    $('#selectedVariantId').val(finalVariant.Id);
+
+                    if (soLuongTon > 0) {
+                        $quantityInput.attr('max', soLuongTon);
+                        $quantityInput.attr('disabled', false);
+                        $addToCartBtn.attr('disabled', false);
+                        $buyNowBtn.attr('disabled', false);
+                        $stockDisplay.text('Còn ' + soLuongTon + ' sản phẩm');
+                        $stockDisplay.css('color', 'green');
+                        if (parseInt($quantityInput.val()) > soLuongTon) {
+                            $quantityInput.val(1);
+                        }
+                    } else {
+                        $quantityInput.attr('max', 0);
+                        $quantityInput.val(0);
+                        $quantityInput.attr('disabled', true);
+                        $addToCartBtn.attr('disabled', true);
+                        $buyNowBtn.attr('disabled', true);
+                        $stockDisplay.text('Hết hàng');
+                        $stockDisplay.css('color', 'red');
+                    }
+                } else {
+                    $quantityInput.attr('disabled', true);
+                    $addToCartBtn.attr('disabled', true);
+                    $buyNowBtn.attr('disabled', true);
+                    $stockDisplay.text('Không tồn tại biến thể này.');
+                    $stockDisplay.css('color', 'red');
+                }
+            }
+
+            // Chọn màu
+            $('.product-color-swatches .color-swatch-item').on('click', function (e) {
+                e.preventDefault();
+                $('.product-color-swatches .color-swatch-item').removeClass('selected');
+                $(this).addClass('selected');
+
+                var selectedId = parseInt($(this).data('color-id'));
+                $('#selectedColorId').val(selectedId);
+                updateSizeSwatches(selectedId);
+            });
+
+            // Chọn size
+            $(document).on('click', '.product-size-swatches .size-swatch-item', function () {
+                $('.product-size-swatches .size-swatch-item').removeClass('selected');
+                $(this).addClass('selected');
+
+                var selectedId = parseInt($(this).data('size-id'));
+                $('#selectedSizeId').val(selectedId);
+                updateVariantAndStock();
+            });
+
+            // Tự chọn màu đầu tiên
+            var $firstColor = $('.product-color-swatches .color-swatch-item').first();
+            if ($firstColor.length) {
+                $firstColor.trigger('click');
+            } else {
+                updateVariantAndStock();
+            }
+
+            // Lazy load đánh giá
+            $('a[href="#reviews"]').on('shown.bs.tab', function () {
+                if (!reviewsLoaded) {
+                    loadReviewsContent();
+                }
+            });
+
+            // Rating sao
+            const $stars = $('.star-rating-list li');
+            const $ratingInput = $('#DiemDanhGia');
+            const $ratingText = $('#rating-text');
+
+            $stars.hover(function () {
+                $(this).prevAll().addBack().find('i').removeClass('fa-star-o').addClass('fa-star');
+                $(this).nextAll().find('i').removeClass('fa-star').addClass('fa-star-o');
+            }, function () {
+                if ($ratingInput.val() === "") {
+                    $stars.find('i').removeClass('fa-star').addClass('fa-star-o');
+                    $ratingText.text('Chưa chọn');
+                } else {
+                    let selectedValue = parseInt($ratingInput.val());
+                    $stars.each(function (index) {
+                        if (index < selectedValue) {
+                            $(this).find('i').removeClass('fa-star-o').addClass('fa-star');
+                        } else {
+                            $(this).find('i').removeClass('fa-star').addClass('fa-star-o');
+                        }
+                    });
+                }
+            });
+
+            $stars.on('click', function () {
+                const selectedRating = $(this).data('rating');
+                $ratingInput.val(selectedRating);
+                $stars.removeClass('selected');
+                $(this).prevAll().addBack().addClass('selected');
+
+                $(this).prevAll().addBack().find('i').removeClass('fa-star-o').addClass('fa-star');
+                $(this).nextAll().find('i').removeClass('fa-star').addClass('fa-star-o');
+
+                $ratingText.text(selectedRating + ' sao');
+                $ratingInput.trigger('change');
+            });
+
+            // Submit đánh giá
+            $('#addReviewForm').on('submit', function (e) {
+                e.preventDefault();
+
+                var form = $(this);
+                var url = form.attr('asp-action') ? form.attr('asp-action') : form.attr('action');
+                var method = form.attr('method');
+                var data = form.serialize();
+                var diemDanhGia = $('#DiemDanhGia').val();
+
+                if (diemDanhGia === "" || parseInt(diemDanhGia) < 1 || parseInt(diemDanhGia) > 5) {
+                    toastr.warning($('#DiemDanhGia').data('required-message'));
+                    return;
+                }
+
+                $.ajax({
+                    url: url,
+                    type: method,
+                    data: data,
+                    beforeSend: function () {
+                        $('#submitReviewBtn').attr('disabled', true).text('Đang gửi...');
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                            reviewsLoaded = false;
+
+                            setTimeout(function () {
+                                loadReviewsContent();
+                                form[0].reset();
+                                $('#rating-text').text('Chưa chọn');
+                                $('.star-rating-list li')
+                                    .removeClass('selected')
+                                    .find('i').removeClass('fa-star').addClass('fa-star-o');
+                            }, 500);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Lỗi kết nối server.");
+                    },
+                    complete: function () {
+                        $('#submitReviewBtn').attr('disabled', false).text('Gửi đánh giá');
+                    }
+                });
+            });
+
+            // Thêm vào giỏ
+            $('#add-to-cart-btn').on('click', function (e) {
+                e.preventDefault();
+
+                var variantId = $('#selectedVariantId').val();
+                var quantity = $('#quantity').val();
+
+                if (!variantId || quantity <= 0) {
+                    toastr.warning("Vui lòng chọn đầy đủ màu sắc, kích cỡ.");
+                    return;
+                }
+
+                $.post('@Url.Action("AddToCart", "Cart")',
+                    { variantId: variantId, quantity: quantity })
+                    .done(function (response) {
+                        if (response && response.success === false) {
+                            toastr.error(response.message || "Có lỗi xảy ra, vui lòng thử lại.");
+                        } else {
+                            var cartContainer = $("#cartplaceholder");
+                            cartContainer.html(response);
+                            toastr.success("Đã thêm vào giỏ hàng thành công!");
+                        }
+                    })
+                    .fail(function () {
+                        toastr.error("Lỗi kết nối. Không thể thêm vào giỏ hàng.");
+                    });
+            });
+
+            // Mua ngay
+            $('#buy-now-btn').on('click', function (e) {
+                e.preventDefault();
+
+                var variantId = $('#selectedVariantId').val();
+                var quantity = $('#quantity').val();
+
+                if (!variantId || quantity <= 0) {
+                    toastr.warning("Vui lòng chọn đầy đủ màu sắc, kích cỡ.");
+                    return;
+                }
+
+                $.post('@Url.Action("BuyNow", "Cart")',
+                    { variantId: variantId, quantity: quantity })
+                    .done(function (response) {
+                        if (response && response.success === false) {
+                            toastr.error(response.message || "Có lỗi xảy ra, vui lòng thử lại.");
+                        } else {
+                            window.location.href = '@Url.Action("Index", "Checkout")';
+                        }
+                    })
+                    .fail(function () {
+                        toastr.error("Lỗi kết nối. Không thể mua ngay.");
+                    });
+            });
+        });
+    </script>
+}

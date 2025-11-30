@@ -1,0 +1,371 @@
+﻿@using ShopNgocLan.Models
+@model List<ChatIntent>
+
+@{
+    ViewData["Title"] = "Quản trị Chatbot";
+    Layout = "AdminLayout";
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+
+        <div class="pagetitle">
+            <h3>Quản trị Chatbot</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item active">Chatbot</li>
+                </ol>
+            </nav>
+        </div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+
+        <div class="row">
+            <!-- ====== CARD: THÊM INTENT MỚI ====== -->
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Thêm Intent mới</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-area="Admin" asp-controller="ChatBot" asp-action="CreateIntent" method="post" class="row g-3">
+                            <div class="col-md-2">
+                                <label class="form-label">Code <span class="text-danger">*</span></label>
+                                <input name="code" class="form-control" placeholder="SHIPPING, PAYMENT..." />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Tên Intent <span class="text-danger">*</span></label>
+                                <input name="tenIntent" class="form-control" placeholder="Hỏi giao hàng, Hỏi thanh toán..." />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Mô tả</label>
+                                <input name="moTa" class="form-control" />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Độ ưu tiên</label>
+                                <input name="doUuTien" type="number" value="0" class="form-control" />
+                                <small class="text-muted">Số nhỏ sẽ được check trước</small>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-circle"></i> Thêm Intent
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== CARD: DANH SÁCH INTENT ====== -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Danh sách Intent</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (!Model.Any())
+                        {
+                            <p class="text-muted mb-0">Chưa có intent nào, hãy thêm intent mới phía trên.</p>
+                        }
+                        else
+                        {
+                            <div class="accordion" id="intentAccordion">
+                                @for (int i = 0; i < Model.Count; i++)
+                                {
+                                    var intent = Model[i];
+                                    var collapseId = $"collapseIntent_{intent.Id}";
+                                    var headingId = $"headingIntent_{intent.Id}";
+
+                                    <div class="accordion-item mb-2">
+                                        <h2 class="accordion-header" id="@headingId">
+                                            <button class="accordion-button @(i == 0 ? "" : "collapsed")"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#@collapseId"
+                                                    aria-expanded="@(i == 0 ? "true" : "false")"
+                                                    aria-controls="@collapseId">
+                                                <div class="d-flex flex-column flex-md-row w-100 justify-content-between">
+                                                    <div>
+                                                        <strong>@intent.Code</strong> - @intent.TenIntent
+                                                        <span class="badge bg-secondary ms-2">Ưu tiên: @intent.DoUuTien</span>
+                                                        @if (!intent.TrangThai)
+                                                        {
+                                                            <span class="badge bg-danger ms-2">Đang tắt</span>
+                                                        }
+                                                    </div>
+                                                    <div class="text-muted small mt-1 mt-md-0">
+                                                        @intent.MoTa
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </h2>
+
+                                        <div id="@collapseId"
+                                             class="accordion-collapse collapse @(i == 0 ? "show" : "")"
+                                             aria-labelledby="@headingId"
+                                             data-bs-parent="#intentAccordion">
+                                            <div class="accordion-body">
+
+                                                <!-- ====== FORM CẬP NHẬT INTENT ====== -->
+                                                <form asp-area="Admin"
+                                                      asp-controller="ChatBot"
+                                                      asp-action="UpdateIntent"
+                                                      method="post"
+                                                      class="row g-2 mb-3">
+                                                    <input type="hidden" name="id" value="@intent.Id" />
+
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">Code</label>
+                                                        <input name="code" class="form-control form-control-sm" value="@intent.Code" />
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Tên Intent</label>
+                                                        <input name="tenIntent" class="form-control form-control-sm" value="@intent.TenIntent" />
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Mô tả</label>
+                                                        <input name="moTa" class="form-control form-control-sm" value="@intent.MoTa" />
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">Độ ưu tiên</label>
+                                                        <input name="doUuTien" type="number" class="form-control form-control-sm" value="@intent.DoUuTien" />
+                                                    </div>
+                                                    <div class="col-md-1 d-flex align-items-end">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input"
+                                                                   type="checkbox"
+                                                                   name="trangThai"
+                                                                   value="true"
+                                                                   @(intent.TrangThai ? "checked" : "") />
+                                                            <input type="hidden" name="trangThai" value="false" />
+                                                            <label class="form-check-label small">Bật</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1 d-flex align-items-end gap-1">
+                                                        <button type="submit" class="btn btn-sm btn-success w-100">
+                                                            Lưu
+                                                        </button>
+                                                    </div>
+                                                </form>
+
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <div class="small text-muted">
+                                                        Số pattern: @(intent.ChatIntentPatterns?.Count() ?? 0) |
+                                                        Số câu trả lời: @(intent.ChatIntentReplies?.Count() ?? 0)
+                                                    </div>
+                                                    <form asp-area="Admin"
+                                                          asp-controller="ChatBot"
+                                                          asp-action="DeleteIntent"
+                                                          method="post"
+                                                          onsubmit="return confirm('Xóa intent này? Toàn bộ pattern & reply liên quan cũng sẽ bị xóa.');">
+                                                        <input type="hidden" name="id" value="@intent.Id" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                            Xóa intent
+                                                        </button>
+                                                    </form>
+                                                </div>
+
+                                                <hr />
+
+                                                <div class="row">
+                                                    <!-- ====== PATTERNS ====== -->
+                                                    <div class="col-md-6">
+                                                        <h6 class="mb-2">Patterns (từ khóa / Regex)</h6>
+
+                                                        @if (intent.ChatIntentPatterns == null || !intent.ChatIntentPatterns.Any())
+                                                        {
+                                                            <p class="text-muted small">Chưa có pattern nào.</p>
+                                                        }
+                                                        else
+                                                        {
+                                                            <table class="table table-sm table-bordered align-middle">
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th style="width: 40%">Pattern</th>
+                                                                        <th style="width: 15%">Regex?</th>
+                                                                        <th style="width: 15%">Trạng thái</th>
+                                                                        <th style="width: 30%">Hành động</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach (var p in intent.ChatIntentPatterns)
+                                                                    {
+                                                                        <tr>
+                                                                            <form asp-area="Admin"
+                                                                                  asp-controller="ChatBot"
+                                                                                  asp-action="UpdatePattern"
+                                                                                  method="post">
+                                                                                <input type="hidden" name="id" value="@p.Id" />
+                                                                                <input type="hidden" name="intentId" value="@intent.Id" />
+                                                                            <td>
+                                                                                <input name="patternText"
+                                                                                       class="form-control form-control-sm"
+                                                                                       value="@p.PatternText" />
+                                                                            </td>
+                                                                            <td class="text-center">
+                                                                                <input type="checkbox"
+                                                                                       class="form-check-input"
+                                                                                       name="isRegex"
+                                                                                       value="true"
+                                                                                       @(p.IsRegex ? "checked" : "") />
+                                                                                <input type="hidden" name="isRegex" value="false" />
+                                                                            </td>
+                                                                            <td class="text-center">
+                                                                                <input type="checkbox"
+                                                                                       class="form-check-input"
+                                                                                       name="trangThai"
+                                                                                       value="true"
+                                                                                       @(p.TrangThai ? "checked" : "") />
+                                                                                <input type="hidden" name="trangThai" value="false" />
+                                                                            </td>
+                                                                            <td class="d-flex gap-1 justify-content-center">
+                                                                                <button type="submit" class="btn btn-sm btn-success">
+                                                                                    Lưu
+                                                                                </button>
+                                                                                <button type="submit"
+                                                                                        class="btn btn-sm btn-outline-danger"
+                                                                                        formaction="@Url.Action("DeletePattern", "ChatBot", new { area = "Admin" })"
+                                                                                        formmethod="post"
+                                                                                        onclick="return confirm('Xóa pattern này?');">
+                                                                                    Xóa
+                                                                                </button>
+                                                                            </td>
+                                                                            </form>
+                                                                        </tr>
+                                                                    }
+                                                                </tbody>
+                                                            </table>
+                                                        }
+
+                                                        <form asp-area="Admin"
+                                                              asp-controller="ChatBot"
+                                                              asp-action="AddPattern"
+                                                              method="post"
+                                                              class="row g-2 mt-2">
+                                                            <input type="hidden" name="intentId" value="@intent.Id" />
+                                                            <div class="col-8">
+                                                                <input name="patternText"
+                                                                       class="form-control form-control-sm"
+                                                                       placeholder="vd: ship, giao hàng, cảm ơn..." />
+                                                            </div>
+                                                            <div class="col-2 d-flex align-items-center">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input"
+                                                                           type="checkbox"
+                                                                           name="isRegex"
+                                                                           value="true"
+                                                                           id="regex_@intent.Id" />
+                                                                    <input type="hidden" name="isRegex" value="false" />
+                                                                    <label class="form-check-label small" for="regex_@intent.Id">
+                                                                        Regex
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2">
+                                                                <button type="submit" class="btn btn-sm btn-primary w-100">
+                                                                    Thêm
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+
+                                                    <!-- ====== REPLIES ====== -->
+                                                    <div class="col-md-6">
+                                                        <h6 class="mb-2">Replies (Câu trả lời)</h6>
+
+                                                        @if (intent.ChatIntentReplies == null || !intent.ChatIntentReplies.Any())
+                                                        {
+                                                            <p class="text-muted small">Chưa có câu trả lời nào.</p>
+                                                        }
+                                                        else
+                                                        {
+                                                            <table class="table table-sm table-bordered align-middle">
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th style="width: 70%">Nội dung</th>
+                                                                        <th style="width: 10%">Trạng thái</th>
+                                                                        <th style="width: 20%">Thao tác</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach (var r in intent.ChatIntentReplies)
+                                                                    {
+                                                                        <tr>
+                                                                            <form asp-area="Admin"
+                                                                                  asp-controller="ChatBot"
+                                                                                  asp-action="UpdateReply"
+                                                                                  method="post">
+                                                                                <input type="hidden" name="id" value="@r.Id" />
+                                                                                <input type="hidden" name="intentId" value="@intent.Id" />
+                                                                            <td>
+                                                                                <textarea name="replyText"
+                                                                          class="form-control form-control-sm"
+                                                                          rows="3">@r.ReplyText</textarea>
+                                                                            </td>
+                                                                            <td class="text-center">
+                                                                                <input type="checkbox"
+                                                                                       class="form-check-input"
+                                                                                       name="trangThai"
+                                                                                       value="true"
+                                                                                       @(r.TrangThai ? "checked" : "") />
+                                                                                <input type="hidden" name="trangThai" value="false" />
+                                                                            </td>
+                                                                            <td class="text-center">
+                                                                                <button type="submit" class="btn btn-sm btn-success mb-1">
+                                                                                    Lưu
+                                                                                </button>
+                                                                                <button type="submit"
+                                                                                        class="btn btn-sm btn-outline-danger"
+                                                                                        formaction="@Url.Action("DeleteReply", "ChatBot", new { area = "Admin" })"
+                                                                                        formmethod="post"
+                                                                                        onclick="return confirm('Xóa câu trả lời này?');">
+                                                                                    Xóa
+                                                                                </button>
+                                                                            </td>
+                                                                            </form>
+                                                                        </tr>
+                                                                    }
+                                                                </tbody>
+                                                            </table>
+                                                        }
+
+                                                        <form asp-area="Admin"
+                                                              asp-controller="ChatBot"
+                                                              asp-action="AddReply"
+                                                              method="post"
+                                                              class="mt-2">
+                                                            <input type="hidden" name="intentId" value="@intent.Id" />
+                                                            <div class="mb-2">
+                                                                <textarea name="replyText"
+                                                                  class="form-control form-control-sm"
+                                                                  rows="3"
+                                                                  placeholder="Nhập nội dung trả lời..."></textarea>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                                Thêm câu trả lời
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div> <!-- row -->
+                                            </div> <!-- accordion-body -->
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

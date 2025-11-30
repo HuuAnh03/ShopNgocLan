@@ -1,0 +1,705 @@
+﻿@model ShopNgocLan.Models.DashboardViewModel
+@using System.Text.Json
+
+@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="pagetitle">
+            <h3>Trang tổng quan</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    
+                </ol>
+            </nav>
+        </div>
+        <!-- HÀNG 1: 4 THẺ THỐNG KÊ -->
+        <div class="row">
+            <div class="col-xxl-5">
+                <div class="row g-3">
+
+                    <!-- TOTAL ORDERS -->
+                    <div class="col-md-6">
+                        <div class="card stat-card overflow-hidden">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-4">
+                                        <div class="avatar-md bg-soft-primary rounded">
+                                            <iconify-icon icon="solar:cart-5-bold-duotone"
+                                                          class="avatar-title fs-32 text-primary"></iconify-icon>
+                                        </div>
+                                    </div>
+                                    <div class="col-8 text-end">
+                                        <p class="text-muted mb-0 text-truncate">Tổng đơn hàng</p>
+                                        <h3 class="text-dark mt-1 mb-0">@Model.TotalOrders</h3>
+                                        <small class="text-muted">Toàn hệ thống</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEW LEADS -->
+                    <div class="col-md-6">
+                        <div class="card stat-card overflow-hidden">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-4">
+                                        <div class="avatar-md bg-soft-info rounded">
+                                            <i class="bx bx-user-plus avatar-title fs-24 text-info"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-8 text-end">
+                                        <p class="text-muted mb-0 text-truncate">Khách mới (30 ngày)</p>
+                                        <h3 class="text-dark mt-1 mb-0">@Model.NewLeads</h3>
+                                        <small class="text-muted">Đăng ký tài khoản</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DEALS -->
+                    <div class="col-md-6">
+                        <div class="card stat-card overflow-hidden">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-4">
+                                        <div class="avatar-md bg-soft-success rounded">
+                                            <i class="bx bxs-badge-check avatar-title fs-24 text-success"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-8 text-end">
+                                        <p class="text-muted mb-0 text-truncate">Đơn hoàn tất</p>
+                                        <h3 class="text-dark mt-1 mb-0">@Model.TotalDeals</h3>
+                                        <small class="text-muted">Đã hoàn thành</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DOANH THU -->
+                    <div class="col-md-6">
+                        <div class="card stat-card overflow-hidden">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-4">
+                                        <div class="avatar-md bg-soft-warning rounded">
+                                            <i class="bx bx-dollar-circle avatar-title text-warning fs-24"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-8 text-end">
+                                        <p class="text-muted mb-0 text-truncate">Tổng doanh thu</p>
+                                        <h3 class="text-dark mt-1 mb-0">@Model.Revenue.ToString("N0") ₫</h3>
+                                        <small class="text-muted">Từ đơn hàng hoàn thành</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card stat-card overflow-hidden">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-4">
+                                        <div class="avatar-md bg-soft-info rounded">
+                                            <i class="bx bx-bell avatar-title text-info fs-24"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-8 text-end">
+                                        <p class="text-muted mb-0 text-truncate">Chờ xác nhận</p>
+                                        <h3 class="text-dark mt-1 mb-0">@Model.PendingOrders</h3>
+                                        <a asp-area="Admin" asp-controller="HoaDon" asp-action="IndexPending"><small class="text-muted">Hóa đơn cần duyệt</small></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card stat-card overflow-hidden">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-4">
+                                        <div class="avatar-md bg-soft-success rounded">
+                                            <i class="bx bx-line-chart avatar-title text-success fs-24"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-8 text-end">
+                                        <p class="text-muted mb-0 text-truncate">Lợi nhuận</p>
+                                        <h3 class="text-dark mt-1 mb-0">@Model.Profit.ToString("N0") ₫</h3>
+                                        <small class="text-muted">Giá bán trừ giá nhập</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div> <!-- end inner row -->
+            </div>
+
+            <!-- BIỂU ĐỒ DOANH THU -->
+            <div class="col-xxl-7">
+                <div class="card card-chart">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between flex-wrap gap-2 align-items-center mb-3">
+                            <div>
+                                <h4 class="card-title mb-1">Doanh thu theo thời gian</h4>
+                                <div class="text-muted fs-13">
+                                    Lọc theo ngày / tuần / tháng / năm và khoảng thời gian tùy chọn.
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <select id="revenueType" class="form-select form-select-sm" style="width:auto;">
+                                    <option value="day">Theo ngày</option>
+                                    <option value="week">Theo tuần</option>
+                                    <option value="month" selected>Theo tháng</option>
+                                    <option value="year">Theo năm</option>
+                                </select>
+
+                                <input type="date" id="revenueStart" class="form-control form-control-sm" style="width:auto;" />
+                                <input type="date" id="revenueEnd" class="form-control form-control-sm" style="width:auto;" />
+
+                                <button type="button" id="btnRevenueApply" class="btn btn-sm btn-primary">
+                                    Áp dụng
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="revenue-chart-container" style="min-height: 320px;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- end row -->
+        <!-- HÀNG 2: CONVERSIONS / MAP / TOP PAGES -->
+        <div class="row">
+            <!-- Conversion -->
+            <div class="col-lg-4">
+                <div class="card card-small">
+                    <div class="card-body">
+                        <h5 class="card-title">Tỷ lệ đơn hàng</h5>
+                        <p class="text-muted fs-13">Đơn hàng thành công</p>
+                        <div id="conversions" class="apex-charts mb-3 mt-n2" style="min-height: 230px;"></div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <p class="text-muted mb-1">Tỉ lệ hoàn thành (Tuần này)</p>
+                                <h4 class="text-dark mb-0">@Model.SessionThisWeek %</h4>
+                            </div>
+                            <div class="col-6">
+                                <p class="text-muted mb-1">Tỉ lệ hoàn thành (Tuần trước)</p>
+                                <h4 class="text-dark mb-0">@Model.SessionLastWeek %</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SẢN PHẨM BÁN CHẠY -->
+            <div class="col-lg-4">
+                <div class="card card-small card-height-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h4 class="card-title mb-0">Sản phẩm bán chạy</h4>
+                        
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-nowrap table-centered m-0 align-middle">
+                            <thead class="bg-light bg-opacity-50">
+                                <tr>
+                                    <th class="text-muted ps-3">Sản phẩm</th>
+                                    <th class="text-muted">SL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var sp in Model.TopSellingProducts)
+                                {
+                                    <tr>
+                                        <td class="ps-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a asp-area="Admin" asp-controller="Products" asp-action="Edit" asp-route-id="@sp.SanPhamId">
+                                                    <img src="@sp.Image"
+                                                         class="rounded avatar-sm img-fluid"
+                                                         alt="@sp.TenSanPham" />
+                                                    <span>@sp.TenSanPham</span>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td><strong>@sp.SoLuong</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SẢN PHẨM BÁN CHẬM -->
+            <div class="col-lg-4">
+                <div class="card card-small card-height-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h4 class="card-title mb-0">Sản phẩm bán chậm</h4>
+                        
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-nowrap table-centered m-0 align-middle">
+                            <thead class="bg-light bg-opacity-50">
+                                <tr>
+                                    <th class="text-muted ps-3">Sản phẩm</th>
+                                    <th class="text-muted">SL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var sp in Model.SlowSellingProducts)
+                                {
+                                    <tr>
+                                        <td class="ps-3">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a asp-area="Admin" asp-controller="Products" asp-action="Edit" asp-route-id="@sp.SanPhamId">
+                                                    <img src="@sp.Image"
+                                                         class="rounded avatar-sm img-fluid"
+                                                         alt="@sp.TenSanPham" />
+                                                    <span>@sp.TenSanPham</span>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td><strong>@sp.SoLuong</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- HÀNG 3: RECENT ORDERS + FILTER & PAGINATION -->
+        <div class="row">
+            <div class="col">
+                <div class="card card-height-100">
+                    <div class="card-body pb-0">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h4 class="card-title mb-0">Đơn hàng gần đây</h4>
+                            <div class="d-flex gap-2">
+                                <select id="orderStatusFilter" class="form-select form-select-sm" style="width:auto;">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="Chờ thanh toán trực tuyến">Chờ thanh toán trực tuyến</option>
+                                    <option value="Chờ xác nhận">Chờ xác nhận</option>
+                                    <option value="Đã xác nhận">Đã xác nhận</option>
+                                    <option value="Đang xử lý">Đang xử lý</option>
+                                    <option value="Đang giao">Đang giao</option>
+                                    <option value="Hoàn thành">Hoàn thành</option>
+                                    <option value="Thanh toán thất bại">Thanh toán thất bại</option>
+                                    <option value="Đã hủy">Đã hủy</option>
+                                </select>
+
+                                <a asp-area="Admin" asp-controller="HoaDon" asp-action="Index" class="btn btn-sm btn-soft-primary">
+                                    Quản lý đơn hàng
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive table-centered">
+                        <table class="table mb-0" id="recentOrdersTable">
+                            <thead class="bg-light bg-opacity-50">
+                                <tr>
+                                    <th class="ps-3">Mã đơn</th>
+                                    <th>Ngày</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Khách hàng</th>
+                                    <th>Email</th>
+                                    <th>SĐT</th>
+                                    <th>Địa chỉ</th>
+                                    <th>Thanh toán</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var o in Model.RecentOrders)
+                                {
+                                    <tr data-status="@o.TrangThai">
+                                        <td class="ps-3">
+                                            <a href="#!">#@o.OrderId</a>
+                                        </td>
+                                        <td>@o.NgayTao?.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(o.Image))
+                                            {
+                                                <img src="@o.Image" class="img-fluid avatar-sm rounded" />
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">N/A</span>
+                                            }
+                                        </td>
+                                        <td>@o.KhachHang</td>
+                                        <td>@o.Email</td>
+                                        <td>@o.Phone</td>
+                                        <td>@o.DiaChi</td>
+                                        <td>@o.Payment</td>
+                                        <td>
+                                            <span class="badge bg-soft-primary text-primary">@o.TrangThai</span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer border-top">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="text-muted">
+                                Hiển thị <span id="currentCount">0</span> / <span id="totalCount">0</span> đơn.
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted me-1">Trang:</span>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0" id="ordersPagination">
+                                        <!-- JS sẽ render -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- end card -->
+            </div>
+        </div> <!-- end row -->
+
+    </div> <!-- container-fluid -->
+</div>
+
+@section Styles {
+    <style>
+        .stat-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+            }
+
+        .card-chart, .card-small {
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
+        }
+
+        .card-title {
+            font-weight: 600;
+        }
+
+        .table thead th {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+
+        .table tbody td {
+            vertical-align: middle;
+        }
+
+        .chart-range-group .btn {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+
+            .chart-range-group .btn.active {
+                border-color: rgba(59, 130, 246, 0.5);
+                background: rgba(59, 130, 246, 0.1);
+            }
+    </style>
+}
+@section Scripts {
+    <script>
+        window.addEventListener("load", function () {
+
+            // ================== CONVERSION RADIAL CHART ==================
+            const conversionData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ConversionData ?? new List<int>()));
+            if (typeof ApexCharts !== 'undefined') {
+                const convValues = conversionData.length ? conversionData : [65];
+
+                const optionsConv = {
+                    chart: {
+                        height: 230,
+                        type: 'radialBar'
+                    },
+                    series: [convValues[0]],
+                    labels: ['Tỉ lệ đơn hoàn thành'],
+                    plotOptions: {
+                        radialBar: {
+                            hollow: { size: '60%' },
+                            dataLabels: {
+                                name: { fontSize: '14px' },
+                                value: {
+                                    fontSize: '22px',
+                                    formatter: function (val) {
+                                        return val + '%';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    colors: ['#22c55e']
+                };
+
+                const convEl = document.querySelector("#conversions");
+                if (convEl) {
+                    const convChart = new ApexCharts(convEl, optionsConv);
+                    convChart.render();
+                } else {
+                    console.error("#conversions container không tồn tại.");
+                }
+            } else {
+                console.error("ApexCharts chưa được load (conversion chart).");
+            }
+
+            // ================== DOANH THU (AREA CHART) ==================
+            let revenueChart = null;
+
+            function createRevenueChart(labels, values) {
+                if (typeof ApexCharts === 'undefined') {
+                    console.error("ApexCharts chưa được load (revenue chart).");
+                    return;
+                }
+
+                const el = document.querySelector("#revenue-chart-container");
+                if (!el) {
+                    console.error("#revenue-chart-container container không tồn tại.");
+                    return;
+                }
+
+                // Nếu đã có chart cũ thì destroy
+                if (revenueChart) {
+                    try {
+                        revenueChart.destroy();
+                    } catch (e) {
+                        console.warn("Destroy revenueChart lỗi (có thể bỏ qua):", e);
+                    }
+                    revenueChart = null;
+                }
+
+                const options = {
+                    chart: {
+                        type: 'area',
+                        height: 320,
+                        toolbar: { show: false },
+                        zoom: { enabled: false }
+                    },
+                    dataLabels: { enabled: false },
+                    stroke: {
+                        curve: 'smooth',
+                        width: 3
+                    },
+                    series: [{
+                        name: 'Doanh thu',
+                        data: values
+                    }],
+                    xaxis: {
+                        categories: labels,
+                        labels: { style: { fontSize: '11px' } }
+                    },
+                    yaxis: {
+                        labels: {
+                            style: { fontSize: '11px' },
+                            formatter: function (val) {
+                                return val.toLocaleString('vi-VN') + ' ₫';
+                            }
+                        }
+                    },
+                    colors: ['#4f46e5'],
+                    fill: {
+                        type: 'gradient',
+                        gradient: {
+                            shadeIntensity: 0.5,
+                            opacityFrom: 0.4,
+                            opacityTo: 0,
+                            stops: [0, 90, 100]
+                        }
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function (val) {
+                                return val.toLocaleString('vi-VN') + ' ₫';
+                            }
+                        }
+                    }
+                };
+
+                revenueChart = new ApexCharts(el, options);
+                revenueChart.render();
+            }
+
+            async function loadRevenueData() {
+                const type = document.getElementById('revenueType')?.value;
+                const start = document.getElementById('revenueStart')?.value;
+                const end = document.getElementById('revenueEnd')?.value;
+
+                const params = new URLSearchParams();
+                params.append('type', type || 'month');
+                if (start) params.append('start', start);
+                if (end) params.append('end', end);
+
+                const url = '/Admin/Dashboard/GetRevenueData?' + params.toString();
+
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error('Network error: ' + res.status);
+                    const data = await res.json();
+
+                    console.log('RevenueData:', data);
+
+                    const labels = data.labels || [];
+                    const values = (data.values || []).map(v => Number(v));
+
+                    createRevenueChart(labels, values);
+                } catch (e) {
+                    console.error('Lỗi tải dữ liệu doanh thu:', e);
+                }
+            }
+
+            function setDefaultDateRange() {
+                const endInput = document.getElementById('revenueEnd');
+                const startInput = document.getElementById('revenueStart');
+
+                if (!endInput || !startInput) return;
+
+                const today = new Date();
+                const prior = new Date();
+                prior.setMonth(prior.getMonth() - 5); // mặc định 6 tháng gần nhất
+
+                endInput.value = today.toISOString().slice(0, 10);
+                startInput.value = prior.toISOString().slice(0, 10);
+            }
+
+            // Set range + load lần đầu
+            setDefaultDateRange();
+            loadRevenueData();
+
+            const btnApply = document.getElementById('btnRevenueApply');
+            if (btnApply) {
+                btnApply.addEventListener('click', function () {
+                    loadRevenueData();
+                });
+            }
+
+            const typeSelect = document.getElementById('revenueType');
+            if (typeSelect) {
+                typeSelect.addEventListener('change', function () {
+                    loadRevenueData();
+                });
+            }
+
+            // ================== RECENT ORDERS: FILTER + PAGINATION ==================
+            const table = document.getElementById('recentOrdersTable');
+            const tbody = table?.querySelector('tbody');
+            const rows = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
+            const statusFilter = document.getElementById('orderStatusFilter');
+            const pagination = document.getElementById('ordersPagination');
+            const currentCountSpan = document.getElementById('currentCount');
+            const totalCountSpan = document.getElementById('totalCount');
+
+            const pageSize = 5;
+            let currentPage = 1;
+            let filteredRows = [...rows];
+
+            function renderTable() {
+                if (!rows.length) return;
+
+                rows.forEach(r => r.style.display = 'none');
+
+                const total = filteredRows.length;
+                if (totalCountSpan) totalCountSpan.textContent = total;
+
+                const totalPages = Math.max(1, Math.ceil(total / pageSize));
+                if (currentPage > totalPages) currentPage = totalPages;
+
+                const start = (currentPage - 1) * pageSize;
+                const end = start + pageSize;
+                const pageRows = filteredRows.slice(start, end);
+
+                pageRows.forEach(r => r.style.display = '');
+
+                if (currentCountSpan) currentCountSpan.textContent = pageRows.length;
+
+                renderPagination(totalPages);
+            }
+
+            function renderPagination(totalPages) {
+                if (!pagination) return;
+                pagination.innerHTML = '';
+
+                const prevLi = document.createElement('li');
+                prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+                prevLi.innerHTML = `<a class="page-link" href="#">&laquo;</a>`;
+                prevLi.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderTable();
+                    }
+                });
+                pagination.appendChild(prevLi);
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const li = document.createElement('li');
+                    li.className = 'page-item' + (i === currentPage ? ' active' : '');
+                    li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                    li.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        currentPage = i;
+                        renderTable();
+                    });
+                    pagination.appendChild(li);
+                }
+
+                const nextLi = document.createElement('li');
+                nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+                nextLi.innerHTML = `<a class="page-link" href="#">&raquo;</a>`;
+                nextLi.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderTable();
+                    }
+                });
+                pagination.appendChild(nextLi);
+            }
+
+            if (statusFilter) {
+                statusFilter.addEventListener('change', function () {
+                    const value = this.value.trim();
+
+                    if (!value) {
+                        filteredRows = [...rows];
+                    } else {
+                        filteredRows = rows.filter(r =>
+                            (r.getAttribute('data-status') || '').trim() === value
+                        );
+                    }
+                    currentPage = 1;
+                    renderTable();
+                });
+            }
+
+            renderTable();
+        });
+    </script>
+}
+
+
+

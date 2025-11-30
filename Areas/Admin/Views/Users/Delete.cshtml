@@ -1,0 +1,87 @@
+﻿@model ShopNgocLan.Models.User
+
+@{
+    ViewData["Title"] = "Xác Nhận Xóa";
+    Layout = "~/Views/Shared/AdminLayout.cshtml"; // Sử dụng layout Admin của bạn
+}
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="pagetitle">
+            <h3>Xóa người dùng</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Users" asp-action="Index">Danh sách người dùng</a>
+                    </li>
+                    <li class="breadcrumb-item active">Xóa người dùng</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title text-danger">Xác Nhận Xóa Người Dùng</h4>
+                    </div>
+                    <div class="card-body">
+
+                        <h3 class="text-danger">Bạn có chắc chắn muốn xóa người dùng này không?</h3>
+                        <p>Hành động này không thể hoàn tác.</p>
+
+                        @* Hiển thị thông báo lỗi (ví dụ: "Không thể xóa vì user đã có hóa đơn") *@
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <hr />
+
+                        <div>
+                            <h4>Thông tin User</h4>
+                            <dl class="row">
+                                <dt class="col-sm-3">
+                                    Họ và Tên
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @Model.Ho @Model.Ten
+                                </dd>
+                                <dt class="col-sm-3">
+                                    Email
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @Model.Email
+                                </dd>
+                                <dt class="col-sm-3">
+                                    Số Điện Thoại
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @Model.SoDienThoai
+                                </dd>
+                                <dt class="col-sm-3">
+                                    Vai Trò (Role)
+                                </dt>
+                                <dd class="col-sm-9">
+                                    @Model.Role?.TenRole
+                                </dd>
+                            </dl>
+                        </div>
+
+                        <hr />
+
+                        <form asp-action="Delete" method="post">
+                            @* BẮT BUỘC: Phải có Id ẩn để POST biết đang xóa user nào *@
+                            <input type="hidden" asp-for="Id" />
+
+                            <div class="mt-4">
+                                <input type="submit" value="XÁC NHẬN XÓA" class="btn btn-danger" />
+                                <a asp-action="Index" class="btn btn-light">Hủy</a>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

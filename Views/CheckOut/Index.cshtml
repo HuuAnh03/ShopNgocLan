@@ -1,0 +1,463 @@
+﻿@model CheckoutViewModel
+@{
+    Layout = "_Layout";
+}
+<link rel="stylesheet" href="~/assets/css/checkout.css" asp-append-version="true">
+
+<div class="breadcrumbs_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">Trang chủ</a></li>
+                        <li>Xác nhân đặt hàng</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="checkout-container">
+
+    <main class="info-column">
+
+        <form id="checkout-form" asp-action="Create" asp-controller="Order" method="post">
+
+            <section class="checkout-section">
+                <h2>Thông tin khách hàng</h2>
+                <div class="customer-info-box">
+                    <div class="info-item">
+                        <span class="info-label">Họ và tên:</span>
+                        <span class="info-value">@Model.HovaTen</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Số điện thoại:</span>
+                        <span class="info-value">@Model.SoDienThoai</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="checkout-section">
+                <h2>Địa chỉ giao hàng</h2>
+                @{
+                    var dcgh = Model.DiaChiGiaoHangs;
+                    var hasAddress = dcgh != null && dcgh.Any();
+                    int? defaultId = null;
+
+                    if (hasAddress)
+                    {
+                        defaultId = dcgh.FirstOrDefault(x => x.LaMacDinh == true)?.Id
+                        ?? dcgh.FirstOrDefault()?.Id;
+
+                        foreach (var item in dcgh)
+                        {
+                            var radioId = "addr_" + item.Id;
+                            var fullAddress = $"{item.DiaChiChiTiet}, {item.PhuongXa}, {item.QuanHuyen}, {item.TinhThanhPho}";
+
+                            <div class="address-card">
+                                <input type="radio"
+                                       id="@radioId"
+                                       name="address_choice"
+                                       value="@item.Id"
+                                       checked="@(item.Id == defaultId)">
+
+                                <label for="@radioId" class="address-details">
+                                    <div class="user-info">
+                                        <strong>@Model.HovaTen</strong>
+                                        <span>(@Model.SoDienThoai)</span>
+                                    </div>
+                                    <p>@fullAddress</p>
+                                    @if (item.LaMacDinh == true)
+                                    {
+                                        <span class="default-badge">Mặc định</span>
+                                    }
+                                </label>
+                            </div>
+                        }
+                    }
+                }
+                <div class="address-card add-new-trigger">
+                    <input type="radio"
+                           id="new_addr"
+                           name="address_choice"
+                           value="new"
+                           @(hasAddress ? "" : "checked=\"checked\"")>
+                    <label for="new_addr" class="address-details-new">
+                        <span>[+] Thêm địa chỉ mới</span>
+                    </label>
+                </div>
+
+                <div class="new-address-form"
+                     id="new-address-form"
+                     style="@(hasAddress ? "display:none;" : "block;")">
+
+                    <div class="form-group">
+                        <label for="full_name">Họ và tên</label>
+                        <input type="text" id="full_name" name="NewAddress.FullName" value="@Model.HovaTen" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại</label>
+                        <input type="tel" id="phone" name="NewAddress.Phone" value="@Model.SoDienThoai" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_tinhthanhpho">Tỉnh/Thành phố</label>
+                        <input type="text" id="new_tinhthanhpho" name="NewAddress.TinhThanhPho" placeholder="Tỉnh / Thành phố" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_quanhuyen">Quận/Huyện</label>
+                        <input type="text" id="new_quanhuyen" name="NewAddress.QuanHuyen" placeholder="Quận / Huyện" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_phuongxa">Phường/Xã</label>
+                        <input type="text" id="new_phuongxa" name="NewAddress.PhuongXa" placeholder="Phường / Xã" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_diachichitiet">Địa chỉ cụ thể</label>
+                        <input type="text" id="new_diachichitiet" name="NewAddress.DiaChiChiTiet" placeholder="Số nhà, tên đường..." required>
+                    </div>
+
+                    <div class="form-group checkbox">
+                        <input type="checkbox" id="save_default" name="NewAddress.LaMacDinh" value="true">
+                        <label for="save_default">Đặt làm địa chỉ mặc định</label>
+                    </div>
+                    <div class="form-group form-buttons">
+                        <button type="button" id="cancel-new-address" class="btn-cancel">Hủy</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="checkout-section">
+                <h2>Phương thức vận chuyển</h2>
+                <div class="shipping-method">
+                    <input type="radio" id="ship_standard" name="shipping_method" value="standard"
+                           data-cost="25000" checked>
+                    <label for="ship_standard">
+                        <span>Giao hàng tiêu chuẩn (3-5 ngày)</span>
+                        <strong>25.000đ</strong>
+                    </label>
+                </div>
+                <div class="shipping-method">
+                    <input type="radio" id="ship_fast" name="shipping_method" value="fast"
+                           data-cost="40000">
+                    <label for="ship_fast">
+                        <span>Giao hàng nhanh (1-2 ngày)</span>
+                        <strong>40.000đ</strong>
+                    </label>
+                </div>
+            </section>
+
+            <section class="checkout-section">
+                <h2>Phương thức thanh toán</h2>
+
+                <div class="payment-method">
+                    <input type="radio" id="payment_cod" name="payment_method" value="cod" checked>
+                    <label for="payment_cod">
+                        <img src="~/assets/img/logo/tienmat.png" alt="Logo tiền mặt" class="payment-icon momo-icon" />
+                        Thanh toán khi nhận hàng (COD)
+                    </label>
+                </div>
+
+                @* <div class="payment-method">
+                    <input type="radio" id="payment_qr" name="payment_method" value="qr">
+                    <label for="payment_qr">🏦 Chuyển khoản ngân hàng (VietQR)</label>
+                </div> *@
+
+                <div class="payment-method">
+                    <input type="radio" id="payment_momo" name="payment_method" value="momo">
+                    <label for="payment_momo">
+                        <img src="~/assets/img/logo/MoMo_Logo.png" alt="Logo Momo" class="payment-icon momo-icon" />
+                        Ví điện tử Momo
+                    </label>
+                </div>
+
+                <div class="payment-content" data-payment-content="cod" style="display: block;">
+                    <p>Bạn sẽ thanh toán bằng tiền mặt khi nhận hàng.</p>
+                </div>
+
+                <div class="payment-content" data-payment-content="momo" style="display: none;">
+                    <p>Bạn sẽ được chuyển hướng đến Momo để hoàn tất thanh toán.</p>
+                </div>
+
+            </section>
+        </form>
+    </main>
+
+    <aside class="summary-column">
+        <h2>Tóm tắt đơn hàng</h2>
+
+        <div class="order-items-list">
+            @foreach (var item in Model.Items)
+            {
+                <div class="order-item">
+                    <img src="@item.ImageUrl" alt="@item.ProductName" class="item-thumbnail">
+                    <div class="item-info">
+                        <span class="item-name">@item.ProductName x @item.Quantity</span>
+                        <span class="item-variant">Size: @item.SizeName / Màu: @item.ColorName</span>
+                    </div>
+                    <span class="item-price">@((item.Price * item.Quantity).ToString("N0"))đ</span>
+                </div>
+            }
+        </div>
+
+        <hr>
+
+        <form class="discount-form" id="discount-form">
+            <div class="form-group">
+                <label for="discount_code">Mã giảm giá</label>
+                <div class="discount-input-group">
+                    <input type="text" id="discount_code" name="discount_code" placeholder="Nhập mã...">
+                    <button type="submit" class="btn-apply">Áp dụng</button>
+                </div>
+                <div id="voucher-message" style="margin-top: 10px;"></div>
+            </div>
+        </form>
+
+        <hr>
+
+        <div class="order-summary-total">
+            <div class="summary-line">
+                <span>Tạm tính</span>
+                <strong id="summary-subtotal">@Model.Tamtinh.ToString("N0")đ</strong>
+            </div>
+
+            <div class="summary-line" id="discount-line" style="display: none;">
+                <span>Giảm giá</span>
+                <strong id="summary-discount" style="color: red;">-0đ</strong>
+            </div>
+
+            <div class="summary-line">
+                <span>Phí vận chuyển</span>
+                <strong id="summary-shipping">@Model.Ship.ToString("N0")đ</strong>
+            </div>
+
+            <div class="summary-line total">
+                <span>Tổng cộng</span>
+                <strong class="total-price" id="summary-total">@Model.Tongtien.ToString("N0")đ</strong>
+            </div>
+        </div>
+
+        <hr>
+
+        <button type="submit" form="checkout-form" class="btn-checkout">
+            HOÀN TẤT ĐẶT HÀNG
+        </button>
+
+        <div class="checkout-trust-badge">
+            <span>🔒 Giao dịch của bạn được bảo mật</span>
+        </div>
+    </aside>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // ====== COMMON: format tiền ======
+            const formatCurrency = (value) => {
+                return new Intl.NumberFormat('vi-VN').format(value) + 'đ';
+            };
+
+            // ====== ĐỊA CHỈ GIAO HÀNG: ẩn/hiện form + disable inputs khi không dùng ======
+            const radioButtons = document.querySelectorAll('input[name="address_choice"]');
+            const newAddressForm = document.getElementById('new-address-form');
+            const newAddressFormInputs = newAddressForm
+                ? newAddressForm.querySelectorAll('input, button')
+                : [];
+
+            // Mặc định disable toàn bộ input trong form địa chỉ mới
+            newAddressFormInputs.forEach(input => input.disabled = true);
+
+            // Nếu lúc load trang đã chọn "new" (trường hợp user chưa có địa chỉ)
+            const initiallySelected = document.querySelector('input[name="address_choice"]:checked');
+            if (initiallySelected && initiallySelected.value === 'new' && newAddressForm) {
+                newAddressForm.style.display = 'block';
+                newAddressFormInputs.forEach(input => input.disabled = false);
+            }
+
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    if (!newAddressForm) return;
+
+                    if (this.value === 'new') {
+                        newAddressForm.style.display = 'block';
+                        newAddressFormInputs.forEach(input => input.disabled = false);
+                    } else {
+                        newAddressForm.style.display = 'none';
+                        newAddressFormInputs.forEach(input => input.disabled = true);
+                    }
+                });
+            });
+
+            const cancelButton = document.getElementById('cancel-new-address');
+            const defaultAddressRadio = document.querySelector('input[name="address_choice"]:not([value="new"])');
+
+            if (cancelButton && newAddressForm) {
+                cancelButton.addEventListener('click', function () {
+                    // 1. Ẩn form
+                    newAddressForm.style.display = 'none';
+                    // 2. Disable toàn bộ input trong form
+                    newAddressFormInputs.forEach(input => input.disabled = true);
+                    // 3. Chọn lại địa chỉ cũ (nếu có)
+                    if (defaultAddressRadio) {
+                        defaultAddressRadio.checked = true;
+                    }
+                });
+            }
+
+            // ====== VOUCHER: áp dụng mã giảm giá ======
+            const discountForm = document.getElementById('discount-form');
+            if (discountForm) {
+                discountForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const code = document.getElementById('discount_code').value;
+                    const messageEl = document.getElementById('voucher-message');
+
+                    if (!code) {
+                        messageEl.textContent = 'Vui lòng nhập mã giảm giá.';
+                        messageEl.style.color = 'red';
+                        return;
+                    }
+
+                    fetch('/api/VoucherApi/apply', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ Code: code })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            messageEl.textContent = data.message;
+
+                            if (data.success) {
+                                messageEl.style.color = 'green';
+
+                                // Cập nhật tóm tắt đơn hàng
+                                document.getElementById('summary-subtotal').textContent = formatCurrency(data.tamtinh);
+                                document.getElementById('summary-shipping').textContent = formatCurrency(data.phiVanChuyen);
+                                document.getElementById('summary-total').textContent = formatCurrency(data.tongCong);
+
+                                if (data.giamGia > 0) {
+                                    document.getElementById('summary-discount').textContent = '-' + formatCurrency(data.giamGia);
+                                    document.getElementById('discount-line').style.display = 'flex';
+                                } else {
+                                    document.getElementById('discount-line').style.display = 'none';
+                                }
+                            } else {
+                                messageEl.style.color = 'red';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Lỗi:', error);
+                            messageEl.textContent = 'Có lỗi xảy ra, vui lòng thử lại.';
+                            messageEl.style.color = 'red';
+                        });
+                });
+            }
+
+            // ====== PHÍ VẬN CHUYỂN: chọn phương thức ship ======
+            const shippingRadios = document.querySelectorAll('input[name="shipping_method"]');
+            shippingRadios.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    const selectedMethod = this.value;
+
+                    fetch('/api/VoucherApi/update-shipping', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ Method: selectedMethod })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById('summary-shipping').textContent = formatCurrency(data.phiVanChuyen);
+                                document.getElementById('summary-total').textContent = formatCurrency(data.tongCong);
+                            } else {
+                                console.error('Lỗi cập nhật phí vận chuyển:', data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Lỗi:', error);
+                        });
+                });
+            });
+
+            // ====== PHƯƠNG THỨC THANH TOÁN: ẩn/hiện nội dung ======
+            const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
+            const paymentContents = document.querySelectorAll('.payment-content');
+
+            paymentRadios.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    const selectedValue = this.value;
+
+                    paymentContents.forEach(content => {
+                        content.style.display = 'none';
+                    });
+
+                    const contentToShow = document.querySelector(`.payment-content[data-payment-content="${selectedValue}"]`);
+                    if (contentToShow) {
+                        contentToShow.style.display = 'block';
+                    }
+                });
+            });
+
+            // ====== VALIDATE FORM: bắt buộc chọn/nhập địa chỉ giao hàng ======
+            const checkoutForm = document.getElementById('checkout-form');
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', function (e) {
+                    const selectedAddress = document.querySelector('input[name="address_choice"]:checked');
+
+                    // Chưa chọn địa chỉ nào
+                    if (!selectedAddress) {
+                        e.preventDefault();
+                        alert('Vui lòng chọn hoặc thêm địa chỉ giao hàng trước khi đặt hàng.');
+                        return;
+                    }
+
+                    // Nếu chọn "Thêm địa chỉ mới", phải nhập đủ thông tin
+                    if (selectedAddress.value === 'new' && newAddressForm) {
+                        // Bật lại input để HTML5 required hoạt động
+                        newAddressFormInputs.forEach(input => input.disabled = false);
+
+                        const tinh = document.getElementById('new_tinhthanhpho').value.trim();
+                        const quan = document.getElementById('new_quanhuyen').value.trim();
+                        const phuong = document.getElementById('new_phuongxa').value.trim();
+                        const diachi = document.getElementById('new_diachichitiet').value.trim();
+
+                        if (!tinh || !quan || !phuong || !diachi) {
+                            e.preventDefault();
+                            alert('Vui lòng nhập đầy đủ thông tin địa chỉ giao hàng mới.');
+                            newAddressForm.style.display = 'block';
+                            return;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+<style>
+    /* Đảm bảo đường dẫn này khớp với thư mục images/icons/momo_logo.png trong wwwroot của bạn */
+    .payment-method .payment-icon {
+        height: 20px; /* Chiều cao cố định */
+        width: auto; /* Giữ tỷ lệ khung hình */
+        margin-left: 8px; /* Khoảng cách với văn bản */
+        vertical-align: middle; /* Căn giữa dọc với văn bản */
+    }
+
+    /* (Tùy chọn) Thêm CSS cụ thể cho logo Momo nếu cần */
+    .payment-method .momo-icon {
+        border-radius: 4px; /* Vì logo Momo thường có nền vuông */
+    }
+</style>

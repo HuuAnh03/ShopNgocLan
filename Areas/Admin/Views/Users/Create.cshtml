@@ -1,0 +1,143 @@
+﻿@model ShopNgocLan.Models.User
+
+@{
+    ViewData["Title"] = "Tạo Người Dùng Mới";
+    Layout = "~/Views/Shared/AdminLayout.cshtml"; // Sử dụng layout Admin của bạn
+}
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="pagetitle">
+            <h3>Thêm người dùng</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Users" asp-action="Index">Danh sách người dùng</a>
+                    </li>
+                    <li class="breadcrumb-item active">Thêm người dùng</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title"></h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <form asp-action="Create" method="post" enctype="multipart/form-data">
+
+                                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                                    <div class="mb-3 text-center">
+                                        <label class="form-label">Ảnh đại diện</label>
+                                        <br />
+                                        <img src="/images/avatars/default.jpg"
+                                             id="avatarPreview" @* Thêm ID để JS có thể cập nhật ảnh xem trước (nếu muốn) *@
+                                             alt="Avatar Mặc định"
+                                             class="img-thumbnail rounded-circle mb-2"
+                                             style="width: 150px; height: 150px; object-fit: cover;">
+
+                                        <input type="file" name="avatarFile"
+                                               id="avatarFileInput" class="form-control d-none" accept="image/*"
+                                               onchange="previewAvatar(event)" /> 
+                                               <br />
+                                               <label for="avatarFileInput" class="btn btn-primary btn-sm"> <i class='bx bx-upload'></i> Chọn ảnh </label>
+
+                                        
+                                        
+                                    </div>
+                                    <hr />
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label asp-for="Ho" class="form-label">Họ</label>
+                                                <input asp-for="Ho" class="form-control" />
+                                                <span asp-validation-for="Ho" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label asp-for="Ten" class="form-label">Tên</label>
+                                                <input asp-for="Ten" class="form-control" />
+                                                <span asp-validation-for="Ten" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="Email" class="form-label">Email</label>
+                                        <input asp-for="Email" class="form-control" type="email" placeholder="admin@example.com" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="SoDienThoai" class="form-label">Số Điện Thoại</label>
+                                        <input asp-for="SoDienThoai" class="form-control" type="tel" />
+                                        <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="MatKhau" class="form-label">Mật Khẩu</label>
+                                        <input asp-for="MatKhau" class="form-control" type="password" />
+                                        <span asp-validation-for="MatKhau" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label asp-for="NgaySinh" class="form-label">Ngày Sinh</label>
+                                                <input asp-for="NgaySinh" class="form-control" type="date" />
+                                                <span asp-validation-for="NgaySinh" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label asp-for="GioiTinh" class="form-label">Giới Tính</label>
+                                                <select asp-for="GioiTinh" class="form-select">
+                                                    <option value="">-- Chọn giới tính --</option>
+                                                    <option value="Nam">Nam</option>
+                                                    <option value="Nữ">Nữ</option>
+                                                    <option value="Khác">Khác</option>
+                                                </select>
+                                                <span asp-validation-for="GioiTinh" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label asp-for="RoleId" class="form-label">Vai Trò (Role)</label>
+                                        <select asp-for="RoleId" class="form-select">
+                                            <option value="">-- Chọn vai trò --</option>
+                                            <option value="1">Admin</option>
+                                            <option value="2">Nhân viên</option>
+                                            <option value="3">Khách hàng</option>
+                                        </select>
+                                        <span asp-validation-for="RoleId" class="text-danger"></span>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <input type="submit" value="Tạo Mới" class="btn btn-primary" />
+                                        <a asp-action="Index" class="btn btn-light">Quay lại danh sách</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    
+}

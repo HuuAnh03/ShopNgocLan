@@ -1,0 +1,567 @@
+﻿@{
+    Layout = "_Layout";
+}
+@model List<DanhMucSanPham>
+
+<!--breadcrumbs area start-->
+<div class="breadcrumbs_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">Trang chủ</a></li>
+                        <li>Danh sách sản phẩm</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--breadcrumbs area end-->
+<!--shop  area start-->
+<div class="shop_area shop_reverse mt-60 mb-60">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-12">
+                <!--sidebar widget start-->
+                <aside class="sidebar_widget">
+                    <div class="widget_inner">
+                        <div class="widget_list widget_categories">
+                            <h3><a asp-action="Index" asp-controller="Shop" asp-route-idDanhMuc="0">Danh mục sản phẩm</a></h3>
+
+                            @{
+                                List<DanhMucSanPham> allCategory = ViewBag.Categories;
+                                foreach (var Menuitem in allCategory)
+                                {
+                                    if (Menuitem.Parent == null)
+                                    {
+                                        var pathCha = Menuitem.Path;
+                                        var Category = allCategory
+                                        .Where(dm => dm.Path != null && dm.Path.StartsWith(pathCha))
+                                        .Select(dm => new { dm.TenDanhMuc, dm.Id })
+                                        .ToList();
+                                        <ul>
+                                            <li class="widget_sub_categories sub_categories1">
+                                                <a href="javascript:void(0)">@Menuitem.TenDanhMuc</a>
+                                                <ul class="widget_dropdown_categories dropdown_categories1">
+                                                    @foreach (var item in Category)
+                                                    {
+                                                        <li><a asp-action="Index" asp-controller="Shop" asp-route-idDanhMuc="@item.Id">@item.TenDanhMuc</a></li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    }
+                                }
+                            }
+                        </div>
+
+                        <!-- Lọc theo giá -->
+                        <div class="widget_list widget_filter">
+                            <h3>Lọc theo Giá</h3>
+                            <div id="slider-range"></div>
+                            <div class="filter-attr-info">
+                                <button type="button" class="btn btn-sm btn-dark" id="filter-price-button">Lọc</button>
+                                <div class="filter-price-wraper">
+                                    <p>
+                                        Giá: <span id="amount"></span>
+                                        <input type="hidden" id="min_price_input" />
+                                        <input type="hidden" id="max_price_input" />
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lựa chọn khác -->
+                        <div class="widget_list widget_color">
+                            <h3>Lựa chọn khác</h3>
+                            <ul>
+                                <li>
+                                    <a href="#" class="filter-option" data-filter="best-seller">
+                                        <span>Sản phẩm bán chạy</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="filter-option" data-filter="newest">
+                                        <span>Sản phẩm mới</span>
+                                    </a>
+                                </li>
+                                <!-- 🔥 THÊM MỚI: LỌC SẢN PHẨM ĐANG KHUYẾN MÃI -->
+                                <li>
+                                    <a href="#" class="filter-option" data-filter="promotion">
+                                        <span>Sản phẩm đang khuyến mãi</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </aside>
+                <!--sidebar widget end-->
+            </div>
+
+            <div class="col-lg-9 col-md-12">
+                <!--shop wrapper start-->
+                <!--shop toolbar start-->
+                <div class="shop_toolbar_wrapper">
+                    <div class="shop_toolbar_btn">
+                        <button data-role="grid_3" type="button" class="active btn-grid-3" data-bs-toggle="tooltip" title="3"></button>
+                        <button data-role="grid_4" type="button" class="btn-grid-4" data-bs-toggle="tooltip" title="4"></button>
+                        <button data-role="grid_list" type="button" class="btn-list" data-bs-toggle="tooltip" title="List"></button>
+                    </div>
+                    <div class=" niceselect_option">
+                        <select id="list-filter" class="form-control">
+                            <option value="0">--- Tất cả sản phẩm---</option>
+                            <option value="1">--- Giá tăng dần---</option>
+                            <option value="2">--- Giá giảm dần---</option>
+                            <option value="3">--- Sắp xếp theo tên A-Z---</option>
+                            <option value="4">--- New---</option>
+                        </select>
+                    </div>
+                </div>
+                <!--shop toolbar end-->
+                <div id="filter-status" class="filter-status-bar" style="display:none;">
+                    <span class="filter-status-label">
+                        Bộ lọc đang áp dụng:
+                    </span>
+                    <div id="filter-status-tags" class="filter-status-tags">
+                        <!-- JS sẽ render các tag ở đây -->
+                    </div>
+                    <button id="clear-all-filters" type="button" class="filter-clear-all">
+                        Xóa tất cả
+                    </button>
+                </div>
+
+
+                <div id="product-list-container">
+                    <p>Đang tải sản phẩm...</p>
+                </div>
+
+                <!--shop wrapper end-->
+            </div>
+        </div>
+    </div>
+</div>
+<!--shop  area end-->
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Lấy giá trị search ban đầu (nếu có)
+            const initialSearchString = "@Html.Raw(ViewBag.SearchString)";
+            if (initialSearchString) {
+                $('#search_input').val(initialSearchString);
+            }
+            const $searchInput = $('#search_input');
+
+            // --- Thiết lập giá trị Max/Min của Slider ---
+            const MIN_PRICE = 0;          // Giá thấp nhất
+            const MAX_PRICE = 5000000;    // Giá cao nhất (5 triệu)
+            let currentMinPrice = MIN_PRICE;
+            let currentMaxPrice = MAX_PRICE;
+
+            // Lưu trạng thái filter hiện tại (global)
+            let currentIsBestSeller = @((ViewBag.IsBestSeller ?? false).ToString().ToLower());
+            let currentHasPromotion = @((ViewBag.HasPromotion ?? false).ToString().ToLower());
+            let currentForceNewest = false; // filter "Sản phẩm mới" (ép sort mới nhất)
+
+            // Nếu load từ URL có sẵn HasPromotion/IsBestSeller thì set active tương ứng
+            if (currentIsBestSeller) {
+                $('.filter-option[data-filter="best-seller"]').addClass('active');
+            }
+            if (currentHasPromotion) {
+                $('.filter-option[data-filter="promotion"]').addClass('active');
+            }
+
+            // --- KHỞI TẠO JQUERY UI SLIDER ---
+            $("#slider-range").slider({
+                range: true,
+                min: MIN_PRICE,
+                max: MAX_PRICE,
+                values: [MIN_PRICE, MAX_PRICE],
+                slide: function (event, ui) {
+                    $("#amount").text(formatCurrency(ui.values[0]) + " - " + formatCurrency(ui.values[1]));
+                    $("#min_price_input").val(ui.values[0]);
+                    $("#max_price_input").val(ui.values[1]);
+                }
+            });
+
+            $("#amount").text(
+                formatCurrency($("#slider-range").slider("values", 0)) + " - " +
+                formatCurrency($("#slider-range").slider("values", 1))
+            );
+            currentMinPrice = $("#slider-range").slider("values", 0);
+            currentMaxPrice = $("#slider-range").slider("values", 1);
+
+            // --- HÀM FORMAT TIỀN ---
+            function formatCurrency(number) {
+                return new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND',
+                    minimumFractionDigits: 0
+                }).format(number);
+            }
+
+            // --- HÀM TẠO TAG ---
+            function createTag(type, label, value) {
+                var $tag = $('<div>')
+                    .addClass('filter-tag')
+                    .attr('data-type', type);
+
+                if (value !== undefined && value !== null) {
+                    $tag.attr('data-value', value);
+                }
+
+                var $text = $('<span>').text(label);
+                var $btnRemove = $('<button>')
+                    .addClass('filter-tag-remove')
+                    .attr('type', 'button')
+                    .html('&times;');
+
+                $tag.append($text).append($btnRemove);
+                return $tag;
+            }
+
+            // --- HÀM CẬP NHẬT TAG TRẠNG THÁI LỌC ---
+            function updateFilterStatus() {
+                var $bar = $('#filter-status');
+                var $tagsContainer = $('#filter-status-tags');
+                var $clearAll = $('#clear-all-filters');
+
+                if ($bar.length === 0 || $tagsContainer.length === 0) return;
+
+                $tagsContainer.empty();
+                let hasAnything = false;
+
+                // 1. Tag tìm kiếm
+                let searchText = ($searchInput.val() || "").trim();
+                if (searchText.length > 0) {
+                    $tagsContainer.append(
+                        createTag('search', 'Từ khóa: "' + searchText + '"', searchText)
+                    );
+                    hasAnything = true;
+                }
+
+                // 2. Tag lọc giá (khi không phải khoảng full)
+                if (currentMinPrice > MIN_PRICE || currentMaxPrice < MAX_PRICE) {
+                    var labelPrice = 'Giá: ' + formatCurrency(currentMinPrice) +
+                        ' - ' + formatCurrency(currentMaxPrice);
+                    $tagsContainer.append(
+                        createTag('price', labelPrice, currentMinPrice + '-' + currentMaxPrice)
+                    );
+                    hasAnything = true;
+                }
+
+                // 3. Tag bán chạy
+                if (currentIsBestSeller) {
+                    $tagsContainer.append(
+                        createTag('best-seller', 'Sản phẩm bán chạy')
+                    );
+                    hasAnything = true;
+                }
+
+                // 4. Tag khuyến mãi
+                if (currentHasPromotion) {
+                    $tagsContainer.append(
+                        createTag('promotion', 'Sản phẩm đang khuyến mãi')
+                    );
+                    hasAnything = true;
+                }
+
+                // 5. Tag mới nhất
+                if (currentForceNewest) {
+                    $tagsContainer.append(
+                        createTag('newest', 'Sản phẩm mới nhất')
+                    );
+                    hasAnything = true;
+                }
+
+                // 6. Hiển thị / ẩn cả thanh
+                if (!hasAnything) {
+                    $bar.hide();
+                } else {
+                    $bar.show();
+                }
+
+                // 7. Nút Xóa tất cả
+                if ($clearAll.length) {
+                    if (hasAnything) {
+                        $clearAll.show();
+                    } else {
+                        $clearAll.hide();
+                    }
+                }
+            }
+
+            // --- HÀM GỌI AJAX ĐỂ TẢI SẢN PHẨM ---
+            function loadProducts(
+                page,
+                listfilter = null,
+                overrideIsBestSeller = null,
+                minPrice = null,
+                maxPrice = null,
+                overrideHasPromotion = null,
+                overrideForceNewest = null
+            ) {
+                var categoryId = @ViewBag.SelectedCategoryId;
+                var searchString = $searchInput.val();
+
+                // Cập nhật state từ tham số truyền vào (nếu có)
+                if (overrideIsBestSeller !== null) {
+                    currentIsBestSeller = overrideIsBestSeller;
+                }
+                if (overrideHasPromotion !== null) {
+                    currentHasPromotion = overrideHasPromotion;
+                }
+                if (overrideForceNewest !== null) {
+                    currentForceNewest = overrideForceNewest;
+                }
+                if (minPrice !== null) {
+                    currentMinPrice = minPrice;
+                }
+                if (maxPrice !== null) {
+                    currentMaxPrice = maxPrice;
+                }
+
+                var isBestSellerValue = currentIsBestSeller;
+                var minPriceValue = currentMinPrice;
+                var maxPriceValue = currentMaxPrice;
+                var hasPromotionValue = currentHasPromotion;
+
+                // Tính listfilter gửi lên:
+                var filterValue;
+                if (listfilter !== null) {
+                    filterValue = listfilter;
+                } else if (currentForceNewest) {
+                    filterValue = 4; // sort mới nhất
+                } else {
+                    filterValue = $('#list-filter').val();
+                }
+
+                $('#product-list-container').html('<p>Đang tải...</p>');
+
+                $.ajax({
+                    url: '@Url.Action("_GetProductListPartial", "Shop")',
+                    type: 'GET',
+                    data: {
+                        page: page,
+                        idDanhMuc: categoryId,
+                        listfilter: filterValue,
+                        searchString: searchString,
+                        isBestSeller: isBestSellerValue,
+                        minPrice: minPriceValue,
+                        maxPrice: maxPriceValue,
+                        hasPromotion: hasPromotionValue
+                    },
+                    success: function (result) {
+                        $('#product-list-container').html(result);
+                        updateFilterStatus(); // cập nhật tag mỗi lần load xong
+                    },
+                    error: function () {
+                        $('#product-list-container').html('<p class="text-danger">Lỗi khi tải sản phẩm.</p>');
+                    }
+                });
+            }
+
+            // 1. Tải sản phẩm lần đầu
+            loadProducts(1);
+
+            // 2. Sắp xếp (dropdown)
+            $('#list-filter').on('change', function () {
+                // Khi user tự chọn sort ở dropdown → tắt filter "Sản phẩm mới"
+                currentForceNewest = false;
+                $('.filter-option[data-filter="newest"]').removeClass('active');
+
+                loadProducts(1, $(this).val(), null, null, null, null, null);
+            });
+
+            // 3. Lọc giá
+            $('#filter-price-button').on('click', function (e) {
+                e.preventDefault();
+                var min = parseInt($("#min_price_input").val() || MIN_PRICE);
+                var max = parseInt($("#max_price_input").val() || MAX_PRICE);
+                loadProducts(1, null, null, min, max, null, null);
+            });
+
+            // 4. Tìm kiếm
+            $('#productSearchForm').on('submit', function (e) {
+                e.preventDefault();
+                loadProducts(1);
+            });
+
+            // 5. Phân trang
+            $(document).on('click', '#product-list-container .pagination a', function (e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                var page = new URLSearchParams(url.split('?')[1]).get('page');
+                loadProducts(page);
+            });
+
+            // 6. Lọc từ "Lựa chọn khác" – 3 filter CÓ THỂ KẾT HỢP
+            $(document).on('click', '.filter-option', function (e) {
+                e.preventDefault();
+                var filterType = $(this).data('filter');
+
+                // Toggle class active độc lập
+                $(this).toggleClass('active');
+                var isActiveNow = $(this).hasClass('active');
+
+                if (filterType === 'best-seller') {
+                    // Bật/tắt filter bán chạy
+                    loadProducts(1, null, isActiveNow, null, null, null, null);
+                }
+                else if (filterType === 'promotion') {
+                    // Bật/tắt filter khuyến mãi
+                    loadProducts(1, null, null, null, null, isActiveNow, null);
+                }
+                else if (filterType === 'newest') {
+                    // Bật/tắt filter "mới nhất" (ép sort=4 khi bật)
+                    if (isActiveNow) {
+                        $('#list-filter').val(4); // đồng bộ dropdown
+                        loadProducts(1, 4, null, null, null, null, true);
+                    } else {
+                        loadProducts(1, null, null, null, null, null, false);
+                    }
+                }
+            });
+
+            // 7. Xóa tag riêng lẻ
+            $(document).on('click', '.filter-tag-remove', function () {
+                var $tag = $(this).closest('.filter-tag');
+                var type = $tag.data('type');
+
+                if (type === 'search') {
+                    // Xóa từ khóa tìm kiếm
+                    $searchInput.val('');
+                }
+                else if (type === 'price') {
+                    // Reset slider giá về full range
+                    currentMinPrice = MIN_PRICE;
+                    currentMaxPrice = MAX_PRICE;
+                    $("#slider-range").slider("values", [MIN_PRICE, MAX_PRICE]);
+                    $("#amount").text(formatCurrency(MIN_PRICE) + " - " + formatCurrency(MAX_PRICE));
+                    $("#min_price_input").val(MIN_PRICE);
+                    $("#max_price_input").val(MAX_PRICE);
+                }
+                else if (type === 'best-seller') {
+                    currentIsBestSeller = false;
+                    $('.filter-option[data-filter="best-seller"]').removeClass('active');
+                }
+                else if (type === 'promotion') {
+                    currentHasPromotion = false;
+                    $('.filter-option[data-filter="promotion"]').removeClass('active');
+                }
+                else if (type === 'newest') {
+                    currentForceNewest = false;
+                    $('.filter-option[data-filter="newest"]').removeClass('active');
+                    // không ép sort nữa, để dropdown quyết định
+                }
+
+                loadProducts(1);
+            });
+
+            // 8. Nút "Xóa tất cả"
+            $('#clear-all-filters').on('click', function () {
+                // Reset search
+                $searchInput.val('');
+
+                // Reset filters đặc biệt
+                currentIsBestSeller = false;
+                currentHasPromotion = false;
+                currentForceNewest = false;
+
+                // Reset UI của 3 nút
+                $('.filter-option').removeClass('active');
+
+                // Reset slider giá
+                $("#slider-range").slider("values", [MIN_PRICE, MAX_PRICE]);
+                $("#amount").text(formatCurrency(MIN_PRICE) + " - " + formatCurrency(MAX_PRICE));
+                $("#min_price_input").val(MIN_PRICE);
+                $("#max_price_input").val(MAX_PRICE);
+                currentMinPrice = MIN_PRICE;
+                currentMaxPrice = MAX_PRICE;
+
+                // Giữ nguyên dropdown sort hiện tại (tuỳ bạn, có thể reset nếu muốn)
+
+                loadProducts(1);
+            });
+        });
+    </script>
+}
+<style>
+    .filter-status-bar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        background: #f5f7ff;
+        border: 1px solid #d6dcff;
+        border-radius: 999px;
+        padding: 6px 12px;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+    }
+
+    .filter-status-label {
+        font-weight: 600;
+        color: #333;
+        margin-right: 4px;
+    }
+
+    .filter-status-tags {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        flex: 1;
+    }
+
+    .filter-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 1px solid #cfd4ff;
+        font-size: 0.85rem;
+        color: #333;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+        .filter-tag span {
+            margin-right: 6px;
+        }
+
+    .filter-tag-remove {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        padding: 0;
+        color: #777;
+    }
+
+        .filter-tag-remove:hover {
+            color: #e55353;
+        }
+
+    .filter-clear-all {
+        border: none;
+        background: transparent;
+        color: #666;
+        font-size: 0.85rem;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 999px;
+        transition: background 0.15s, color 0.15s;
+        white-space: nowrap;
+    }
+
+        .filter-clear-all:hover {
+            background: #e4e7ff;
+            color: #333;
+        }
+
+</style>
+

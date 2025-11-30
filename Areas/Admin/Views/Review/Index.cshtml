@@ -1,0 +1,394 @@
+﻿@model List<ShopNgocLan.Models.DanhGiaSanPham>
+@{
+    ViewData["Title"] = "Quản lý Đánh giá Sản phẩm";
+    Layout = "AdminLayout";
+
+    // Khởi tạo một biến rỗng vì tìm kiếm trong Review Controller sẽ dùng DataTables
+    string currentSearch = ViewBag.CurrentSearch ?? "";
+}
+
+@* QUAN TRỌNG: Đảm bảo link SweetAlert2 và style cần thiết được tải *@
+<link rel="stylesheet" href="~/assets/css/account.css" asp-append-version="true">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+@* Thêm style cho phần phản hồi nếu cần *@
+<style>
+    /* ... (CSS cho search box, status badge giữ nguyên nếu cần) ... */
+    .admin-reply-box {
+        background-color: #f8f9fa;
+        border-left: 3px solid #007bff;
+        padding: 5px 8px;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+
+    .status-badge {
+        /* Đảm bảo style badge được định nghĩa */
+        padding: 4px 8px;
+        border-radius: .25rem;
+    }
+</style>
+
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="pagetitle">
+            <h3>Quản lý đánh giá</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    
+                    <li class="breadcrumb-item active">Quản lý đánh giá</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">DANH SÁCH ĐÁNH GIÁ SẢN PHẨM (@Model.Count)</h6>
+
+                @* --- KHỐI TÌM KIẾM --- *@
+                <div class="search-box ms-auto me-3">
+                    @* Sửa action để chỉ thực hiện tìm kiếm trên client-side DataTables *@
+                    <form class="d-flex align-items-center">
+                        <div style="position: relative; flex-grow: 1;">
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Tìm Tên SP/Khách hàng..."
+                                   name="searchQuery"
+                                   id="searchInput"
+                                   value="@currentSearch" />
+                        </div>
+                        <button type="submit" class="btn btn-primary ms-2 btn-sm">
+                            Tìm
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>      
+                                <th>Ngày ĐG</th>
+                                <th>Sản phẩm</th>
+                                <th>Điểm</th>
+                                <th style ="width: 12%;">Khách hàng</th>
+                                <th style ="width: 20%;">Nội dung ĐG</th>
+                                <th style="width: 20%;">Phản hồi của Shop</th>
+                                <th>Trạng thái</th>
+                                <th style="width: 10%;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var review in Model)
+                            {   
+                                         
+                                            var mainImage = review.SanPham.HinhAnhSanPhams
+                                            .FirstOrDefault(h => h.LaAnhDaiDien == true)
+                                            ?? review.SanPham.HinhAnhSanPhams.FirstOrDefault();
+                                            string imgSrc = mainImage?.UrlHinhAnh ?? "/images/placeholder.jpg";
+                                        
+                                <tr id="review-row-@review.Id">
+                                    <td>@review.Id</td>
+
+                                    <td>@(review.NgayDanhGia?.ToString("dd/MM/yyyy") ?? "N/A")</td>
+                                    <td>
+                                        <img src="@Url.Content(imgSrc)" alt="@review.SanPham.TenSanPham" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />
+                                        <strong>@review.SanPham.TenSanPham</strong></td>
+                                    @{
+                                        // Lấy điểm đánh giá
+                                        int rating = review.DiemDanhGia;
+                                        const int maxStars = 5;
+
+                                        // Xác định class CSS cho ô (td) nếu điểm thấp
+                                        string highlightClass = (rating <= 2) ? "table-danger fw-bold" : "";
+                                    }
+
+                                    <td class="@highlightClass">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-primary text-white">@rating/@maxStars</span>
+                                        </div>
+                                    </td>
+
+                                    
+                                    <td>
+                                        @{
+                                            string userAvatar = string.IsNullOrEmpty(review.User.AvatarUrl) ?
+                                            "/images/avatars/default-user.jpg" : review.User.AvatarUrl;
+                                        }
+                                        <img src="@Url.Content(userAvatar)" alt="Avatar Khách hàng" style="width: 30px; height: 30px; object-fit: cover; border-radius: 50%; margin-right: 5px;" />
+                                        <strong>@review.User.Ho @review.User.Ten</strong>
+                                        <br />
+                                        <small>(ID: @review.UserId)</small>
+                                    </td>
+
+                                    <td>
+                                        @review.NoiDung
+                                    </td>
+
+                                    
+                                    <td id="reply-cell-@review.Id">
+                                        <div id="reply-display-@review.Id">
+                                            @if (!string.IsNullOrEmpty(review.PhanHoiAdmin))
+                                            {
+                                                <div class="admin-reply-box">
+                                                    @review.PhanHoiAdmin
+                                                    <small class="d-block text-muted">
+                                                        @if (review.AdminUser != null)
+                                                        {
+                                                            string adminAvatar = string.IsNullOrEmpty(review.AdminUser.AvatarUrl) ?
+                                                            "/images/avatars/default-admin.jpg" : review.AdminUser.AvatarUrl;
+                                                            <img src="@Url.Content(adminAvatar)" alt="Avatar Admin" style="width: 20px; height: 20px; object-fit: cover; border-radius: 50%;" />
+                                                            @review.AdminUser.Ten
+                                                        }
+                                                        - @(review.NgayPhanHoi?.ToString("dd/MM/yyyy"))
+                                                    </small>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-secondary">Chưa phản hồi</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td id="status-cell-@review.Id">
+                                        @{
+                                            string statusClass = review.IsPublished ? "bg-success" : "bg-danger";
+                                            string statusText = review.IsPublished ? "Đang hiện" : "Đã ẩn";
+                                        }
+                                        <span class="badge @statusClass status-text">@statusText</span>
+                                    </td>
+                                    
+                                    <td>
+                                        <button class="btn btn-sm btn-publish-toggle @(review.IsPublished ? "btn-danger" : "btn-success")"
+                                                data-review-id="@review.Id"
+                                                data-is-published="@review.IsPublished.ToString().ToLower()">
+                                            @(review.IsPublished ? "Ẩn" : "Hiện")
+                                        </button>
+                                        <button class="btn btn-info btn-sm btn-toggle-reply"
+                                                data-review-id="@review.Id"
+                                                data-current-reply="@review.PhanHoiAdmin">
+                                            @(string.IsNullOrEmpty(review.PhanHoiAdmin) ? "Phản hồi" : "Sửa")
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="replyModalLabel">Phản hồi đánh giá</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="replyForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="modalReviewId" name="reviewId" />
+                <div class="modal-body">
+                    <p class="text-muted">Phản hồi này sẽ hiển thị công khai trên trang sản phẩm.</p>
+                    <textarea id="modalReplyContent" name="replyContent" class="form-control" rows="5" placeholder="Nhập nội dung phản hồi..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Gửi Phản hồi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @* Đảm bảo đã tải thư viện DataTables (nếu chưa có trong layout) *@
+
+    <script>
+        // *** ĐỊNH NGHĨA BIẾN TĨNH BÊN NGOÀI ĐỂ RAZOR XỬ LÝ ĐƯỜNG DẪN MẶC ĐỊNH CHÍNH XÁC ***
+        const defaultAdminAvatarUrl = '@Url.Content("/images/avatars/default-admin.jpg")';
+
+        $(document).ready(function() {
+            // Lấy CSRF token
+            const antiForgeryToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
+            // --- 1. KHỞI TẠO DATA TABLES (Giữ nguyên logic của bạn) ---
+            const table = $('#dataTable').DataTable({
+                "language": {
+                     "sProcessing": "Đang xử lý...", "sLengthMenu": "Xem _MENU_ mục",
+                     "sZeroRecords": "Không tìm thấy kết quả nào",
+                     "sInfo": "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                     "sInfoEmpty": "Đang xem 0 đến 0 trong tổng số 0 mục",
+                     "sInfoFiltered": "(Được lọc từ tổng số _MAX_ mục)",
+                     "sSearch": "",
+                     "oPaginate": { "sFirst": "Đầu", "sPrevious": "Trước", "sNext": "Tiếp", "sLast": "Cuối" }
+                },
+                "paging": true,
+                "ordering": true,
+                "searching": true,
+                "dom": 'lrtip',
+                "order": [[ 1, "desc" ]]
+            });
+
+            // Gắn tìm kiếm client-side vào input
+            $('#searchInput').on('keyup', function() {
+                table.search(this.value).draw();
+            });
+
+
+            // --- 2. XỬ LÝ MỞ MODAL PHẢN HỒI ---
+            $('.btn-toggle-reply').on('click', function() {
+                // ... (Logic mở modal giữ nguyên) ...
+                const reviewId = $(this).data('review-id');
+                const currentReply = $(this).data('current-reply');
+
+                $('#modalReviewId').val(reviewId);
+                $('#modalReplyContent').val(currentReply || '');
+                $('#replyModalLabel').text(`Phản hồi đánh giá #${reviewId}`);
+
+                var replyModal = new bootstrap.Modal(document.getElementById('replyModal'));
+                replyModal.show();
+            });
+
+
+            // --- 3. XỬ LÝ SUBMIT PHẢN HỒI (AJAX) ---
+            $('#replyForm').on('submit', function(e) {
+                e.preventDefault();
+                const reviewId = $('#modalReviewId').val();
+                const replyContent = $('#modalReplyContent').val();
+
+                if (!replyContent || replyContent.trim() === "") {
+                    Swal.fire('Lỗi', 'Nội dung phản hồi không được để trống.', 'warning');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SubmitAdminReply", "Review", new { Area = "Admin" })',
+                    type: 'POST',
+                    data: {
+                        reviewId: reviewId,
+                        replyContent: replyContent,
+                        __RequestVerificationToken: antiForgeryToken
+                    },
+                    beforeSend: function() {
+                        $('#modalSubmitBtn').attr('disabled', true).text('Đang gửi...');
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire('Thành công!', response.message, 'success');
+
+                            // *** TRUY CẬP DỮ LIỆU TỪ RESPONSE.DATA ***
+                            const adminName = response.data.adminname || "Quản trị viên";
+                            const ngayPhanHoi = response.data.ngayphanhoi || 'Vừa xong';
+                            const phanHoiText = response.data.phanhoi;
+
+                            // Sử dụng biến tĩnh đã định nghĩa ở đầu script
+                            const adminAvatarUrl = response.data.adminavatarurl || defaultAdminAvatarUrl;
+
+                            // 1. Xây dựng nội dung phản hồi mới
+                            const newReplyHtml = `
+                                <div class="admin-reply-box">
+                                    ${phanHoiText}
+                                    <small class="d-block text-muted">
+                                        <img src="${adminAvatarUrl}" alt="Avatar Admin" style="width: 20px; height: 20px; object-fit: cover; border-radius: 50%; margin-right: 5px;" />
+                                        ${adminName} - ${ngayPhanHoi}
+                                    </small>
+                                </div>
+                            `;
+
+                            // 2. CẬP NHẬT TRỰC TIẾP PHẦN HIỂN THỊ
+                            $('#reply-display-' + reviewId).html(newReplyHtml);
+
+                            // 3. Cập nhật nút thao tác và data attribute
+                            $('.btn-toggle-reply[data-review-id="' + reviewId + '"]')
+                                .text('Sửa')
+                                .data('current-reply', phanHoiText);
+
+                            // 4. Đóng modal
+                            var replyModal = bootstrap.Modal.getInstance(document.getElementById('replyModal'));
+                            replyModal.hide();
+
+                        } else {
+                            Swal.fire('Thất bại', response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Lỗi kết nối', 'Không thể kết nối đến máy chủ.', 'error');
+                    },
+                    complete: function() {
+                        $('#modalSubmitBtn').attr('disabled', false).text('Gửi Phản hồi');
+                    }
+                });
+            });
+
+                // --- 4. XỬ LÝ ẨN/HIỆN ĐÁNH GIÁ (TOGGLE PUBLISH STATUS) ---
+        $(document).on('click', '.btn-publish-toggle', function() {
+            const $btn = $(this);
+            const reviewId = $btn.data('review-id');
+
+            // Xác nhận từ người dùng
+            Swal.fire({
+                title: $btn.text() + ' đánh giá này?',
+                text: "Đánh giá sẽ thay đổi trạng thái hiển thị công khai.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Xác nhận',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("TogglePublishStatus", "Review", new { Area = "Admin" })',
+                        type: 'POST',
+                        data: { id: reviewId, __RequestVerificationToken: antiForgeryToken },
+                        beforeSend: function() {
+                            $btn.attr('disabled', true);
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire('Thành công', response.message, 'success');
+
+                                // Cập nhật giao diện DataTables ngay lập tức
+                                const newStatus = response.isPublished;
+                                const $row = $('#review-row-' + reviewId);
+
+                                if (newStatus) {
+                                    // Đã hiện
+                                    $btn.removeClass('btn-danger').addClass('btn-success').text('Ẩn');
+                                    $row.find('.status-text').removeClass('bg-danger').addClass('bg-success').text('Đang hiện');
+                                    $row.attr('data-is-published', 'true');
+                                } else {
+                                    // Đã ẩn
+                                    $btn.removeClass('btn-success').addClass('btn-danger').text('Hiện');
+                                    $row.find('.status-text').removeClass('bg-success').addClass('bg-danger').text('Đã ẩn');
+                                    $row.attr('data-is-published', 'false');
+                                }
+
+                                // Cần thiết nếu bạn dùng lọc DataTables
+                                // table.row($row).invalidate().draw(false);
+
+                            } else {
+                                Swal.fire('Thất bại', response.message, 'error');
+                            }
+                        },
+                        error: function() {
+                            Swal.fire('Lỗi kết nối', 'Không thể thay đổi trạng thái.', 'error');
+                        },
+                        complete: function() {
+                            $btn.attr('disabled', false);
+                        }
+                    });
+                }
+            });
+        });
+        });
+    </script>
+}

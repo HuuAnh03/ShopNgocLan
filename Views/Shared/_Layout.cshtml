@@ -1,0 +1,414 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+<!doctype html>
+<html class="no-js" lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>@ViewBag.Title - Ngọc Lan Fashion</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" type="image/x-icon" href="~/assets/img/favicon.ico">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="~/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="~/assets/css/slick.css">
+    <link rel="stylesheet" href="~/assets/css/magnific-popup.css">
+    <link rel="stylesheet" href="~/assets/css/font.awesome.css">
+    <link rel="stylesheet" href="~/assets/css/ionicons.min.css">
+    <link rel="stylesheet" href="~/assets/css/material.design.min.css">
+    <link rel="stylesheet" href="~/assets/css/animate.css">
+    <link rel="stylesheet" href="~/assets/css/jquery-ui.min.css">
+    <link rel="stylesheet" href="~/assets/css/slinky.menu.css">
+    <link rel="stylesheet" href="~/assets/css/plugins.css">
+    <link rel="stylesheet" href="~/assets/css/style.css">
+    <link rel="stylesheet" href="~/assets/css/site.css">
+
+    <script src="~/assets/js/vendor/modernizr-3.7.1.min.js"></script>
+
+    <!-- Fonts + Toastr -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+</head>
+
+<body>
+
+    <div class="off_canvars_overlay"></div>
+
+    <div class="offcanvas_menu offcanvas_four">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="canvas_open">
+                        <a href="javascript:void(0)"><i class="ion-navicon"></i></a>
+                    </div>
+                    <div class="offcanvas_menu_wrapper">
+                        <div class="canvas_close">
+                            <a href="javascript:void(0)"><i class="ion-android-close"></i></a>
+                        </div>
+                        <div id="menu" class="text-left ">
+                            <ul class="offcanvas_main_menu">
+                                <li><a href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                                <li><a href="@Url.Action("Index", "Shop")">Cửa hàng</a></li>
+                                <li><a href="@Url.Action("Index", "Blog")">Blog</a></li>
+                                <li><a href="@Url.Action("About", "Home")">Về chúng tôi</a></li>
+                                <li><a href="@Url.Action("Contact", "Home")">Liên hệ</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="main_header header-seven">
+            <div class="header_top color-seven">
+                <div class="container">
+                    <div class="header_top-inner7">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6">
+                                <div class="language_currency4">
+                                    
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="top_links text-right">
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        var userName = HttpContextAccessor.HttpContext.Session.GetString("FullUserName");
+                                        var avartarUrl = HttpContextAccessor.HttpContext.Session.GetString("AvartarUrl");
+
+                                        <a>
+                                            <img src="@(string.IsNullOrEmpty(avartarUrl) ? "/images/avatars/default.jpg" : avartarUrl)"
+                                                 width="36px"
+                                                 class="avatar-sm rounded-circle me-2"
+                                                 alt="...">
+                                            @userName <i class="zmdi zmdi-chevron-down zmdi-hc-fw"></i>
+                                        </a>
+
+                                        <ul class="dropdown_links">
+
+                                            @* ⭐ Nút vào trang quản trị (chỉ Admin + Nhân viên thấy) *@
+                                            @if (User.IsInRole("Admin") || User.IsInRole("NhanVien"))
+                                            {
+                                                <li>
+                                                    <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                                        Trang quản trị
+                                                    </a>
+                                                </li>
+
+                                                <li><hr class="dropdown-divider" /></li>
+                                            }
+
+                                            <li><a asp-controller="Account" asp-action="Edit">Tài khoản của tôi</a></li>
+                                            <li><a asp-controller="Cart" asp-action="Index">Giỏ hàng</a></li>
+                                            <li><a asp-controller="HoaDon" asp-action="Index">Lịch sử mua hàng</a></li>
+
+                                            <li><hr class="dropdown-divider" /></li>
+                                            <li><a asp-controller="Account" asp-action="Logout">Đăng xuất</a></li>
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Account" asp-action="Login"> Đăng nhập </a>
+                                    }
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header_middle hmiddle-seven color-seven">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-2">
+                            <div class="logo logo_seven">
+                                <a href="@Url.Action("Index", "Home")">
+                                    <img src="~/assets/img/logo/logo3.png" alt="" style="max-width: 150px; height: auto;">
+                                   
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-10">
+                            <div class="header_container_right">
+                                <div class="main_menu menu_seven menu_position">
+                                    <nav>
+                                        <ul>
+                                            <li><a class="" href="@Url.Action("Index", "Home")">Trang chủ</a></li>
+                                            @await Component.InvokeAsync("DanhMucMenu")
+                                           
+                                            <li>
+                                            <li>
+                                                <a asp-action="Index"
+                                                   asp-controller="Shop"
+                                                   asp-route-hasPromotion="true">
+                                                    Sản phẩm khuyến mãi
+                                                </a>
+                                            </li>
+
+                                            </li>
+                                            <li><a href="@Url.Action("Index", "About")">Thông tin Shop</a></li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                                <div class="header_right_info">
+                                    <ul>
+                                        <li class="search_box">
+                                            <a href="javascript:void(0)">
+                                                <img src="~/assets/img/icon/icon-search.png" alt="">
+                                            </a>
+                                            <div class="search_widget">
+                                                <form asp-controller="Shop"
+                                                      asp-action="Index"
+                                                      asp-route-idDanhMuc="0"
+                                                      method="get"
+                                                      id="productSearchForm">
+                                                    <input type="text" id="search_input" name="searchString" placeholder="Tìm kiếm sản phẩm...">
+                                                    <button type="submit">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div id="cartplaceholder">
+                                                @await Component.InvokeAsync("AddToCart")
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    @RenderBody()
+
+    <footer class="footer_widgets color_seven">
+    <div class="footer_top small-footer">
+        <div class="container">
+            <div class="footer-flex">
+                
+                <div class="footer_logo">
+                    <a href="@Url.Action("Index", "Home")">
+                        <img src="~/assets/img/logo/logo3.png" alt="" style="max-width: 120px; height: auto;">
+                    </a>
+                </div>
+
+                <div class="footer_info">
+                    <span>Shop thời trang Ngọc Lan</span>
+                    <span>Địa chỉ: Đông Anh - Hà Nội</span>
+                        <span>Email: <a href="mailto:ngoclan02@gmail.com">ngoclan02@gmail.com</a></span>
+                    <span>Điện thoại: <a href="tel:0345343040">0345 343 040</a></span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="footer_bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="copyright_area">
+                        <p>Bản quyền &copy; 2025 <a href="#">Ngọc Lan</a> Bảo lưu mọi quyền.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    <div id="chat-floating-btn">
+        💬
+    </div>
+
+    <div id="chat-popup" style="display:none;">
+        <iframe id="chat-iframe" src="/Chat/Index" frameborder="0"></iframe>
+    </div>
+
+    <script>
+        (function () {
+            var btn = document.getElementById('chat-floating-btn');
+            var popup = document.getElementById('chat-popup');
+            var iframe = document.getElementById('chat-iframe');
+
+            function callScrollInIframe() {
+                try {
+                    if (iframe && iframe.contentWindow && typeof iframe.contentWindow.scrollToBottomChat === "function") {
+                        iframe.contentWindow.scrollToBottomChat();
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            // Khi bấm nút chat
+            btn.onclick = function () {
+                if (popup.style.display === 'block') {
+                    popup.style.display = 'none';
+                } else {
+                    popup.style.display = 'block';
+                    // Mỗi lần mở popup -> yêu cầu iframe cuộn xuống cuối
+                    callScrollInIframe();
+                }
+            };
+
+            // Khi iframe load xong lần đầu -> nếu đang mở thì cuộn xuống luôn
+            iframe.addEventListener('load', function () {
+                if (popup.style.display === 'block') {
+                    callScrollInIframe();
+                }
+            });
+        })();
+    </script>
+
+    <!-- SweetAlert2 JS (1 lần duy nhất) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- jQuery: chỉ giữ 1 bản -->
+    <script src="~/assets/js/vendor/jquery-3.4.1.min.js"></script>
+
+    <!-- Toastr -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- Bootstrap & Plugins -->
+    <script src="~/assets/js/popper.js"></script>
+    <script src="~/assets/js/bootstrap.min.js"></script>
+    <script src="~/assets/js/owl.carousel.min.js"></script>
+    <script src="~/assets/js/slick.min.js"></script>
+    <script src="~/assets/js/jquery.magnific-popup.min.js"></script>
+    <script src="~/assets/js/jquery.counterup.min.js"></script>
+    <script src="~/assets/js/jquery.countdown.js"></script>
+
+    <!-- jQuery UI (dùng cho slider lọc giá) -->
+    <script src="~/assets/js/jquery.ui.js"></script>
+
+    <script src="~/assets/js/jquery.elevatezoom.js"></script>
+    <script src="~/assets/js/isotope.pkgd.min.js"></script>
+    <script src="~/assets/js/slinky.menu.js"></script>
+    <script src="~/assets/js/plugins.js"></script>
+    <script src="~/assets/js/function.js"></script>
+    <script src="~/assets/js/main.js"></script>
+
+    <script>
+        // Cấu hình chung cho Toastr
+        toastr.options = {
+            closeButton: true,
+            debug: false,
+            newestOnTop: false,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            preventDuplicates: false,
+            onclick: null,
+            showDuration: "300",
+            hideDuration: "1000",
+            timeOut: "3000",
+            extendedTimeOut: "1000",
+            showEasing: "swing",
+            hideEasing: "linear",
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut"
+        };
+            
+    </script>
+    
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
+<style>
+    #chat-floating-btn {
+        position: fixed;
+        bottom: 22px;
+        right: 22px;
+        width: 65px;
+        height: 65px;
+        background: #111827;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        cursor: pointer;
+        z-index: 9999;
+        box-shadow: 0px 5px 15px rgba(0,0,0,0.25);
+        transition: 0.2s;
+    }
+
+        #chat-floating-btn:hover {
+            transform: scale(1.05);
+        }
+
+    #chat-popup {
+        position: fixed;
+        bottom: 100px;
+        right: 22px;
+        width: 380px;
+        height: 520px;
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 28px rgba(0,0,0,.2);
+        display: none;
+        z-index: 9998;
+    }
+
+        #chat-popup iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+    .small-footer {
+        padding: 15px 0; /* giảm chiều cao */
+    }
+
+    .footer_widgets,
+    .footer_widgets p,
+    .footer_widgets span,
+    .footer_widgets a {
+        color: #ffffff !important;
+    }
+
+    .footer_info a:hover {
+        color: #ffd700 !important; /* vàng nhẹ khi hover, tùy chọn */
+    }
+
+    .footer-flex {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 40px; /* khoảng cách giữa logo và text */
+        flex-wrap: wrap; /* tự xuống dòng ở mobile */
+    }
+
+    .footer_info span {
+        margin-right: 25px;
+        font-size: 14px;
+        white-space: nowrap; /* giữ text không bị xuống dòng */
+    }
+
+    .footer_info a {
+        color: inherit;
+    }
+
+    .footer_logo img {
+        max-height: 60px;
+    }
+
+</style>

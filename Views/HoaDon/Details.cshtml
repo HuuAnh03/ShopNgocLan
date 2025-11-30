@@ -1,0 +1,475 @@
+﻿@model ShopNgocLan.Models.HoaDon
+@using System
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng #" + Model.Id;
+    Layout = "_Layout";
+}
+<link rel="stylesheet" href="~/assets/css/account.css" asp-append-version="true">
+
+@functions {
+    // Hàm này giúp ánh xạ tất cả các trạng thái thành một cấp độ tiến trình từ 1 đến 4
+    public int GetStatusLevel(string maTrangThai)
+    {
+        switch (maTrangThai)
+        {
+            case "AwaitingPayment":
+            case "Pending":     // Chờ TT hoặc Chờ XN
+                return 1;
+
+            case "Confirmed":   // Đã xác nhận
+            case "Processing":  // Đang xử lý
+                return 2;
+
+            case "Shipped":     // Đang giao
+                return 3;
+
+            case "Delivered":       // Hoàn thành
+            case "ReturnRequested": // Yêu cầu hoàn hàng
+            case "Returned":        // Hoàn hàng xong
+                return 4;
+
+            case "Cancelled":       // Đã hủy
+            case "PaymentFailed":   // TT thất bại
+                return 0; // Trạng thái kết thúc tiêu cực
+
+            default:
+                return 1;
+        }
+    }
+}
+
+@{
+    // *******************************************************************
+    // KHỐI LOGIC CHÍNH - Xử lý tính toán cho thanh tiến độ
+    // *******************************************************************
+
+    int currentThuTu = Model.TrangThai?.ThuTu ?? 0;
+    int statusLevel = GetStatusLevel(Model.TrangThai.MaTrangThai);
+
+    // Tính toán độ rộng thanh tiến độ (4 bước chính: Confirmed->Delivered)
+    double progressWidth;
+
+    if (statusLevel == 0)
+    {
+        progressWidth = 0;
+    }
+    else if (statusLevel == 4)
+    {
+        progressWidth = 100; // Hoàn thành (hoặc đã yêu cầu hoàn hàng / hoàn hàng)
+    }
+    else
+    {
+        double progressFactor;
+
+        if (currentThuTu <= 3)
+        {
+            progressFactor = (currentThuTu - 2); // 1, 2 -> -1, 0; 3 -> 1
+            progressFactor = Math.Max(0.5, progressFactor);
+        }
+        else
+        {
+            // 4, 5, 6, 7, 8, 9, 10 -> tăng dần
+            progressFactor = currentThuTu - 2; // 4 -> 2, 5 -> 3, ...
+        }
+
+        progressWidth = (progressFactor / 4.0) * 100;
+        progressWidth = Math.Min(progressWidth, 100);
+    }
+
+    bool isCanceled = Model.TrangThai.MaTrangThai == "Cancelled";
+    bool isFailed = Model.TrangThai.MaTrangThai == "PaymentFailed";
+    bool isReturnRequested = Model.TrangThai.MaTrangThai == "ReturnRequested";
+    bool isReturned = Model.TrangThai.MaTrangThai == "Returned";
+
+    // Các trạng thái KHÔNG cho phép hủy
+    bool cannotCancel =
+        Model.TrangThai.MaTrangThai == "Cancelled" ||
+        Model.TrangThai.MaTrangThai == "Shipped" ||
+        Model.TrangThai.MaTrangThai == "Delivered" ||
+        Model.TrangThai.MaTrangThai == "ReturnRequested" ||
+        Model.TrangThai.MaTrangThai == "Returned";
+
+    // Chỉ cho phép yêu cầu hoàn hàng khi đơn đã giao thành công
+    bool canRequestReturn = Model.TrangThai.MaTrangThai == "Delivered";
+}
+
+<div class="breadcrumbs_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb_content">
+                    <ul>
+                        <li><a asp-action="Index" asp-controller="Home">home</a></li>
+                        <li><a asp-action="Index" asp-controller="HoaDon">Danh sách hóa đơn</a></li>
+                        <li>Chi tiết hóa đơn</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="account-container">
+
+    <nav class="account-nav">
+        <h3>Chi tiết đơn hàng</h3>
+        <ul class="account-nav-list">
+            <li><a asp-action="Edit" asp-controller="Account">Thông tin tài khoản</a></li>
+            <li><a asp-action="Index" asp-controller="HoaDon" class="active">Lịch sử đơn hàng</a></li>
+            <li><a asp-action="Index" asp-controller="DiaChiGiaoHang">Địa chỉ giao hàng</a></li>
+            <li><a asp-action="Logout" asp-controller="Account">Đăng xuất</a></li>
+        </ul>
+    </nav>
+
+    <main class="order-detail-content">
+
+        <div class="order-detail-header">
+            <h1>Chi tiết Đơn hàng: #@Model.Id</h1>
+            <p>
+                Đặt lúc: @Model.NgayTao?.ToString("dd/MM/yyyy HH:mm") -
+                <a asp-action="Index" asp-controller="HoaDon">&larr; Quay lại danh sách</a>
+            </p>
+
+            @* Nút HỦY ĐƠN: chỉ hiển thị khi still có thể hủy *@
+            @if (!cannotCancel && !isFailed)
+            {
+                <a href="#" class="btn-cancel-order" data-order-id="@Model.Id" style="margin-top: 1rem;">
+                    Hủy Đơn Hàng
+                </a>
+            }
+
+            @* Nút YÊU CẦU HOÀN HÀNG: chỉ khi đơn đã giao thành công *@
+            @if (canRequestReturn)
+            {
+                <a href="#" class="btn-return-order" data-order-id="@Model.Id" style="margin-top: 1rem; margin-left: 0.5rem;">
+                    Yêu cầu hoàn hàng
+                </a>
+            }
+        </div>
+
+        <input type="hidden" id="orderIdHidden" value="@Model.Id" />
+
+        @* THÔNG BÁO TRẠNG THÁI *@
+        @if (isCanceled)
+        {
+            <div class="status-alert status-danger">
+                Đơn hàng này đã bị <strong>HỦY</strong>. (Hủy lúc: @Model.NgayTao?.ToString("dd/MM/yyyy HH:mm"))
+            </div>
+        }
+        else if (isFailed)
+        {
+            <div class="status-alert status-failed">
+                Thanh toán trực tuyến <strong>THẤT BẠI</strong>. Vui lòng liên hệ hỗ trợ hoặc đặt lại đơn khác.
+            </div>
+        }
+        else if (isReturnRequested)
+        {
+            <div class="status-alert status-info">
+                Bạn đã gửi <strong>Yêu cầu hoàn hàng</strong> cho đơn này. Cửa hàng sẽ liên hệ để xử lý trong thời gian sớm nhất.
+            </div>
+        }
+        else if (isReturned)
+        {
+            <div class="status-alert status-success">
+                Đơn hàng này đã được <strong>Hoàn hàng</strong>. Nếu bạn có thắc mắc, vui lòng liên hệ bộ phận hỗ trợ.
+            </div>
+        }
+
+        @if (!isCanceled && !isFailed)
+        {
+            <div class="order-status-tracker">
+                <div class="tracker-line" style="width: @progressWidth%;"></div>
+
+                @* STEP 1 *@
+                <div class="status-step @(currentThuTu >= 1 ? "active" : "")">
+                    <div class="step-icon">1</div>
+                    <div class="step-label">
+                        @if (currentThuTu <= 2)
+                        {
+                            @Model.TrangThai.TenTrangThai
+                        }
+                        else
+                        {
+                            @:Đặt hàng
+                        }
+                    </div>
+                </div>
+
+                @* STEP 2 *@
+                <div class="status-step @(currentThuTu >= 3 ? "active" : "")">
+                    <div class="step-icon">2</div>
+                    <div class="step-label">
+                        @if (currentThuTu == 3)
+                        {
+                            @Model.TrangThai.TenTrangThai
+                        }
+                        else
+                        {
+                            @:Đã xác nhận
+                        }
+                    </div>
+                </div>
+
+                @* STEP 3 *@
+                <div class="status-step @(currentThuTu >= 4 ? "active" : "")">
+                    <div class="step-icon">3</div>
+                    <div class="step-label">
+                        @if (currentThuTu == 4)
+                        {
+                            @:Đang xử lý
+                        }
+                        else if (currentThuTu == 5)
+                        {
+                            @:Đang giao
+                        }
+                        else
+                        {
+                            @:Chuẩn bị giao
+                        }
+                    </div>
+                </div>
+
+                @* STEP 4 (HOÀN THÀNH / YÊU CẦU HOÀN HÀNG / HOÀN HÀNG) *@
+                <div class="status-step @(currentThuTu >= 6 ? "active" : "") @(isReturnRequested ? "step-return-requested" : "") @(isReturned ? "step-returned" : "")">
+                    <div class="step-icon">4</div>
+                    <div class="step-label">
+                        @if (isReturnRequested)
+                        {
+                            @:Yêu cầu hoàn hàng
+                        }
+                        else if (isReturned)
+                        {
+                            @:Hoàn hàng
+                        }
+                        else
+                        {
+                            @:Hoàn thành
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="order-detail-container">
+            <div class="order-detail-main">
+                <h2>Các sản phẩm (@Model.ChiTietHoaDons.Count)</h2>
+                @foreach (var item in Model.ChiTietHoaDons)
+                {
+                    var hinhAnh = item.ChiTietSanPham.SanPham.HinhAnhSanPhams
+                    .FirstOrDefault(h => h.LaAnhDaiDien == true);
+                    string imageUrl = (hinhAnh != null) ? hinhAnh.UrlHinhAnh : "/images/default-product.png";
+
+                    <div class="order-item">
+                        <div class="item-image">
+                            <a asp-action="Details" asp-controller="Shop" asp-route-id="@item.ChiTietSanPham.SanPham.Id">
+                                <img src="@imageUrl" alt="@item.ChiTietSanPham.SanPham.TenSanPham">
+                            </a>
+                        </div>
+                        <div class="item-details">
+                            <span class="item-name">@item.ChiTietSanPham.SanPham.TenSanPham</span>
+                            <span class="item-variant">
+                                @item.ChiTietSanPham.MauSac.TenMau / @item.ChiTietSanPham.Size.TenSize
+                            </span>
+                        </div>
+                        <div class="item-price-quantity">
+                            <span>@item.DonGia.ToString("N0")đ x @item.SoLuong</span><br />
+                            <strong class="item-total">@((item.DonGia * item.SoLuong).ToString("N0"))đ</strong>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <aside class="order-detail-sidebar">
+                <div class="summary-card">
+                    <h3>Tóm tắt đơn hàng</h3>
+                    <div class="summary-line">
+                        <span>Tạm tính:</span>
+                        <strong>@Model.TongTien.ToString("N0")đ</strong>
+                    </div>
+                    <div class="summary-line">
+                        <span>Phí vận chuyển:</span>
+                        <strong>@Model.PhiVanChuyen?.ToString("N0")đ</strong>
+                    </div>
+                    @if (Model.GiamGia > 0)
+                    {
+                        <div class="summary-line" style="color: var(--status-cancelled-text);">
+                            <span>Giảm giá:</span>
+                            <strong>-@Model.GiamGia?.ToString("N0")đ</strong>
+                        </div>
+                    }
+                    <div class="summary-line total">
+                        <span>Tổng cộng:</span>
+                        <strong>@Model.ThanhTien.ToString("N0")đ</strong>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <h3>Địa chỉ giao hàng</h3>
+                    <p>
+                        <strong>@Model.TenKhachHang</strong><br />
+                        @Model.SoDienThoaiKhachHang<br />
+                        @Model.DiaChiGiaoHang
+                    </p>
+                </div>
+
+                <div class="summary-card">
+                    <h3>Phương thức thanh toán</h3>
+                    <p>
+                        @Model.PhuongThucThanhToan.TenPhuongThuc
+                    </p>
+                </div>
+            </aside>
+        </div>
+    </main>
+</div>
+
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cancelButton = document.querySelector('.btn-cancel-order');
+        const returnButton = document.querySelector('.btn-return-order');
+        const orderIdInput = document.getElementById('orderIdHidden');
+
+        const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')
+                                   ? document.querySelector('input[name="__RequestVerificationToken"]').value
+                                   : '';
+
+        // ========= NÚT HỦY ĐƠN =========
+        if (cancelButton && orderIdInput) {
+            const orderId = orderIdInput.value;
+
+            cancelButton.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: `Xác nhận hủy đơn hàng #${orderId}`,
+                    text: "Thao tác này không thể hoàn tác. Bạn có chắc chắn muốn hủy đơn?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Đồng ý, Hủy đơn!',
+                    cancelButtonText: 'Không, Quay lại'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Đang hủy...',
+                            text: 'Vui lòng chờ trong giây lát.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading()
+                            }
+                        });
+
+                        fetch('/Order/CancelOrder', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': antiForgeryToken
+                            },
+                            body: JSON.stringify(parseInt(orderId))
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                Swal.close();
+
+                                if (data.success) {
+                                    Swal.fire(
+                                        'Đã Hủy!',
+                                        data.message,
+                                        'success'
+                                    ).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'Thất bại!',
+                                        'Lỗi: ' + data.message,
+                                        'error'
+                                    );
+                                }
+                            })
+                            .catch(error => {
+                                Swal.close();
+                                console.error('Lỗi khi gọi API:', error);
+                                Swal.fire(
+                                    'Lỗi kết nối!',
+                                    'Không thể kết nối đến máy chủ. Vui lòng thử lại.',
+                                    'error'
+                                );
+                            });
+                    }
+                });
+            });
+        }
+
+        // ========= NÚT YÊU CẦU HOÀN HÀNG =========
+        if (returnButton && orderIdInput) {
+            const orderId = orderIdInput.value;
+
+            returnButton.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: `Yêu cầu hoàn hàng #${orderId}`,
+                    text: "Bạn có chắc chắn muốn gửi yêu cầu hoàn hàng cho đơn này?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Gửi yêu cầu',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Đang gửi yêu cầu...',
+                            text: 'Vui lòng chờ trong giây lát.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading()
+                            }
+                        });
+
+                        fetch('/Order/RequestReturn', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': antiForgeryToken
+                            },
+                            body: JSON.stringify(parseInt(orderId))
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                Swal.close();
+
+                                if (data.success) {
+                                    Swal.fire(
+                                        'Thành công!',
+                                        data.message,
+                                        'success'
+                                    ).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire(
+                                        'Thất bại!',
+                                        'Lỗi: ' + data.message,
+                                        'error'
+                                    );
+                                }
+                            })
+                            .catch(error => {
+                                Swal.close();
+                                console.error('Lỗi khi gọi API:', error);
+                                Swal.fire(
+                                    'Lỗi kết nối!',
+                                    'Không thể kết nối đến máy chủ. Vui lòng thử lại.',
+                                    'error'
+                                );
+                            });
+                    }
+                });
+            });
+        }
+    });
+</script>

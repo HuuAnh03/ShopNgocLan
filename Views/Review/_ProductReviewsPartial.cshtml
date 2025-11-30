@@ -1,0 +1,86 @@
+﻿@model List<ProductReviewViewModel>
+
+@if (Model == null || !Model.Any())
+{
+    <div  >
+        <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+    </div>
+}
+else
+{
+    @foreach (var review in Model)
+    {
+        <div class="reviews_comment_box mb-3">
+            <div class="comment_thmb">
+                @{
+                    // Đảm bảo sử dụng Url.Content() để phân giải đường dẫn an toàn
+                    string defaultUserAvatarPath = "~/images/avatars/default-user.jpg";
+                    string userAvatarSrc = string.IsNullOrEmpty(review.AvatarUrl)
+                    ? Url.Content(defaultUserAvatarPath)
+                    : Url.Content(review.AvatarUrl);
+                }
+
+                <img src="@userAvatarSrc" alt="@(review.UserName ?? "User") Avatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+            </div>
+
+            <div class="comment_text">
+                <div class="reviews_meta">
+
+
+                    <div class="star_rating">
+                        <ul class="d-flex p-0" style="list-style: none;">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                @if (i <= review.DiemDanhGia)
+                                {
+                                    <li class="me-1"><i class="fa fa-star" style="color: #ffc107;"></i></li>
+                                }
+                                else
+                                {
+                                    <li class="me-1"><i class="fa fa-star-o" style="color: #ccc;"></i></li>
+                                }
+                            }
+                        </ul>
+                    </div>
+
+
+                    <p class="mb-1">
+                        <strong>@review.UserName </strong> -
+                        @(review.NgayDanhGia.HasValue? review.NgayDanhGia.Value.ToString("dd/MM/yyyy") : "N/A")
+                    </p>
+
+
+                    <span class="d-block">@review.NoiDung</span>
+                </div>
+
+
+                @if (!string.IsNullOrEmpty(review.PhanHoiAdmin))
+                {
+                    <div class="admin-reply-display mt-3 p-3 border-start border-3 border-secondary" style="background-color: #f7f7f7;">
+
+                        @{
+                            // Tên Admin (Đã xử lý null trong Controller)
+                            string adminName = review.AdminName ?? "Quản trị viên";
+
+                            // *** SỬA LỖI: KIỂM TRA NULL VÀ PHÂN GIẢI ĐƯỜNG DẪN ADMIN ***
+                            string defaultAdminAvatarPath = "/images/avatars/default-admin.jpg";
+                            string adminAvatarSrc = string.IsNullOrEmpty(review.AdminAvatarUrl)
+                            ? Url.Content(defaultAdminAvatarPath)
+                            : Url.Content(review.AdminAvatarUrl);
+                        }
+
+
+
+
+                        <strong>Phản hồi từ Shop (<img src="@adminAvatarSrc" alt="@adminName Avatar" style="width: 25px; height: 25px; object-fit: cover; border-radius: 50%; margin-right: 5px;" />@adminName):</strong>
+                        <p class="mb-1">@review.PhanHoiAdmin</p>
+                        <small class="text-muted d-block mt-1">
+                            @(review.NgayPhanHoi?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")
+                        </small>
+                    </div>
+                }
+
+            </div>
+        </div>
+    }
+}

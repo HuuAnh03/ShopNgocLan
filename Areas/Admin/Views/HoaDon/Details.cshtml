@@ -1,0 +1,234 @@
+﻿@model ShopNgocLan.Models.HoaDon
+@{
+    ViewData["Title"] = "Chi tiết ĐH #" + Model.Id;
+    Layout = "~/Views/Shared/AdminLayout.cshtml"; // Layout Admin
+}
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="pagetitle">
+            <h3>Chi tiết hóa đơn</h3>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang tổng quan</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-area="Admin" asp-controller="HoaDon" asp-action="Index">Danh sách hóa đơn</a>
+                    </li>
+                    <li class="breadcrumb-item active">Chi tiết hóa đơn</li>
+                </ol>
+            </nav>
+        </div>
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h5 class="m-0 font-weight-bold text-primary">CHI TIẾT ĐƠN HÀNG #@Model.Id</h5>
+    </div>
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">Sản phẩm đã đặt (@Model.ChiTietHoaDons.Count)</div>
+                    <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>STT</th>
+                                                <th>Sản phẩm</th>
+                                                <th>Chi tiết</th>
+                                                <th>Đơn giá</th>
+                                                <th>Số lượng</th>
+                                                <th class="text-end">Thành tiền</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.ChiTietHoaDons)
+                                            {
+                                                // Tìm ảnh đại diện (LaAnhDaiDien == true)
+                                                var anhDaiDien = item.ChiTietSanPham.SanPham.HinhAnhSanPhams
+                                                .FirstOrDefault(h => h.LaAnhDaiDien == true);
+                                                string imageUrl = anhDaiDien?.UrlHinhAnh ?? "/images/default-product.png";
+                                                int stt = 1;
+                                                <tr>
+                                                    <td>@stt</td>
+                                                    <td>
+                                                        <img src="@imageUrl" alt="Ảnh sản phẩm" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />
+                                                        
+                                                        <strong>@item.ChiTietSanPham.SanPham.TenSanPham</strong>
+                                                    </td>
+                                                    <td>
+                                                        @item.ChiTietSanPham.MauSac.TenMau / @item.ChiTietSanPham.Size.TenSize
+                                                    </td>
+                                                    <td>@item.DonGia.ToString("N0") đ</td>
+                                                    <td>@item.SoLuong</td>
+                                                    <td class="text-end">@((item.DonGia * item.SoLuong).ToString("N0")) đ</td>
+                                                </tr>
+                                                stt++;
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">Cập nhật Trạng thái</div>
+                    <div class="card-body">
+                        <p>Trạng thái hiện tại: <strong>@Model.TrangThai.TenTrangThai</strong></p>
+
+                        <div class="form-group mb-3">
+                            <label for="newStatus">Thay đổi trạng thái:</label>
+                            <select id="newStatus" class="form-control">
+                                @foreach (var status in ViewBag.TrangThais)
+                                {
+                                    <option value="@status.Id" selected="@(status.Id == Model.TrangThaiId)">
+                                        @status.TenTrangThai
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <button id="btnUpdateStatus" class="btn btn-success w-100" data-order-id="@Model.Id">
+                            Cập nhật & Lưu
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">Thông tin Đơn hàng</div>
+                    <div class="card-body">
+                        <p><strong>Người mua:</strong> @(Model.User?.Ho) @(Model.User?.Ten)</p>
+                        <p><strong>Ngày đặt:</strong> @Model.NgayTao</p>
+                        <p><strong>PT Thanh toán:</strong> @Model.PhuongThucThanhToan.TenPhuongThuc</p>
+                        <hr />
+                        <p class="d-flex justify-content-between">
+                            <span>Tạm tính:</span> <strong>@Model.TongTien.ToString("N0") đ</strong>
+                        </p>
+                        <p class="d-flex justify-content-between">
+                            <span>Phí VC:</span> <strong>@Model.PhiVanChuyen?.ToString("N0") đ</strong>
+                        </p>
+                        @if (Model.GiamGia > 0)
+                        {
+                            <p class="d-flex justify-content-between text-danger">
+                                <span>Giảm giá:</span> <strong>-@Model.GiamGia?.ToString("N0") đ</strong>
+                            </p>
+                        }
+                        <h5 class="d-flex justify-content-between mt-3 border-top pt-2">
+                            <span>Tổng tiền:</span> <strong class="text-primary">@Model.ThanhTien.ToString("N0") đ</strong>
+                        </h5>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Địa chỉ Người nhận</div>
+                    <div class="card-body">
+                        <p><strong>@Model.TenKhachHang</strong></p>
+                        <p>SĐT: @Model.SoDienThoaiKhachHang</p>
+                        <p>Địa chỉ: @Model.DiaChiGiaoHang</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<</div>
+<</div>
+@* --- SCRIPT XỬ LÝ CẬP NHẬT TRẠNG THÁI (AJAX) --- *@
+<script>
+       // Dựa trên logic SweetAlert2 và Fetch/AJAX bạn đã sử dụng
+    document.addEventListener('DOMContentLoaded', () => {
+        // -----------------------------------------------------
+        // LẮNG NGHE NÚT CẬP NHẬT TRẠNG THÁI
+        // -----------------------------------------------------
+        const updateButton = document.getElementById('btnUpdateStatus');
+
+        if (updateButton) {
+            updateButton.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // 1. Lấy dữ liệu cần thiết từ View
+                const orderId = $(this).data('order-id'); // ID đơn hàng từ nút
+                const newStatusId = $('#newStatus').val(); // ID trạng thái mới từ dropdown
+
+                // Lấy Anti-forgery Token (Đã được định nghĩa ở trên)
+                const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')
+                                           ? document.querySelector('input[name="__RequestVerificationToken"]').value
+                                           : '';
+
+                // 2. Xác nhận trước khi gửi (Dùng SweetAlert2)
+                Swal.fire({
+                    title: `Cập nhật Trạng thái ĐH #${orderId}?`,
+                    text: "Xác nhận thay đổi trạng thái và lưu lại?",
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745', // Màu xanh cho Lưu
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Đồng ý, Lưu!',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        // Hiển thị trạng thái đang xử lý (Loading)
+                        Swal.fire({
+                            title: 'Đang lưu...',
+                            text: 'Đang cập nhật trạng thái đơn hàng...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading()
+                            }
+                        });
+
+                        // 3. GỌI API CẬP NHẬT TRẠNG THÁI
+                        fetch('/Admin/HoaDon/UpdateStatus', { // Đảm bảo đúng Area và Controller
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded', // Dùng URL-encoded nếu Controller nhận param riêng lẻ
+                                'RequestVerificationToken': antiForgeryToken
+                            },
+                            // Gửi dữ liệu dưới dạng URL-encoded (vì Controller nhận id, newStatusId riêng lẻ)
+                            body: `id=${orderId}&newStatusId=${newStatusId}&__RequestVerificationToken=${antiForgeryToken}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            Swal.close();
+
+                            if (data.success) {
+                                Swal.fire(
+                                    'Thành công!',
+                                    data.message + ` Trạng thái mới: ${data.newStatusName}`,
+                                    'success'
+                                ).then(() => {
+                                    // Tải lại trang để hiển thị trạng thái và các nút mới
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Lỗi!',
+                                    'Lỗi: ' + data.message,
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            Swal.close();
+                            console.error('Lỗi khi gọi API:', error);
+                            Swal.fire(
+                                'Lỗi kết nối!',
+                                'Không thể kết nối đến Server.',
+                                'error'
+                            );
+                        });
+                    }
+                });
+            });
+        }
+    });
+</script>
